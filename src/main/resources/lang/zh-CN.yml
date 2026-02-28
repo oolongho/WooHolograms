@@ -1,0 +1,127 @@
+# WooHolograms 中文语言文件
+# Chinese language file for WooHolograms
+
+prefix: "&a[WooHolograms] &r"
+
+# 通用消息
+general:
+  no-permission: "&c你没有权限执行此操作！"
+  player-only: "&c此命令只能由玩家执行！"
+  hologram-not-found: "&c未找到名为 {name} 的全息图！"
+  hologram-exists: "&c名为 {name} 的全息图已存在！"
+  invalid-location: "&c无效的位置！"
+  invalid-material: "&c无效的物品材质！"
+  invalid-number: "&c无效的数字！"
+  invalid-page: "&c无效的页码！"
+  config-reloaded: "&a配置已重新加载！"
+  plugin-disabled: "&c插件已被禁用！"
+  world-not-found: "&c世界 {world} 不存在！"
+
+# 创建相关
+create:
+  success: "&a成功创建全息图 {name}！"
+  usage: "&c用法: /hologram create <名称> [类型]"
+  at-location: "&a已在你的位置创建全息图 {name}！"
+
+# 删除相关
+delete:
+  success: "&a成功删除全息图 {name}！"
+  usage: "&c用法: /hologram delete <名称>"
+  confirm: "&e确定要删除全息图 {name} 吗？输入 /hologram delete {name} 确认。"
+  cancelled: "&c删除操作已取消。"
+
+# 编辑相关
+edit:
+  usage: "&c用法: /hologram edit <名称> <操作> [参数]"
+  line-set: "&a已设置第 {line} 行内容！"
+  line-added: "&a已添加新行！"
+  line-removed: "&a已删除第 {line} 行！"
+  line-inserted: "&a已在第 {line} 行插入新内容！"
+  position-updated: "&a已更新全息图位置！"
+  height-set: "&a已设置行高为 {height}！"
+  range-set: "&a已设置显示范围为 {range}！"
+
+# 列表相关
+list:
+  header: "&e========== 全息图列表 =========="
+  format: "&7- &f{name} &8({type}) &7@ {world}, {x}, {y}, {z}"
+  empty: "&7暂无全息图"
+  footer: "&e总计: {count} 个全息图"
+  page-info: "&e第 {page} 页，共 {total} 页"
+
+# 移动相关
+move:
+  success: "&a已将全息图 {name} 移动到你的位置！"
+  usage: "&c用法: /hologram move <名称>"
+  here: "&a全息图已移动到这里！"
+
+# 行操作相关
+line:
+  usage: "&c用法: /hologram line <名称> <add|set|remove|insert> [行号] [内容]"
+  added: "&a已添加行: {content}"
+  set: "&a已设置第 {line} 行: {content}"
+  removed: "&a已移除第 {line} 行"
+  inserted: "&a已在第 {line} 行插入: {content}"
+  invalid-index: "&c无效的行号！"
+
+# 页面操作相关
+page:
+  usage: "&c用法: /hologram page <名称> <add|remove|switch> [页码]"
+  added: "&a已添加新页面！"
+  removed: "&a已移除第 {page} 页！"
+  switched: "&a已切换到第 {page} 页！"
+  next: "&a切换到下一页！"
+  prev: "&a切换到上一页！"
+  no-pages: "&c没有更多页面！"
+
+# 复制相关
+copy:
+  success: "&a已将全息图 {source} 复制为 {target}！"
+  usage: "&c用法: /hologram copy <源名称> <目标名称>"
+
+# GUI 相关
+gui:
+  title-list: "&b全息图列表"
+  title-edit: "&b编辑全息图: {name}"
+  title-create: "&b创建全息图"
+  previous-page: "&e上一页"
+  next-page: "&e下一页"
+  close: "&c关闭"
+  create-new: "&a创建新全息图"
+  delete-hologram: "&c删除全息图"
+  edit-lines: "&e编辑内容"
+  edit-position: "&e移动位置"
+  edit-settings: "&7设置"
+  back: "&7返回"
+
+# 类型名称
+types:
+  text: "文本"
+  item: "物品"
+  head: "头颅"
+  block: "方块"
+  entity: "实体"
+
+# 动作相关
+action:
+  usage: "&c用法: /hologram action <名称> <add|remove|list> [点击类型] [动作]"
+  added: "&a已添加动作: {action}"
+  removed: "&a已移除第 {index} 个动作！"
+  list-header: "&e动作列表:"
+  list-format: "&7{index}. &f{action}"
+  invalid-click-type: "&c无效的点击类型！"
+
+# 点击类型
+click-types:
+  left: "左键"
+  right: "右键"
+  shift_left: "Shift+左键"
+  shift_right: "Shift+右键"
+  any: "任意"
+
+# 调试消息
+debug:
+  enabled: "&e调试模式已启用"
+  disabled: "&e调试模式已禁用"
+  hologram-info: "&e全息图信息: {info}"
+  viewer-count: "&e当前观看者数量: {count}"

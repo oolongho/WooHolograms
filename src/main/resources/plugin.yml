@@ -1,0 +1,42 @@
+name: WooHolograms
+version: ${project.version}
+main: com.oolonghoo.holograms.WooHolograms
+api-version: '1.21'
+author: oolongho
+description: A simple hologram plugin
+
+softdepend:
+  - PlaceholderAPI
+
+commands:
+  wooholograms:
+    description: 全息图管理命令
+    usage: /wooholograms <create|delete|edit|list|move|line|reload|help>
+    permission: wooholograms.admin
+    aliases: [holo, wh, hologram]
+
+permissions:
+  wooholograms.admin:
+    description: 管理员权限
+    default: op
+  wooholograms.use:
+    description: 基本使用权限
+    default: true
+  wooholograms.create:
+    description: 创建全息图
+    default: op
+  wooholograms.delete:
+    description: 删除全息图
+    default: op
+  wooholograms.edit:
+    description: 编辑全息图
+    default: op
+  wooholograms.move:
+    description: 移动全息图
+    default: op
+  wooholograms.list:
+    description: 列出全息图
+    default: op
+  wooholograms.reload:
+    description: 重载配置
+    default: op

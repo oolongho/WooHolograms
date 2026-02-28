@@ -1,0 +1,69 @@
+# WooHolograms 配置文件
+# Configuration file for WooHolograms
+
+# 基本设置
+settings:
+  # 是否启用调试模式
+  debug: false
+  # 语言设置 (zh-CN, en-US)
+  language: zh-CN
+  # 自动保存间隔（秒）
+  auto-save-interval: 300
+
+# 默认设置
+defaults:
+  # 默认显示距离（方块）
+  display-range: 48
+  # 默认更新距离（方块）
+  update-range: 48
+  # 默认更新间隔（tick）
+  update-interval: 3
+  # 是否从下往上构建
+  down-origin: true
+  # 默认行高
+  line-height: 0.3
+  # 默认文本行高
+  text-height: 0.3
+  # 默认物品行高
+  item-height: 0.6
+  # 默认头颅行高
+  head-height: 0.6
+
+# 性能设置
+performance:
+  # 渲染任务间隔（tick）
+  render-interval: 2
+  # 占位符更新间隔（tick）
+  placeholder-interval: 40
+  # LRU缓存大小
+  cache-size: 500
+  # 最大每帧更新数量
+  max-updates-per-tick: 50
+
+# 动画设置
+animation:
+  # 是否启用动画
+  enabled: true
+  # 动画帧间隔（tick）
+  frame-interval: 4
+
+# 交互设置
+interaction:
+  # 是否启用点击交互
+  enabled: true
+  # 点击冷却（tick）
+  click-cooldown: 10
+
+# 限制设置
+limits:
+  # 每个世界最大全息图数量
+  max-holograms-per-world: 100
+  # 每个全息图最大行数
+  max-lines-per-hologram: 20
+
+# 存储设置
+storage:
+  # 保存间隔（秒）
+  save-interval: 300
+  # 自动保存
+  auto-save: true

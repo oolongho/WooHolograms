@@ -1,0 +1,127 @@
+# WooHolograms English Language File
+# English language file for WooHolograms
+
+prefix: "&a[WooHolograms] &r"
+
+# General messages
+general:
+  no-permission: "&cYou don't have permission to do this!"
+  player-only: "&cThis command can only be executed by a player!"
+  hologram-not-found: "&cHologram {name} not found!"
+  hologram-exists: "&cHologram {name} already exists!"
+  invalid-location: "&cInvalid location!"
+  invalid-material: "&cInvalid material!"
+  invalid-number: "&cInvalid number!"
+  invalid-page: "&cInvalid page number!"
+  config-reloaded: "&aConfiguration reloaded!"
+  plugin-disabled: "&cPlugin is disabled!"
+  world-not-found: "&cWorld {world} not found!"
+
+# Create related
+create:
+  success: "&aCreated hologram {name}!"
+  usage: "&cUsage: /hologram create <name> [type]"
+  at-location: "&aCreated hologram {name} at your location!"
+
+# Delete related
+delete:
+  success: "&aDeleted hologram {name}!"
+  usage: "&cUsage: /hologram delete <name>"
+  confirm: "&eAre you sure you want to delete {name}? Type /hologram delete {name} to confirm."
+  cancelled: "&cDelete operation cancelled."
+
+# Edit related
+edit:
+  usage: "&cUsage: /hologram edit <name> <action> [args]"
+  line-set: "&aLine {line} has been set!"
+  line-added: "&aNew line added!"
+  line-removed: "&aLine {line} removed!"
+  line-inserted: "&aNew line inserted at line {line}!"
+  position-updated: "&aHologram position updated!"
+  height-set: "&aLine height set to {height}!"
+  range-set: "&aDisplay range set to {range}!"
+
+# List related
+list:
+  header: "&e========== Hologram List =========="
+  format: "&7- &f{name} &8({type}) &7@ {world}, {x}, {y}, {z}"
+  empty: "&7No holograms"
+  footer: "&eTotal: {count} holograms"
+  page-info: "&ePage {page} of {total}"
+
+# Move related
+move:
+  success: "&aMoved hologram {name} to your location!"
+  usage: "&cUsage: /hologram move <name>"
+  here: "&aHologram moved here!"
+
+# Line related
+line:
+  usage: "&cUsage: /hologram line <name> <add|set|remove|insert> [line] [content]"
+  added: "&aAdded line: {content}"
+  set: "&aSet line {line}: {content}"
+  removed: "&aRemoved line {line}"
+  inserted: "&aInserted at line {line}: {content}"
+  invalid-index: "&cInvalid line index!"
+
+# Page related
+page:
+  usage: "&cUsage: /hologram page <name> <add|remove|switch> [page]"
+  added: "&aAdded new page!"
+  removed: "&aRemoved page {page}!"
+  switched: "&aSwitched to page {page}!"
+  next: "&aSwitched to next page!"
+  prev: "&aSwitched to previous page!"
+  no-pages: "&cNo more pages!"
+
+# Copy related
+copy:
+  success: "&aCopied hologram {source} to {target}!"
+  usage: "&cUsage: /hologram copy <source> <target>"
+
+# GUI related
+gui:
+  title-list: "&bHologram List"
+  title-edit: "&bEdit: {name}"
+  title-create: "&bCreate Hologram"
+  previous-page: "&ePrevious Page"
+  next-page: "&eNext Page"
+  close: "&cClose"
+  create-new: "&aCreate New"
+  delete-hologram: "&cDelete Hologram"
+  edit-lines: "&eEdit Lines"
+  edit-position: "&eMove Position"
+  edit-settings: "&7Settings"
+  back: "&7Back"
+
+# Type names
+types:
+  text: "Text"
+  item: "Item"
+  head: "Head"
+  block: "Block"
+  entity: "Entity"
+
+# Action related
+action:
+  usage: "&cUsage: /hologram action <name> <add|remove|list> [click-type] [action]"
+  added: "&aAdded action: {action}"
+  removed: "&aRemoved action #{index}!"
+  list-header: "&eAction List:"
+  list-format: "&7{index}. &f{action}"
+  invalid-click-type: "&cInvalid click type!"
+
+# Click types
+click-types:
+  left: "Left Click"
+  right: "Right Click"
+  shift_left: "Shift+Left Click"
+  shift_right: "Shift+Right Click"
+  any: "Any"
+
+# Debug messages
+debug:
+  enabled: "&eDebug mode enabled"
+  disabled: "&eDebug mode disabled"
+  hologram-info: "&eHologram info: {info}"
+  viewer-count: "&eCurrent viewer count: {count}"
