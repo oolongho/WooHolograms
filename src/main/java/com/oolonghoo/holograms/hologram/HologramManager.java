@@ -473,11 +473,16 @@ public class HologramManager {
     private void startUpdateTask() {
         if (updateTask != null) {
             updateTask.cancel();
+            updateTask = null;
         }
 
         long interval = plugin.getConfigManager() != null 
                 ? plugin.getConfigManager().getUpdateInterval() 
                 : 3L;
+
+        if (interval <= 0) {
+            return;
+        }
 
         updateTask = new UpdateTask();
         updateTask.runTaskTimerAsynchronously(plugin, interval, interval);
