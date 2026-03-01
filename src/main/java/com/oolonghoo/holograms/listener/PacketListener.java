@@ -49,26 +49,33 @@ public class PacketListener {
      */
     private void initReflection() {
         try {
-            // 获取版本
-            String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+            String version;
+            String packageName = Bukkit.getServer().getClass().getPackage().getName();
             
-            // CraftPlayer
-            craftPlayerClass = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+            if (packageName.contains(".v")) {
+                String[] parts = packageName.split("\\.");
+                version = parts.length > 3 ? parts[3] : "";
+            } else {
+                version = "";
+            }
+            
+            if (!version.isEmpty()) {
+                craftPlayerClass = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+            } else {
+                craftPlayerClass = Class.forName("org.bukkit.craftbukkit.entity.CraftPlayer");
+            }
+            
             getHandleMethod = craftPlayerClass.getMethod("getHandle");
             
-            // ServerPlayer (EntityPlayer)
             serverPlayerClass = getHandleMethod.getReturnType();
             
-            // 获取连接对象 - 不同版本可能有不同的方法名
             try {
                 connectionClass = serverPlayerClass.getField("connection").getType();
-                getConnectionMethod = null; // 直接使用字段
+                getConnectionMethod = null;
             } catch (NoSuchFieldException e) {
-                // 尝试其他可能的字段名
                 try {
                     connectionClass = serverPlayerClass.getField("b").getType();
                 } catch (NoSuchFieldException e2) {
-                    // 使用方法
                     for (Method m : serverPlayerClass.getMethods()) {
                         if (m.getReturnType().getSimpleName().contains("Connection") || 
                             m.getReturnType().getSimpleName().contains("PlayerConnection")) {
@@ -80,25 +87,22 @@ public class PacketListener {
                 }
             }
             
-            // 获取 Channel
             if (connectionClass != null) {
                 for (Field f : connectionClass.getDeclaredFields()) {
                     if (f.getType() == Channel.class) {
                         f.setAccessible(true);
-                        getChannelMethod = null; // 直接使用字段
+                        getChannelMethod = null;
                         break;
                     }
                 }
             }
             
-            // 数据包类 - 使用 ServerboundInteractPacket (1.20.5+) 或 PacketPlayInUseEntity
             try {
                 packetClass = Class.forName("net.minecraft.network.protocol.game.ServerboundInteractPacket");
             } catch (ClassNotFoundException e) {
                 try {
                     packetClass = Class.forName("net.minecraft.server.network.PacketListenerInUseEntity");
                 } catch (ClassNotFoundException e2) {
-                    // 尝试旧版本
                     try {
                         packetClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayInUseEntity");
                     } catch (ClassNotFoundException e3) {

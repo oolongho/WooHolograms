@@ -44,7 +44,7 @@ public class LineEditGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&c全息图不存在")
+                    .name("&f全息图不存在")
                     .lore(Arrays.asList(
                             "",
                             "&7该全息图已被删除",
@@ -61,7 +61,7 @@ public class LineEditGui extends GuiScreen {
         HologramPage page = hologram.getPage(pageIndex);
         if (page == null || lineIndex < 0 || lineIndex >= page.size()) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&c行不存在")
+                    .name("&f行不存在")
                     .lore(Arrays.asList(
                             "",
                             "&7该行已被删除",
@@ -78,7 +78,7 @@ public class LineEditGui extends GuiScreen {
         HologramLine line = page.getLine(lineIndex);
         
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&e返回")
+                .name("&f返回")
                 .lore(Arrays.asList(
                         "&7返回全息图详情",
                         "",
@@ -93,13 +93,13 @@ public class LineEditGui extends GuiScreen {
                 .name("&f当前内容")
                 .lore(Arrays.asList(
                         "",
-                        "&f" + ColorUtil.stripColor(line.getContent()),
+                        "&7" + ColorUtil.stripColor(line.getContent()),
                         ""
                 ))
                 .build());
         
         setButton(10, GuiButton.builder(Material.OAK_SIGN)
-                .name("&a设置文本")
+                .name("&f设置文本")
                 .lore(Arrays.asList(
                         "&7设置此行的文本内容",
                         "&7支持颜色代码",
@@ -128,7 +128,7 @@ public class LineEditGui extends GuiScreen {
                 .build());
         
         setButton(11, GuiButton.builder(Material.STICK)
-                .name("&b设置偏移")
+                .name("&f设置偏移")
                 .lore(Arrays.asList(
                         "&7设置此行的位置偏移",
                         "&7当前: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()),
@@ -175,7 +175,7 @@ public class LineEditGui extends GuiScreen {
                 .build());
         
         setButton(12, GuiButton.builder(Material.RAIL)
-                .name("&e设置高度")
+                .name("&f设置高度")
                 .lore(Arrays.asList(
                         "&7设置此行的高度",
                         "&7当前: &f" + line.getHeight(),
@@ -213,7 +213,7 @@ public class LineEditGui extends GuiScreen {
                 .build());
         
         setButton(16, GuiButton.builder(Material.BARRIER)
-                .name("&c删除行")
+                .name("&f删除行")
                 .lore(Arrays.asList(
                         "&7删除此行",
                         "",
@@ -243,7 +243,7 @@ public class LineEditGui extends GuiScreen {
         
         if (lineIndex > 0) {
             setButton(18, GuiButton.builder(Material.ARROW)
-                    .name("&e上移")
+                    .name("&f上移")
                     .lore(Arrays.asList(
                             "&7将此行向上移动",
                             "",
@@ -276,7 +276,7 @@ public class LineEditGui extends GuiScreen {
         
         if (page != null && lineIndex < page.size() - 1) {
             setButton(22, GuiButton.builder(Material.ARROW)
-                    .name("&e下移")
+                    .name("&f下移")
                     .lore(Arrays.asList(
                             "&7将此行向下移动",
                             "",

@@ -25,7 +25,7 @@ public class ConfirmGui extends GuiScreen {
         fillBackground();
         
         setButton(11, GuiButton.builder(Material.RED_WOOL)
-                .name("&c&l确认删除")
+                .name("&f确认删除")
                 .lore(Arrays.asList(
                         "&7" + warningMessage,
                         "",
@@ -37,16 +37,16 @@ public class ConfirmGui extends GuiScreen {
                 .build());
         
         setButton(13, GuiButton.builder(Material.PAPER)
-                .name("&e&l警告")
+                .name("&f警告")
                 .lore(Arrays.asList(
                         "",
-                        warningMessage,
+                        "&7" + warningMessage,
                         ""
                 ))
                 .build());
         
         setButton(15, GuiButton.builder(Material.GREEN_WOOL)
-                .name("&a&l取消")
+                .name("&f取消")
                 .lore(Arrays.asList(
                         "&7取消此操作",
                         "",

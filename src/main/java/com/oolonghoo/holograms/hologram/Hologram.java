@@ -937,51 +937,36 @@ public class Hologram {
      */
     public boolean show(Player player, int pageIndex) {
         synchronized (visibilityMutex) {
-            // 1. 检查全息图是否启用
             if (!enabled) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: not enabled");
                 return false;
             }
 
-            // 2. 检查玩家是否在隐藏列表中
             if (isHideState(player)) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: player " + player.getName() + " is in hide state");
                 return false;
             }
 
-            // 3. 检查默认可见状态
             if (!defaultVisibleState && !isShowState(player)) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: defaultVisibleState=" + defaultVisibleState + ", isShowState=" + isShowState(player));
                 return false;
             }
 
-            // 4. 获取目标页面
             HologramPage page = getPage(pageIndex);
             if (page == null || page.size() == 0) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: page is null or empty, pageIndex=" + pageIndex);
                 return false;
             }
 
-            // 5. 检查玩家是否有权限查看
             if (!canShow(player)) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: player " + player.getName() + " cannot show (no permission)");
                 return false;
             }
 
-            // 6. 检查玩家是否在显示范围内
             if (!isInDisplayRange(player)) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: player " + player.getName() + " is not in display range");
                 return false;
             }
 
-            // 7. 隐藏当前页（如果存在）
             HologramPage currentPage = getPage(player);
             if (currentPage != null && currentPage != page) {
                 hidePageFrom(player, currentPage);
             }
 
-            // 8. 显示新页
-            WooHolograms.getInstance().getLogger().info("[DEBUG] Hologram.show: showing page " + pageIndex + " to player " + player.getName());
             showPageTo(player, page, pageIndex);
             return true;
         }

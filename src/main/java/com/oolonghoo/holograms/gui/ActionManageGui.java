@@ -61,7 +61,7 @@ public class ActionManageGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&c全息图不存在")
+                    .name("&f全息图不存在")
                     .lore(Arrays.asList(
                             "",
                             "&7该全息图已被删除",
@@ -78,7 +78,7 @@ public class ActionManageGui extends GuiScreen {
         HologramPage page = hologram.getPage(pageIndex);
         if (page == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&c页面不存在")
+                    .name("&f页面不存在")
                     .lore(Arrays.asList(
                             "",
                             "&7该页面已被删除",
@@ -93,7 +93,7 @@ public class ActionManageGui extends GuiScreen {
         }
         
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&e返回")
+                .name("&f返回")
                 .lore(Arrays.asList(
                         "&7返回全息图详情",
                         "",
@@ -129,7 +129,7 @@ public class ActionManageGui extends GuiScreen {
             Action action = actions.get(i);
             
             setButton(slot, GuiButton.builder(Material.COMMAND_BLOCK)
-                    .name("&e动作 #" + (i + 1))
+                    .name("&f动作 #" + (i + 1))
                     .lore(Arrays.asList(
                             "",
                             "&7类型: &f" + action.getType().getName(),
@@ -168,7 +168,7 @@ public class ActionManageGui extends GuiScreen {
         }
         
         setButton(45, GuiButton.builder(Material.EMERALD)
-                .name("&a添加动作")
+                .name("&f添加动作")
                 .lore(Arrays.asList(
                         "&7添加新的点击动作",
                         "",
@@ -218,7 +218,7 @@ public class ActionManageGui extends GuiScreen {
                 .build());
         
         setButton(49, GuiButton.builder(Material.BOOK)
-                .name("&e动作类型说明")
+                .name("&f动作类型说明")
                 .lore(Arrays.asList(
                         "",
                         "&7可用动作类型:",
@@ -248,7 +248,7 @@ public class ActionManageGui extends GuiScreen {
         }
         
         return GuiButton.builder(isSelected ? Material.LIME_STAINED_GLASS_PANE : material)
-                .name((isSelected ? "&a " : "&f") + getClickTypeName(clickType))
+                .name("&f" + getClickTypeName(clickType))
                 .lore(lore)
                 .onClick(context -> {
                     if (!isSelected) {

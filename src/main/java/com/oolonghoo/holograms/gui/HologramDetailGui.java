@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * 全息图详情 GUI
@@ -48,7 +47,7 @@ public class HologramDetailGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&c全息图不存在")
+                    .name("&f全息图不存在")
                     .lore(Arrays.asList(
                             "",
                             "&7该全息图已被删除",
@@ -63,7 +62,7 @@ public class HologramDetailGui extends GuiScreen {
         }
         
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&e返回列表")
+                .name("&f返回列表")
                 .lore(Arrays.asList(
                         "&7返回全息图列表",
                         "",
@@ -75,7 +74,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(4, GuiButton.builder(Material.NAME_TAG)
-                .name((hologram.isEnabled() ? "&a" : "&c") + hologram.getName())
+                .name("&f" + hologram.getName())
                 .lore(Arrays.asList(
                         "",
                         "&7状态: " + (hologram.isEnabled() ? "&a启用" : "&c禁用"),
@@ -108,7 +107,7 @@ public class HologramDetailGui extends GuiScreen {
         }
         
         setButton(36, GuiButton.builder(Material.PAPER)
-                .name("&a添加行")
+                .name("&f添加行")
                 .lore(Arrays.asList(
                         "&7在末尾添加新行",
                         "",
@@ -136,7 +135,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(37, GuiButton.builder(hologram.isEnabled() ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name(hologram.isEnabled() ? "&c禁用" : "&a启用")
+                .name("&f" + (hologram.isEnabled() ? "禁用" : "启用"))
                 .lore(Arrays.asList(
                         "&7当前状态: " + (hologram.isEnabled() ? "&a启用" : "&c禁用"),
                         "",
@@ -161,7 +160,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(38, GuiButton.builder(Material.ENDER_PEARL)
-                .name("&b传送")
+                .name("&f传送")
                 .lore(Arrays.asList(
                         "&7传送到全息图位置",
                         "",
@@ -180,7 +179,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(39, GuiButton.builder(Material.COMPASS)
-                .name("&6移动到此处")
+                .name("&f移动到此处")
                 .lore(Arrays.asList(
                         "&7将全息图移动到你的位置",
                         "",
@@ -197,7 +196,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(40, GuiButton.builder(Material.SLIME_BALL)
-                .name("&e克隆")
+                .name("&f克隆")
                 .lore(Arrays.asList(
                         "&7克隆此全息图",
                         "",
@@ -264,7 +263,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(41, GuiButton.builder(Material.REDSTONE_BLOCK)
-                .name("&c删除")
+                .name("&f删除")
                 .lore(Arrays.asList(
                         "&7删除此全息图",
                         "",
@@ -285,7 +284,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(42, GuiButton.builder(Material.TRIPWIRE_HOOK)
-                .name("&b设置权限")
+                .name("&f设置权限")
                 .lore(Arrays.asList(
                         "&7当前权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
                         "",
@@ -314,7 +313,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(43, GuiButton.builder(Material.ENDER_EYE)
-                .name("&d设置范围")
+                .name("&f设置范围")
                 .lore(Arrays.asList(
                         "&7当前范围: &f" + hologram.getDisplayRange() + " 格",
                         "",
@@ -343,7 +342,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(44, GuiButton.builder(Material.CLOCK)
-                .name("&e设置间隔")
+                .name("&f设置间隔")
                 .lore(Arrays.asList(
                         "&7当前间隔: &f" + hologram.getUpdateInterval() + " tick",
                         "",
@@ -374,7 +373,7 @@ public class HologramDetailGui extends GuiScreen {
         if (hologram.getPageCount() > 1) {
             if (currentPageIndex > 0) {
                 setButton(45, GuiButton.builder(Material.ARROW)
-                        .name("&e上一页")
+                        .name("&f上一页")
                         .lore(Arrays.asList(
                                 "&7当前: 第 " + (currentPageIndex + 1) + " 页",
                                 "&7点击查看上一页"
@@ -386,7 +385,7 @@ public class HologramDetailGui extends GuiScreen {
             }
             
             setButton(49, GuiButton.builder(Material.BOOK)
-                    .name("&e页面管理")
+                    .name("&f页面管理")
                     .lore(Arrays.asList(
                             "&7当前: 第 " + (currentPageIndex + 1) + " / " + hologram.getPageCount() + " 页",
                             "",
@@ -399,7 +398,7 @@ public class HologramDetailGui extends GuiScreen {
             
             if (currentPageIndex < hologram.getPageCount() - 1) {
                 setButton(53, GuiButton.builder(Material.ARROW)
-                        .name("&e下一页")
+                        .name("&f下一页")
                         .lore(Arrays.asList(
                                 "&7当前: 第 " + (currentPageIndex + 1) + " 页",
                                 "&7点击查看下一页"
@@ -411,7 +410,7 @@ public class HologramDetailGui extends GuiScreen {
             }
             
             setButton(51, GuiButton.builder(Material.COMMAND_BLOCK)
-                    .name("&6动作管理")
+                    .name("&f动作管理")
                     .lore(Arrays.asList(
                             "&7管理点击动作",
                             "",

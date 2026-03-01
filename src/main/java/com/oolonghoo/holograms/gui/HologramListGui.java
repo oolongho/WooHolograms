@@ -59,7 +59,7 @@ public class HologramListGui extends GuiScreen {
         
         if (currentPage > 0) {
             setButton(45, GuiButton.builder(Material.ARROW)
-                    .name("&e上一页")
+                    .name("&f上一页")
                     .lore(Arrays.asList(
                             "&7当前: 第 " + (currentPage + 1) + " 页",
                             "&7点击查看上一页"
@@ -72,12 +72,12 @@ public class HologramListGui extends GuiScreen {
         }
         
         setButton(49, GuiButton.builder(Material.EMERALD)
-                .name("&a&l创建全息图")
+                .name("&f创建全息图")
                 .lore(Arrays.asList(
-                        "&7点击创建一个新的全息图",
-                        "",
-                        "&e点击创建"
-                ))
+                            "&7点击创建一个新的全息图",
+                            "",
+                            "&e点击创建"
+                    ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
@@ -112,7 +112,7 @@ public class HologramListGui extends GuiScreen {
         
         if (currentPage < totalPages - 1) {
             setButton(53, GuiButton.builder(Material.ARROW)
-                    .name("&e下一页")
+                    .name("&f下一页")
                     .lore(Arrays.asList(
                             "&7当前: 第 " + (currentPage + 1) + " 页",
                             "&7点击查看下一页"
@@ -125,7 +125,7 @@ public class HologramListGui extends GuiScreen {
         }
         
         setButton(46, GuiButton.builder(Material.CLOCK)
-                .name("&e重载配置")
+                .name("&f重载配置")
                 .lore(Arrays.asList(
                         "&7重载所有配置和全息图",
                         "",
@@ -144,7 +144,7 @@ public class HologramListGui extends GuiScreen {
                 .build());
         
         setButton(52, GuiButton.builder(Material.OAK_SIGN)
-                .name("&e附近全息图")
+                .name("&f附近全息图")
                 .lore(Arrays.asList(
                         "&7查看附近的全息图",
                         "",
@@ -181,7 +181,7 @@ public class HologramListGui extends GuiScreen {
         lore.add("&e点击查看详情");
         
         return GuiButton.builder(Material.NAME_TAG)
-                .name((hologram.isEnabled() ? "&a" : "&c") + hologram.getName())
+                .name("&f" + hologram.getName())
                 .lore(lore)
                 .onClick(context -> {
                     Player player = context.getPlayer();

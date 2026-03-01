@@ -38,7 +38,7 @@ public class PageManageGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&c全息图不存在")
+                    .name("&f全息图不存在")
                     .lore(Arrays.asList(
                             "",
                             "&7该全息图已被删除",
@@ -53,7 +53,7 @@ public class PageManageGui extends GuiScreen {
         }
         
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&e返回")
+                .name("&f返回")
                 .lore(Arrays.asList(
                         "&7返回全息图详情",
                         "",
@@ -83,7 +83,7 @@ public class PageManageGui extends GuiScreen {
             int lineCount = page != null ? page.size() : 0;
             
             setButton(slot, GuiButton.builder(Material.BOOK)
-                    .name("&e第 " + (i + 1) + " 页")
+                    .name("&f第 " + (i + 1) + " 页")
                     .lore(Arrays.asList(
                             "",
                             "&7行数: &f" + lineCount,
@@ -120,7 +120,7 @@ public class PageManageGui extends GuiScreen {
         }
         
         setButton(45, GuiButton.builder(Material.EMERALD)
-                .name("&a添加页面")
+                .name("&f添加页面")
                 .lore(Arrays.asList(
                         "&7在末尾添加新页面",
                         "",
@@ -143,7 +143,7 @@ public class PageManageGui extends GuiScreen {
                 .build());
         
         setButton(49, GuiButton.builder(Material.COMPASS)
-                .name("&b快速跳转")
+                .name("&f快速跳转")
                 .lore(Arrays.asList(
                         "&7跳转到指定页面",
                         "",

@@ -1,5 +1,6 @@
 package com.oolonghoo.holograms.gui;
 
+import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -143,10 +144,14 @@ public class GuiButton {
          */
         public GuiButton build() {
             if (name != null) {
-                meta.setDisplayName(name);
+                meta.setDisplayName(ColorUtil.colorize(name));
             }
             if (!lore.isEmpty()) {
-                meta.setLore(lore);
+                List<String> coloredLore = new ArrayList<>();
+                for (String line : lore) {
+                    coloredLore.add(ColorUtil.colorize(line));
+                }
+                meta.setLore(coloredLore);
             }
             itemStack.setItemMeta(meta);
             

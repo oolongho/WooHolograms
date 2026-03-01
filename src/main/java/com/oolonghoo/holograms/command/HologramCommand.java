@@ -530,7 +530,6 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
             HologramPage page = hologram.getPage(0);
             if (page != null) {
                 page.addLine(text);
-                plugin.getLogger().info("[DEBUG] Added line to hologram " + name + ", page size: " + page.size());
             } else {
                 sender.sendMessage(ColorUtil.colorize("&c全息图没有页面！"));
                 return true;
