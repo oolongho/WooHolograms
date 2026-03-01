@@ -64,7 +64,8 @@
 | `/wh setrange <名称> <范围>` | 设置显示范围 | `wooholograms.admin` |
 | `/wh setinterval <名称> <间隔>` | 设置更新间隔 | `wooholograms.admin` |
 | `/wh setpermission <名称> [权限]` | 设置查看权限 | `wooholograms.admin` |
-| `/wh setfacing <名称> <行号> <模式> [角度]` | 设置行朝向 | `wooholograms.admin` |
+| `/wh setfacing <名称> <模式> [角度]` | 设置全息图朝向 | `wooholograms.admin` |
+| `/wh setdoublesided <名称> <true|false>` | 设置双面显示 | `wooholograms.admin` |
 | `/wh addaction <名称> <行号> <点击类型> <动作>` | 添加点击动作 | `wooholograms.admin` |
 | `/wh near [范围]` | 显示附近全息图 | `wooholograms.admin` |
 | `/wh reload` | 重载配置 | `wooholograms.admin` |
@@ -99,13 +100,6 @@
 | `horizontal` | 水平跟随 | 水平方向跟随玩家视角，垂直方向固定 |
 | `vertical` | 垂直跟随 | 垂直方向跟随玩家视角，水平方向固定 |
 | `all` | 完全跟随 | 完全跟随玩家视角（默认） |
-
-**命令示例**:
-```
-/wh setfacing testholo 1 fixed_angle 45   # 固定45度角
-/wh setfacing testholo 1 horizontal       # 水平跟随
-/wh setfacing testholo 1 all              # 完全跟随（默认）
-```
 
 ## PlaceholderAPI 变量
 
