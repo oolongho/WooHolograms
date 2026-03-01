@@ -259,7 +259,7 @@ public class EntityMetadataBuilder {
         if (billboard == null) {
             billboard = Billboard.CENTER;
         }
-        int billboardValue;
+        byte billboardValue;
         switch (billboard) {
             case FIXED:
                 billboardValue = 0;

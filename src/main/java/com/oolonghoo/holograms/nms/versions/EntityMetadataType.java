@@ -59,7 +59,8 @@ class EntityMetadataType<T> {
             = ReflectUtil.getFieldValue(ArmorStand.class, "DATA_BODY_POSE");
 
     // Display Entity - Billboard 渲染约束
-    private static final EntityDataAccessor<Integer> DISPLAY_BILLBOARD_OBJECT
+    @SuppressWarnings("unchecked")
+    private static final EntityDataAccessor<Byte> DISPLAY_BILLBOARD_OBJECT
             = ReflectUtil.getFieldValue(Display.class, "DATA_BILLBOARD_RENDER_CONSTRAINTS_ID");
 
     // Display Entity - 亮度覆盖
@@ -99,7 +100,7 @@ class EntityMetadataType<T> {
     static final EntityMetadataType<net.minecraft.core.Rotations> ARMOR_STAND_BODY_POSE = new EntityMetadataType<>(ARMOR_STAND_BODY_POSE_OBJECT);
 
     // Display Entity 静态实例
-    static final EntityMetadataType<Integer> DISPLAY_BILLBOARD = new EntityMetadataType<>(DISPLAY_BILLBOARD_OBJECT);
+    static final EntityMetadataType<Byte> DISPLAY_BILLBOARD = new EntityMetadataType<>(DISPLAY_BILLBOARD_OBJECT);
     @SuppressWarnings("unchecked")
     static final EntityMetadataType<Optional<?>> DISPLAY_BRIGHTNESS = new EntityMetadataType<>(DISPLAY_BRIGHTNESS_OBJECT);
 
