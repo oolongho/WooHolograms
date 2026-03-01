@@ -3,8 +3,6 @@ package com.oolonghoo.holograms.gui;
 import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
-import com.oolonghoo.holograms.hologram.HologramLine;
-import com.oolonghoo.holograms.hologram.HologramPage;
 import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,7 +11,7 @@ import java.util.Arrays;
 
 /**
  * 朝向设置 GUI
- * 用于设置全息图行的 Billboard 模式
+ * 用于设置全息图的 Billboard 模式
  *
  * @author oolongho
  */
@@ -23,18 +21,14 @@ public class BillboardSelectGui extends GuiScreen {
     private final GuiManager guiManager;
     private final ChatInputManager chatInputManager;
     private final String hologramName;
-    private final int pageIndex;
-    private final int lineIndex;
 
     public BillboardSelectGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
-                              String hologramName, int pageIndex, int lineIndex) {
+                              String hologramName) {
         super("billboard_select", ColorUtil.colorize("&8朝向设置"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
         this.hologramName = hologramName;
-        this.pageIndex = pageIndex;
-        this.lineIndex = lineIndex;
 
         render();
     }
@@ -59,41 +53,23 @@ public class BillboardSelectGui extends GuiScreen {
             return;
         }
 
-        HologramPage page = hologram.getPage(pageIndex);
-        if (page == null || lineIndex < 0 || lineIndex >= page.size()) {
-            setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&f行不存在")
-                    .lore(Arrays.asList(
-                            "",
-                            "&7该行已被删除",
-                            "",
-                            "&e点击返回详情"
-                    ))
-                    .onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
-                    })
-                    .build());
-            return;
-        }
-
-        HologramLine line = page.getLine(lineIndex);
-        Billboard currentBillboard = line.getBillboard();
+        Billboard currentBillboard = hologram.getBillboard();
 
         setButton(0, GuiButton.builder(Material.BOOK)
                 .name("&f返回")
                 .lore(Arrays.asList(
-                        "&7返回行编辑",
+                        "&7返回全息图详情",
                         "",
                         "&e点击返回"
                 ))
                 .onClick(context -> {
-                    guiManager.openGui(context.getPlayer(), new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                    guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                 })
                 .build());
 
         String currentDisplay = currentBillboard.getDisplayName();
         if (currentBillboard == Billboard.FIXED_ANGLE) {
-            currentDisplay += " (" + line.getFacing() + "度)";
+            currentDisplay += " (" + hologram.getFacing() + "度)";
         }
         setButton(4, GuiButton.builder(Material.COMPASS)
                 .name("&f当前朝向模式")
@@ -117,13 +93,13 @@ public class BillboardSelectGui extends GuiScreen {
                     player.closeInventory();
                     
                     chatInputManager.requestInput(player, "&a请输入固定角度 (0-360度):", 
-                            ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                            ChatInputManager.InputType.GENERIC, hologramName, input -> {
                         try {
                             float angle = Float.parseFloat(input);
                             setBillboard(player, Billboard.FIXED_ANGLE, angle);
                         } catch (NumberFormatException e) {
                             player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
-                            guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                            guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
                         }
                     });
                 })
@@ -177,26 +153,20 @@ public class BillboardSelectGui extends GuiScreen {
     private void setBillboard(Player player, Billboard billboard, float facing) {
         Hologram h = plugin.getHologramManager().getHologram(hologramName);
         if (h != null) {
-            HologramPage p = h.getPage(pageIndex);
-            if (p != null && lineIndex < p.size()) {
-                HologramLine l = p.getLine(lineIndex);
-                if (l != null) {
-                    l.setBillboard(billboard);
-                    if (billboard == Billboard.FIXED_ANGLE) {
-                        l.setFacing(facing);
-                    }
-                    h.save();
-                    h.showToNearby();
-                    
-                    String modeDisplay = billboard.getDisplayName();
-                    if (billboard == Billboard.FIXED_ANGLE) {
-                        modeDisplay += " (" + facing + "度)";
-                    }
-                    player.sendMessage(ColorUtil.colorize("&a已设置朝向模式为 " + modeDisplay + "！"));
-                }
+            h.setBillboard(billboard);
+            if (billboard == Billboard.FIXED_ANGLE) {
+                h.setFacing(facing);
             }
+            h.save();
+            h.showToNearby();
+            
+            String modeDisplay = billboard.getDisplayName();
+            if (billboard == Billboard.FIXED_ANGLE) {
+                modeDisplay += " (" + facing + "度)";
+            }
+            player.sendMessage(ColorUtil.colorize("&a已设置朝向模式为 " + modeDisplay + "！"));
         }
-        guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+        guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
     }
 
     private void fillBackground() {

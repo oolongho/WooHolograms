@@ -280,7 +280,18 @@ public class EntityMetadataBuilder {
     }
 
     /**
-     *设置 TextDisplay Entity 的文本内容
+     * 设置 Display Entity 的双面渲染
+     *
+     * @param doubleSided 是否双面渲染
+     * @return this
+     */
+    public EntityMetadataBuilder withDoubleSided(boolean doubleSided) {
+        watchableObjects.add(EntityMetadataType.DISPLAY_DOUBLE_SIDED.construct(doubleSided));
+        return this;
+    }
+
+    /**
+     * 设置 TextDisplay Entity 的文本内容
      *
      * @param text 文本内容
      * @return this

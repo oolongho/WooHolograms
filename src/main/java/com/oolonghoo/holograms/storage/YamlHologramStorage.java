@@ -1,6 +1,7 @@
 package com.oolonghoo.holograms.storage;
 
 import com.oolonghoo.holograms.WooHolograms;
+import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
@@ -69,6 +70,9 @@ public class YamlHologramStorage implements HologramStorage {
         storage.set(path + ".visible", hologram.isVisible());
         storage.set(path + ".persistent", hologram.isPersistent());
         storage.set(path + ".lineHeight", hologram.getLineHeight());
+        storage.set(path + ".billboard", hologram.getBillboard().getId());
+        storage.set(path + ".facing", hologram.getFacing());
+        storage.set(path + ".doubleSided", hologram.isDoubleSided());
         
         List<HologramPage> pages = hologram.getPages();
         for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
@@ -177,6 +181,9 @@ public class YamlHologramStorage implements HologramStorage {
         hologram.setVisible(section.getBoolean("visible", true));
         hologram.setPersistent(section.getBoolean("persistent", true));
         hologram.setLineHeight(section.getDouble("lineHeight", 0.25));
+        hologram.setBillboard(Billboard.fromId(section.getString("billboard", "all")));
+        hologram.setFacing((float) section.getDouble("facing", 0));
+        hologram.setDoubleSided(section.getBoolean("doubleSided", false));
         
         ConfigurationSection pagesSection = section.getConfigurationSection("pages");
         if (pagesSection != null) {

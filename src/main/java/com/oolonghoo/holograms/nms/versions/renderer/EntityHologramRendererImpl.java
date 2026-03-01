@@ -1,5 +1,7 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 
+import com.oolonghoo.holograms.hologram.Billboard;
+import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramPartData;
@@ -23,6 +25,8 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
     private final int entityId;
     private boolean destroyed = false;
     private EntityType currentEntityType;
+    private float currentYaw;
+    private float currentPitch;
 
     public EntityHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.entityId = entityIdGenerator.getFreeEntityId();
@@ -38,7 +42,6 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
                 .withEntityMetadata(entityId, EntityMetadataBuilder.create()
                         .withSilent()
                         .withNoGravity()
-                        .withInvisible()
                         .toWatchableObjects())
                 .sendTo(player);
     }
@@ -85,13 +88,30 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
         this.currentEntityType = entityType;
         DecentPosition position = DecentPosition.fromLocation(location);
         DecentPosition offsetPosition = offsetPosition(position, entityType);
+        
+        Hologram hologram = line.getHologram();
+        Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
+        float facing = hologram != null ? hologram.getFacing() : 0f;
+        
+        float yaw;
+        float pitch;
+        
+        if (billboard == Billboard.FIXED_ANGLE) {
+            yaw = location.getYaw() + facing;
+            pitch = location.getPitch();
+        } else {
+            yaw = calculateYawToPlayer(location, player);
+            pitch = calculatePitchToPlayer(location, player);
+        }
+        
+        this.currentYaw = yaw;
+        this.currentPitch = pitch;
 
         EntityPacketsBuilder.create()
-                .withSpawnEntity(entityId, entityType, offsetPosition)
+                .withSpawnEntity(entityId, entityType, offsetPosition, yaw, pitch)
                 .withEntityMetadata(entityId, EntityMetadataBuilder.create()
                         .withSilent()
                         .withNoGravity()
-                        .withInvisible()
                         .toWatchableObjects())
                 .sendTo(player);
     }
@@ -116,7 +136,6 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
                     .withEntityMetadata(entityId, EntityMetadataBuilder.create()
                             .withSilent()
                             .withNoGravity()
-                            .withInvisible()
                             .toWatchableObjects())
                     .sendTo(player);
         }
@@ -190,5 +209,21 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
         }
 
         return EntityType.ZOMBIE;
+    }
+    
+    private float calculateYawToPlayer(Location hologramLoc, Player player) {
+        Location playerLoc = player.getEyeLocation();
+        double dx = playerLoc.getX() - hologramLoc.getX();
+        double dz = playerLoc.getZ() - hologramLoc.getZ();
+        return (float) Math.toDegrees(Math.atan2(dz, dx)) - 90;
+    }
+    
+    private float calculatePitchToPlayer(Location hologramLoc, Player player) {
+        Location playerLoc = player.getEyeLocation();
+        double dx = playerLoc.getX() - hologramLoc.getX();
+        double dy = playerLoc.getY() - hologramLoc.getY();
+        double dz = playerLoc.getZ() - hologramLoc.getZ();
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        return (float) -Math.toDegrees(Math.atan2(dy, distance));
     }
 }

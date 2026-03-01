@@ -44,8 +44,10 @@ public class Hologram {
     private double displayRange;
     private double updateRange;
     private int updateInterval;
+    private Billboard billboard = Billboard.CENTER;
     private float facing;
     private boolean downOrigin;
+    private boolean doubleSided = false;
     
     // 全息图类型和显示属性
     private HologramType type;
@@ -281,18 +283,49 @@ public class Hologram {
      * @param facing 朝向
      */
     public void setFacing(float facing) {
-        float prev = this.facing;
         this.facing = facing;
+        hideClickableEntitiesAll();
+        showClickableEntitiesAll();
+    }
 
-        // 更新所有行的朝向
-        for (HologramPage page : pages) {
-            for (HologramLine line : page.getLines()) {
-                if (line.getFacing() == prev) {
-                    line.setFacing(facing);
-                }
-            }
-            page.realignLines();
-        }
+    /**
+     * 获取 Billboard 模式
+     * 
+     * @return Billboard 模式
+     */
+    public Billboard getBillboard() {
+        return billboard;
+    }
+
+    /**
+     * 设置 Billboard 模式
+     * 
+     * @param billboard Billboard 模式
+     */
+    public void setBillboard(Billboard billboard) {
+        this.billboard = billboard;
+        hideClickableEntitiesAll();
+        showClickableEntitiesAll();
+    }
+
+    /**
+     * 是否双面显示
+     * 
+     * @return 是否双面显示
+     */
+    public boolean isDoubleSided() {
+        return doubleSided;
+    }
+
+    /**
+     * 设置双面显示
+     * 
+     * @param doubleSided 是否双面显示
+     */
+    public void setDoubleSided(boolean doubleSided) {
+        this.doubleSided = doubleSided;
+        hideClickableEntitiesAll();
+        showClickableEntitiesAll();
     }
 
     /**
@@ -1993,8 +2026,10 @@ public class Hologram {
         map.put("display-range", displayRange);
         map.put("update-range", updateRange);
         map.put("update-interval", updateInterval);
+        map.put("billboard", billboard != Billboard.CENTER ? billboard.getId() : null);
         map.put("facing", facing);
         map.put("down-origin", downOrigin);
+        map.put("double-sided", doubleSided);
         map.put("pages", pages.stream().map(HologramPage::serializeToMap).collect(Collectors.toList()));
         return map;
     }

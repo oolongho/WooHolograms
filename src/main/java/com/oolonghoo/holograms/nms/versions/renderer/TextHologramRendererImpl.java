@@ -1,5 +1,7 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 
+import com.oolonghoo.holograms.hologram.Billboard;
+import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramRenderer;
@@ -47,12 +49,17 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         String text = line.getContent();
         text = ColorUtil.colorize(text);
 
+        Hologram hologram = line.getHologram();
+        Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
+        boolean doubleSided = hologram != null && hologram.isDoubleSided();
+
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withInvisible()
                 .withNoGravity()
                 .withTextDisplayText(text)
-                .withBillboard(line.getBillboard())
-                .withTextAlignment(line.getAlignment());
+                .withBillboard(billboard)
+                .withTextAlignment(line.getAlignment())
+                .withDoubleSided(doubleSided);
 
         if (line.getBrightness() != null && !line.getBrightness().isDefault()) {
             metadataBuilder.withDisplayBrightness(line.getBrightness());
@@ -84,9 +91,15 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         String text = line.getContent();
         text = ColorUtil.colorize(text);
 
+        Hologram hologram = line.getHologram();
+        Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
+        boolean doubleSided = hologram != null && hologram.isDoubleSided();
+
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withTextDisplayText(text)
-                .withTextAlignment(line.getAlignment());
+                .withTextAlignment(line.getAlignment())
+                .withBillboard(billboard)
+                .withDoubleSided(doubleSided);
 
         if (line.getBrightness() != null && !line.getBrightness().isDefault()) {
             metadataBuilder.withDisplayBrightness(line.getBrightness());

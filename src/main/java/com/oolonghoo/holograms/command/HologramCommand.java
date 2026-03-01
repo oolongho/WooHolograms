@@ -62,6 +62,7 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
         subcommands.add(new SetIntervalCommand());
         subcommands.add(new SetPermissionCommand());
         subcommands.add(new SetFacingCommand());
+        subcommands.add(new SetDoubleSidedCommand());
         subcommands.add(new AddActionCommand());
         subcommands.add(new DeleteActionCommand());
         subcommands.add(new ActionsCommand());
@@ -75,7 +76,16 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sendHelp(sender);
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (hasPermission(sender, "wooholograms.admin")) {
+                    plugin.getGuiManager().openGui(player, new HologramListGui(plugin, plugin.getGuiManager(), plugin.getChatInputManager(), 0));
+                } else {
+                    sender.sendMessage(ColorUtil.colorize("&c你没有权限执行此命令！"));
+                }
+            } else {
+                sendHelp(sender);
+            }
             return true;
         }
         
@@ -1313,13 +1323,13 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
 
     private class SetFacingCommand extends Subcommand {
         public SetFacingCommand() {
-            super("setfacing", "设置行朝向", "wooholograms.admin", Collections.emptyList());
+            super("setfacing", "设置全息图朝向", "wooholograms.admin", Collections.emptyList());
         }
 
         @Override
         public boolean execute(CommandSender sender, String[] args) {
-            if (args.length < 3) {
-                sender.sendMessage(ColorUtil.colorize("&c用法: /wh setfacing <名称> <行号> <模式> [角度]"));
+            if (args.length < 2) {
+                sender.sendMessage(ColorUtil.colorize("&c用法: /wh setfacing <名称> <模式> [角度]"));
                 sender.sendMessage(ColorUtil.colorize("&7模式: fixed_angle(固定角度), horizontal(水平跟随), vertical(垂直跟随), all(完全跟随)"));
                 sender.sendMessage(ColorUtil.colorize("&7角度: 仅 fixed_angle 模式需要，0-360度"));
                 return true;
@@ -1333,42 +1343,26 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            try {
-                int lineIndex = Integer.parseInt(args[1]) - 1;
-                if (lineIndex < 0) {
-                    sender.sendMessage(ColorUtil.colorize("&c行号必须大于0！"));
+            Billboard billboard = Billboard.fromId(args[1].toLowerCase());
+            
+            if (billboard == Billboard.FIXED_ANGLE && args.length > 2) {
+                try {
+                    float facing = Float.parseFloat(args[2]);
+                    hologram.setFacing(facing);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ColorUtil.colorize("&c角度必须是数字！"));
                     return true;
                 }
-
-                HologramPage page = hologram.getPage(0);
-                if (page == null || lineIndex >= page.size()) {
-                    sender.sendMessage(ColorUtil.colorize("&c行号超出范围！"));
-                    return true;
-                }
-
-                Billboard billboard = Billboard.fromId(args[2].toLowerCase());
-                HologramLine line = page.getLine(lineIndex);
-                
-                if (line != null) {
-                    line.setBillboard(billboard);
-                    
-                    if (billboard == Billboard.FIXED_ANGLE && args.length > 3) {
-                        float facing = Float.parseFloat(args[3]);
-                        line.setFacing(facing);
-                    }
-                    
-                    hologram.save();
-                    hologram.showToNearby();
-                    
-                    String modeDisplay = billboard.getDisplayName();
-                    if (billboard == Billboard.FIXED_ANGLE) {
-                        modeDisplay += " (" + line.getFacing() + "度)";
-                    }
-                    sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 第 " + (lineIndex + 1) + " 行的朝向设置为 " + modeDisplay + "！"));
-                }
-            } catch (NumberFormatException e) {
-                sender.sendMessage(ColorUtil.colorize("&c行号和角度必须是数字！"));
             }
+            
+            hologram.setBillboard(billboard);
+            hologram.save();
+            
+            String modeDisplay = billboard.getDisplayName();
+            if (billboard == Billboard.FIXED_ANGLE) {
+                modeDisplay += " (" + hologram.getFacing() + "度)";
+            }
+            sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的朝向设置为 " + modeDisplay + "！"));
 
             return true;
         }
@@ -1380,16 +1374,55 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
                         .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
                         .collect(Collectors.toList());
             } else if (args.length == 2) {
-                return Arrays.asList("1", "2", "3", "4", "5").stream()
-                        .filter(n -> n.startsWith(args[1]))
-                        .collect(Collectors.toList());
-            } else if (args.length == 3) {
                 return Arrays.asList("fixed_angle", "horizontal", "vertical", "all").stream()
-                        .filter(m -> m.startsWith(args[2].toLowerCase()))
+                        .filter(m -> m.startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
-            } else if (args.length == 4 && args[2].equalsIgnoreCase("fixed_angle")) {
+            } else if (args.length == 3 && args[1].equalsIgnoreCase("fixed_angle")) {
                 return Arrays.asList("0", "45", "90", "180", "270", "360").stream()
-                        .filter(a -> a.startsWith(args[3]))
+                        .filter(a -> a.startsWith(args[2]))
+                        .collect(Collectors.toList());
+            }
+            return new ArrayList<>();
+        }
+    }
+
+    private class SetDoubleSidedCommand extends Subcommand {
+        public SetDoubleSidedCommand() {
+            super("setdoublesided", "设置双面显示", "wooholograms.admin", Collections.emptyList());
+        }
+
+        @Override
+        public boolean execute(CommandSender sender, String[] args) {
+            if (args.length < 2) {
+                sender.sendMessage(ColorUtil.colorize("&c用法: /wh setdoublesided <名称> <true|false>"));
+                return true;
+            }
+
+            String name = args[0];
+            Hologram hologram = plugin.getHologramManager().getHologram(name);
+
+            if (hologram == null) {
+                sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+                return true;
+            }
+
+            boolean doubleSided = Boolean.parseBoolean(args[1]);
+            hologram.setDoubleSided(doubleSided);
+            hologram.save();
+
+            sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的双面显示设置为 " + doubleSided + "！"));
+            return true;
+        }
+
+        @Override
+        public List<String> tabComplete(CommandSender sender, String[] args) {
+            if (args.length == 1) {
+                return plugin.getHologramManager().getHologramNames().stream()
+                        .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                        .collect(Collectors.toList());
+            } else if (args.length == 2) {
+                return Arrays.asList("true", "false").stream()
+                        .filter(v -> v.startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
             }
             return new ArrayList<>();

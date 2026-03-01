@@ -75,6 +75,35 @@ public class EntityPacketsBuilder {
     }
 
     /**
+     * 生成实体（带自定义朝向）
+     *
+     * @param entityId 实体 ID
+     * @param type     实体类型
+     * @param position 位置
+     * @param yaw      偏航角
+     * @param pitch    俯仰角
+     * @return this
+     */
+    public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, DecentPosition position, float yaw, float pitch) {
+        ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(
+                entityId,
+                UUID.randomUUID(),
+                position.getX(),
+                position.getY(),
+                position.getZ(),
+                pitch,
+                yaw,
+                EntityTypeRegistry.findEntityTypes(type),
+                type == EntityType.ITEM ? 1 : 0,
+                Vec3.ZERO,
+                yaw
+        );
+
+        packets.add(packet);
+        return this;
+    }
+
+    /**
      * 设置实体元数据
      *
      * @param entityId 实体 ID

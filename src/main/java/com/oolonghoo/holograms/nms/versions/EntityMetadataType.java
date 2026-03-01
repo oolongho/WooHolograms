@@ -68,6 +68,11 @@ class EntityMetadataType<T> {
     private static final EntityDataAccessor<Optional<?>> DISPLAY_BRIGHTNESS_OBJECT
             = ReflectUtil.getFieldValue(Display.class, "DATA_BRIGHTNESS_OVERRIDE_ID");
 
+    // Display Entity - 双面渲染
+    @SuppressWarnings("unchecked")
+    private static final EntityDataAccessor<Boolean> DISPLAY_DOUBLE_SIDED_OBJECT
+            = ReflectUtil.getFieldValue(Display.class, "DATA_NO_RENDERING_STATE");
+
     // TextDisplay Entity - 文本内容
     private static final EntityDataAccessor<Component> TEXT_DISPLAY_TEXT_OBJECT
             = ReflectUtil.getFieldValue(Display.TextDisplay.class, "DATA_TEXT_ID");
@@ -103,6 +108,7 @@ class EntityMetadataType<T> {
     static final EntityMetadataType<Byte> DISPLAY_BILLBOARD = new EntityMetadataType<>(DISPLAY_BILLBOARD_OBJECT);
     @SuppressWarnings("unchecked")
     static final EntityMetadataType<Optional<?>> DISPLAY_BRIGHTNESS = new EntityMetadataType<>(DISPLAY_BRIGHTNESS_OBJECT);
+    static final EntityMetadataType<Boolean> DISPLAY_DOUBLE_SIDED = new EntityMetadataType<>(DISPLAY_DOUBLE_SIDED_OBJECT);
 
     // TextDisplay Entity 静态实例
     static final EntityMetadataType<Component> TEXT_DISPLAY_TEXT = new EntityMetadataType<>(TEXT_DISPLAY_TEXT_OBJECT);

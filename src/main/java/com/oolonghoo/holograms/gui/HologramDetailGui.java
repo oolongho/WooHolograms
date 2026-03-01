@@ -3,6 +3,7 @@ package com.oolonghoo.holograms.gui;
 import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.action.Action;
 import com.oolonghoo.holograms.action.ClickType;
+import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
@@ -195,7 +196,49 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(40, GuiButton.builder(Material.SLIME_BALL)
+        Billboard billboard = hologram.getBillboard();
+        String facingDisplay = billboard.getDisplayName();
+        if (billboard == Billboard.FIXED_ANGLE) {
+            facingDisplay += " (" + hologram.getFacing() + "度)";
+        }
+        setButton(40, GuiButton.builder(Material.RECOVERY_COMPASS)
+                .name("&f朝向设置")
+                .lore(Arrays.asList(
+                        "&7设置全息图的朝向模式",
+                        "&7当前: &f" + facingDisplay,
+                        "",
+                        "&7模式说明:",
+                        "&7- 固定角度: 固定朝向",
+                        "&7- 水平跟随: 水平跟随玩家",
+                        "&7- 垂直跟随: 垂直跟随玩家",
+                        "&7- 完全跟随: 完全跟随玩家",
+                        "",
+                        "&e点击设置"
+                ))
+                .onClick(context -> {
+                    guiManager.openGui(context.getPlayer(), new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
+                })
+                .build());
+        
+        setButton(41, GuiButton.builder(Material.GLASS)
+                .name("&f双面显示")
+                .lore(Arrays.asList(
+                        "&7设置全息图是否双面可见",
+                        "&7当前: " + (hologram.isDoubleSided() ? "&a启用" : "&c禁用"),
+                        "",
+                        "&e点击切换"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    hologram.setDoubleSided(!hologram.isDoubleSided());
+                    hologram.save();
+                    hologram.showToNearby();
+                    player.sendMessage(ColorUtil.colorize("&a双面显示已" + (hologram.isDoubleSided() ? "启用" : "禁用") + "！"));
+                    guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                })
+                .build());
+        
+        setButton(42, GuiButton.builder(Material.SLIME_BALL)
                 .name("&f克隆")
                 .lore(Arrays.asList(
                         "&7克隆此全息图",
@@ -262,7 +305,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(41, GuiButton.builder(Material.REDSTONE_BLOCK)
+        setButton(43, GuiButton.builder(Material.REDSTONE_BLOCK)
                 .name("&f删除")
                 .lore(Arrays.asList(
                         "&7删除此全息图",
@@ -283,7 +326,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(42, GuiButton.builder(Material.TRIPWIRE_HOOK)
+        setButton(44, GuiButton.builder(Material.TRIPWIRE_HOOK)
                 .name("&f设置权限")
                 .lore(Arrays.asList(
                         "&7当前权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),

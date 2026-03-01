@@ -927,6 +927,10 @@ public class HologramLine {
         return parent;
     }
 
+    public Hologram getHologram() {
+        return parent != null ? parent.getParent() : null;
+    }
+
     public Location getLocation() {
         return location != null ? location.clone() : null;
     }

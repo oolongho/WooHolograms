@@ -500,15 +500,36 @@ public class HologramManager {
 
     /**
      * 更新任务
-     * 负责更新动画和占位符
+     * 负责更新动画和占位符，以及视距检测
      */
     private class UpdateTask extends BukkitRunnable {
         @Override
         public void run() {
             for (Hologram hologram : holograms.values()) {
-                if (hologram.isEnabled()) {
-                    hologram.updateAnimationsAll();
+                if (!hologram.isEnabled()) {
+                    continue;
                 }
+                
+                Location holoLoc = hologram.getLocation();
+                if (holoLoc == null || holoLoc.getWorld() == null) {
+                    continue;
+                }
+                
+                double displayRange = hologram.getDisplayRange();
+                double displayRangeSq = displayRange * displayRange;
+                
+                for (Player player : holoLoc.getWorld().getPlayers()) {
+                    boolean inRange = player.getLocation().distanceSquared(holoLoc) <= displayRangeSq;
+                    boolean isVisible = hologram.isVisible(player);
+                    
+                    if (inRange && !isVisible) {
+                        hologram.show(player, 0);
+                    } else if (!inRange && isVisible) {
+                        hologram.hide(player);
+                    }
+                }
+                
+                hologram.updateAnimationsAll();
             }
         }
     }
