@@ -1,21 +1,16 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 
-import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsTextHologramRenderer;
+import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
 import com.oolonghoo.holograms.util.ColorUtil;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.EntityType;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -52,15 +47,22 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         String text = line.getContent();
         text = ColorUtil.colorize(text);
 
-        List<SynchedEntityData.DataItem<?>> metadata = EntityMetadataBuilder.create()
+        EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withInvisible()
                 .withNoGravity()
-                .withCustomName(text, true)
-                .toWatchableObjects();
+                .withTextDisplayText(text)
+                .withBillboard(line.getBillboard())
+                .withTextAlignment(line.getAlignment());
+
+        if (line.getBrightness() != null && !line.getBrightness().isDefault()) {
+            metadataBuilder.withDisplayBrightness(line.getBrightness());
+        }
+
+        List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
 
         EntityPacketsBuilder.create()
-                .withSpawnEntity(entityId, org.bukkit.entity.EntityType.ARMOR_STAND, 
-                        new com.oolonghoo.holograms.nms.util.DecentPosition(
+                .withSpawnEntity(entityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
+                        new DecentPosition(
                                 location.getX(), location.getY(), location.getZ()))
                 .withEntityMetadata(entityId, metadata)
                 .sendTo(player);
@@ -82,9 +84,15 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         String text = line.getContent();
         text = ColorUtil.colorize(text);
 
-        List<SynchedEntityData.DataItem<?>> metadata = EntityMetadataBuilder.create()
-                .withCustomName(text, true)
-                .toWatchableObjects();
+        EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
+                .withTextDisplayText(text)
+                .withTextAlignment(line.getAlignment());
+
+        if (line.getBrightness() != null && !line.getBrightness().isDefault()) {
+            metadataBuilder.withDisplayBrightness(line.getBrightness());
+        }
+
+        List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
 
         EntityPacketsBuilder.create()
                 .withEntityMetadata(entityId, metadata)
@@ -119,7 +127,7 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         }
 
         EntityPacketsBuilder.create()
-                .withTeleportEntity(entityId, new com.oolonghoo.holograms.nms.util.DecentPosition(
+                .withTeleportEntity(entityId, new DecentPosition(
                         location.getX(), location.getY(), location.getZ()))
                 .sendTo(player);
     }

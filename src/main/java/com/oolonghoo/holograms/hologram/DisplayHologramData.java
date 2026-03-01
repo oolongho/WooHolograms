@@ -68,7 +68,7 @@ public class DisplayHologramData {
      */
     public DisplayHologramData() {
         this.billboard = Billboard.CENTER;
-        this.brightness = Brightness.DEFAULT;
+        this.brightness = null;
         this.shadowRadius = DEFAULT_SHADOW_RADIUS;
         this.shadowStrength = DEFAULT_SHADOW_STRENGTH;
         this.background = DEFAULT_BACKGROUND;
@@ -86,7 +86,7 @@ public class DisplayHologramData {
     public DisplayHologramData(DisplayHologramData other) {
         if (other == null) {
             this.billboard = Billboard.CENTER;
-            this.brightness = Brightness.DEFAULT;
+            this.brightness = null;
             this.shadowRadius = DEFAULT_SHADOW_RADIUS;
             this.shadowStrength = DEFAULT_SHADOW_STRENGTH;
             this.background = DEFAULT_BACKGROUND;
@@ -183,16 +183,11 @@ public class DisplayHologramData {
      * @param brightness 亮度覆盖
      */
     public void setBrightness(Brightness brightness) {
-        this.brightness = brightness != null ? brightness : Brightness.DEFAULT;
+        this.brightness = brightness;
     }
 
-    /**
-     * 检查是否有亮度覆盖
-     * 
-     * @return 是否有亮度覆盖
-     */
     public boolean hasBrightnessOverride() {
-        return brightness != null && !brightness.isDefault();
+        return brightness != null;
     }
 
     /*

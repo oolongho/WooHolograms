@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.HashMap;
@@ -137,6 +138,22 @@ public class GuiManager implements Listener {
             if (openGuis.get(player.getUniqueId()) == gui) {
                 openGuis.remove(player.getUniqueId());
             }
+        }
+    }
+
+    /**
+     * 处理库存拖拽事件
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+
+        InventoryHolder holder = event.getInventory().getHolder();
+
+        if (holder instanceof GuiScreen) {
+            event.setCancelled(true);
         }
     }
 

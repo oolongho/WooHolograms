@@ -67,3 +67,10 @@ storage:
   save-interval: 300
   # 自动保存
   auto-save: true
+
+# 渲染器缓存池设置
+renderer-pool:
+  # 是否启用渲染器缓存池
+  enabled: true
+  # 最大缓存数量
+  max-size: 100

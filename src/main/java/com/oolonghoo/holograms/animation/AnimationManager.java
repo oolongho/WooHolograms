@@ -3,6 +3,7 @@ package com.oolonghoo.holograms.animation;
 import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.animation.custom.CustomTextAnimation;
 import com.oolonghoo.holograms.animation.text.BlinkAnimation;
+import com.oolonghoo.holograms.animation.text.GradientAnimation;
 import com.oolonghoo.holograms.animation.text.ScrollAnimation;
 import com.oolonghoo.holograms.animation.text.TypewriterAnimation;
 import com.oolonghoo.holograms.animation.text.WaveAnimation;
@@ -68,6 +69,7 @@ public class AnimationManager {
         registerAnimation(new WaveAnimation());
         registerAnimation(new BlinkAnimation());
         registerAnimation(new ScrollAnimation());
+        registerAnimation(new GradientAnimation());
 
         this.step.set(0);
 

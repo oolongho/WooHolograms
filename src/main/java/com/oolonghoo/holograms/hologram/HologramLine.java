@@ -3,6 +3,7 @@ package com.oolonghoo.holograms.hologram;
 import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.NmsHologramRendererFactory;
+import com.oolonghoo.holograms.nms.HologramRendererPool;
 import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -38,6 +39,7 @@ public class HologramLine {
     private String content;
     private HologramType type;
     private double height;
+    private HeadTexture headTexture;
 
     // 偏移
     private double offsetX;
@@ -46,6 +48,15 @@ public class HologramLine {
 
     // 朝向
     private float facing;
+
+    // 亮度
+    private Brightness brightness;
+
+    // 文本对齐
+    private TextAlignment alignment = TextAlignment.LEFT;
+
+    // Billboard 模式
+    private Billboard billboard = Billboard.CENTER;
 
     // 权限
     private String permission;
@@ -130,6 +141,7 @@ public class HologramLine {
                     this.previousRenderer = this.renderer;
                     this.renderer = null;
                 }
+                this.headTexture = HeadTexture.parse(content);
             } else if (upperContent.startsWith("#HEAD:")) {
                 this.type = HologramType.HEAD;
                 if (prevType != this.type) {
@@ -137,6 +149,7 @@ public class HologramLine {
                     this.previousRenderer = this.renderer;
                     this.renderer = null;
                 }
+                this.headTexture = HeadTexture.parse(content);
             } else if (upperContent.startsWith("#ENTITY:")) {
                 this.type = HologramType.ENTITY;
                 if (prevType != this.type) {
@@ -262,8 +275,23 @@ public class HologramLine {
         }
         
         WooHolograms plugin = WooHolograms.getInstance();
-        if (plugin == null || plugin.getRendererFactory() == null) {
-            WooHolograms.getInstance().getLogger().warning("[DEBUG] Cannot create renderer: plugin or factory is null");
+        if (plugin == null) {
+            WooHolograms.getInstance().getLogger().warning("[DEBUG] Cannot create renderer: plugin is null");
+            return;
+        }
+        
+        HologramRendererPool pool = plugin.getRendererPool();
+        if (pool != null) {
+            renderer = pool.obtain(type);
+            if (renderer != null) {
+                WooHolograms.getInstance().getLogger().info("[DEBUG] Renderer obtained from pool for type: " + type);
+                return;
+            }
+        }
+        
+        NmsHologramRendererFactory factory = plugin.getRendererFactory();
+        if (factory == null) {
+            WooHolograms.getInstance().getLogger().warning("[DEBUG] Cannot create renderer: factory is null");
             return;
         }
         
@@ -271,22 +299,22 @@ public class HologramLine {
         
         switch (type) {
             case TEXT:
-                renderer = plugin.getRendererFactory().createTextRenderer();
+                renderer = factory.createTextRenderer();
                 break;
             case ICON:
-                renderer = plugin.getRendererFactory().createIconRenderer();
+                renderer = factory.createIconRenderer();
                 break;
             case HEAD:
-                renderer = plugin.getRendererFactory().createHeadRenderer();
+                renderer = factory.createHeadRenderer();
                 break;
             case SMALLHEAD:
-                renderer = plugin.getRendererFactory().createSmallHeadRenderer();
+                renderer = factory.createSmallHeadRenderer();
                 break;
             case ENTITY:
-                renderer = plugin.getRendererFactory().createEntityRenderer();
+                renderer = factory.createEntityRenderer();
                 break;
             default:
-                renderer = plugin.getRendererFactory().createTextRenderer();
+                renderer = factory.createTextRenderer();
                 break;
         }
         
@@ -716,6 +744,18 @@ public class HologramLine {
             map.put("facing", facing);
         }
 
+        if (brightness != null) {
+            map.put("brightness", brightness.getSkyLight() + "," + brightness.getBlockLight());
+        }
+
+        if (alignment != TextAlignment.LEFT) {
+            map.put("alignment", alignment.getId());
+        }
+
+        if (billboard != Billboard.CENTER) {
+            map.put("billboard", billboard.getId());
+        }
+
         return map;
     }
 
@@ -780,6 +820,35 @@ public class HologramLine {
             }
         }
 
+        if (map.containsKey("brightness")) {
+            Object brightnessObj = map.get("brightness");
+            if (brightnessObj instanceof String) {
+                String[] parts = ((String) brightnessObj).split(",");
+                if (parts.length == 2) {
+                    try {
+                        int sky = Integer.parseInt(parts[0].trim());
+                        int block = Integer.parseInt(parts[1].trim());
+                        line.setBrightness(Brightness.of(sky, block));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+
+        if (map.containsKey("alignment")) {
+            Object alignmentObj = map.get("alignment");
+            if (alignmentObj instanceof String) {
+                line.setAlignment(TextAlignment.fromId((String) alignmentObj));
+            }
+        }
+
+        if (map.containsKey("billboard")) {
+            Object billboardObj = map.get("billboard");
+            if (billboardObj instanceof String) {
+                line.setBillboard(Billboard.fromId((String) billboardObj));
+            }
+        }
+
         return line;
     }
 
@@ -798,6 +867,9 @@ public class HologramLine {
         line.setOffsetZ(this.offsetZ);
         line.setFacing(this.facing);
         line.setPermission(this.permission);
+        line.setBrightness(this.brightness);
+        line.setAlignment(this.alignment);
+        line.setBillboard(this.billboard);
         line.addFlags(this.flags.toArray(new EnumFlag[0]));
         return line;
     }
@@ -829,6 +901,13 @@ public class HologramLine {
         hide();
         if (renderer != null) {
             renderer.destroy(getViewerPlayers());
+            WooHolograms plugin = WooHolograms.getInstance();
+            if (plugin != null) {
+                HologramRendererPool pool = plugin.getRendererPool();
+                if (pool != null) {
+                    pool.release(renderer);
+                }
+            }
             renderer = null;
         }
         if (previousRenderer != null) {
@@ -887,6 +966,10 @@ public class HologramLine {
         synchronized (renderMutex) {
             return type != null ? type : HologramType.UNKNOWN;
         }
+    }
+
+    public HeadTexture getHeadTexture() {
+        return headTexture;
     }
 
     public double getHeight() {
@@ -961,11 +1044,30 @@ public class HologramLine {
         this.enabled = enabled;
     }
 
-    /**
-     * 获取实体 ID 数组
-     * 
-     * @return 实体 ID 数组
-     */
+    public Brightness getBrightness() {
+        return brightness;
+    }
+
+    public void setBrightness(Brightness brightness) {
+        this.brightness = brightness;
+    }
+
+    public TextAlignment getAlignment() {
+        return alignment;
+    }
+
+    public void setAlignment(TextAlignment alignment) {
+        this.alignment = alignment != null ? alignment : TextAlignment.LEFT;
+    }
+
+    public Billboard getBillboard() {
+        return billboard;
+    }
+
+    public void setBillboard(Billboard billboard) {
+        this.billboard = billboard != null ? billboard : Billboard.CENTER;
+    }
+
     public int[] getEntityIds() {
         return renderer != null ? renderer.getEntityIds().stream().mapToInt(Integer::intValue).toArray() : new int[0];
     }

@@ -1,5 +1,8 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.oolonghoo.holograms.hologram.HeadTexture;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramPartData;
@@ -8,21 +11,21 @@ import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
-/**
- * 头颅全息图渲染器实现
- *
- * @author oolongho
- * @since 1.0.0
- */
 public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
 
     protected final int entityId;
@@ -87,7 +90,23 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
 
     @Override
     public void render(Player player, Location location, HologramLine line) {
-        // Head renderer uses display() method with NmsHologramPartData
+        if (location == null || line == null) {
+            return;
+        }
+
+        ItemStack headItem = createHeadItem(line);
+        DecentPosition position = DecentPosition.fromLocation(location);
+        DecentPosition offsetPosition = offsetPosition(position);
+
+        EntityPacketsBuilder.create()
+                .withSpawnEntity(entityId, EntityType.ARMOR_STAND, offsetPosition)
+                .withEntityMetadata(entityId, EntityMetadataBuilder.create()
+                        .withInvisible()
+                        .withNoGravity()
+                        .withArmorStandProperties(small, true)
+                        .toWatchableObjects())
+                .withHelmet(entityId, headItem)
+                .sendTo(player);
     }
 
     @Override
@@ -99,7 +118,10 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
 
     @Override
     public void updateText(Player player, HologramLine line) {
-        // Head renderer uses updateContent() method
+        ItemStack headItem = createHeadItem(line);
+        EntityPacketsBuilder.create()
+                .withHelmet(entityId, headItem)
+                .sendTo(player);
     }
 
     @Override
@@ -123,7 +145,13 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
 
     @Override
     public void teleport(Player player, Location location) {
-        // Head renderer uses move() method
+        if (location == null) {
+            return;
+        }
+        DecentPosition position = DecentPosition.fromLocation(location);
+        EntityPacketsBuilder.create()
+                .withTeleportEntity(entityId, offsetPosition(position))
+                .sendTo(player);
     }
 
     @Override
@@ -141,5 +169,105 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
     protected DecentPosition offsetPosition(DecentPosition position) {
         double offsetY = small ? 1.1875d : 2.0d;
         return position.subtractY(offsetY);
+    }
+
+    protected ItemStack createHeadItem(HologramLine line) {
+        HeadTexture headTexture = line.getHeadTexture();
+        
+        if (headTexture == null) {
+            String content = line.getContent();
+            return createHeadFromContent(content);
+        }
+
+        switch (headTexture.getType()) {
+            case BASE64:
+                return createHeadFromBase64(headTexture.getTextureValue());
+            case PLAYER:
+                return createHeadFromPlayerName(headTexture.getValue());
+            case HDB:
+                return createHeadFromHDB(headTexture.getValue());
+            default:
+                return new ItemStack(Material.PLAYER_HEAD);
+        }
+    }
+
+    protected ItemStack createHeadFromContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return new ItemStack(Material.PLAYER_HEAD);
+        }
+
+        String upperContent = content.toUpperCase();
+        if (upperContent.startsWith("#HEAD:") || upperContent.startsWith("#SMALLHEAD:")) {
+            String textureData = extractTextureData(content);
+            if (textureData != null && !textureData.isEmpty()) {
+                if (isBase64Texture(textureData)) {
+                    return createHeadFromBase64(textureData);
+                } else {
+                    return createHeadFromPlayerName(textureData);
+                }
+            }
+        }
+
+        return new ItemStack(Material.PLAYER_HEAD);
+    }
+
+    protected String extractTextureData(String content) {
+        String upperContent = content.toUpperCase();
+        if (upperContent.startsWith("#HEAD:")) {
+            return content.substring(6);
+        } else if (upperContent.startsWith("#SMALLHEAD:")) {
+            return content.substring(11);
+        }
+        return null;
+    }
+
+    protected boolean isBase64Texture(String data) {
+        if (data == null || data.isEmpty()) {
+            return false;
+        }
+        return data.length() > 50;
+    }
+
+    protected ItemStack createHeadFromBase64(String base64) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        
+        if (meta != null) {
+            GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+            profile.getProperties().put("textures", new Property("textures", base64));
+            
+            try {
+                Field profileField = meta.getClass().getDeclaredField("profile");
+                profileField.setAccessible(true);
+                profileField.set(meta, profile);
+            } catch (Exception e) {
+                try {
+                    Method setProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
+                    setProfileMethod.setAccessible(true);
+                    setProfileMethod.invoke(meta, profile);
+                } catch (Exception ignored) {
+                }
+            }
+            
+            head.setItemMeta(meta);
+        }
+        
+        return head;
+    }
+
+    protected ItemStack createHeadFromPlayerName(String playerName) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        
+        if (meta != null) {
+            meta.setOwner(playerName);
+            head.setItemMeta(meta);
+        }
+        
+        return head;
+    }
+
+    protected ItemStack createHeadFromHDB(String hdbId) {
+        return new ItemStack(Material.PLAYER_HEAD);
     }
 }

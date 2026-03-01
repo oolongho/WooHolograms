@@ -2,13 +2,18 @@ package com.oolonghoo.holograms.nms.versions;
 
 import com.google.common.base.Strings;
 import com.oolonghoo.holograms.hologram.Brightness;
+import com.oolonghoo.holograms.hologram.TextAlignment;
+import com.oolonghoo.holograms.hologram.Billboard;
+import com.oolonghoo.holograms.nms.util.WooHologramsException;
 import net.minecraft.core.Rotations;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Display;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -207,17 +212,142 @@ public class EntityMetadataBuilder {
      * @param brightness 亮度对象
      * @return this
      */
-    EntityMetadataBuilder withBrightness(Brightness brightness) {
-        if (brightness == null || brightness.isDefault()) {
+    public EntityMetadataBuilder withBrightness(Brightness brightness) {
+        if (brightness == null) {
             return this;
         }
 
-        // 如果亮度较高，可以添加发光效果来模拟
         if (brightness.getBlockLight() >= 15 || brightness.getSkyLight() >= 15) {
-            // 设置发光效果
             watchableObjects.add(EntityMetadataType.ENTITY_PROPERTIES.construct((byte) 0x60));
         }
 
+        return this;
+    }
+
+    /**
+     * 设置 Display Entity 的亮度覆盖
+     * 使用 Display.Brightness 类设置亮度
+     *
+     * @param brightness 亮度对象
+     * @return this
+     */
+    public EntityMetadataBuilder withDisplayBrightness(Brightness brightness) {
+        if (brightness == null || brightness.isDefault()) {
+            watchableObjects.add(EntityMetadataType.DISPLAY_BRIGHTNESS.construct(Optional.empty()));
+        } else {
+            try {
+                Class<?> brightnessClass = Class.forName("net.minecraft.world.entity.Display$Brightness");
+                Constructor<?> constructor = brightnessClass.getConstructor(int.class, int.class);
+                Object nmsBrightness = constructor.newInstance(brightness.getBlockLight(), brightness.getSkyLight());
+                @SuppressWarnings("unchecked")
+                Optional<Object> optional = Optional.of(nmsBrightness);
+                watchableObjects.add(EntityMetadataType.DISPLAY_BRIGHTNESS.construct((Optional) optional));
+            } catch (Exception e) {
+                watchableObjects.add(EntityMetadataType.DISPLAY_BRIGHTNESS.construct(Optional.empty()));
+            }
+        }
+        return this;
+    }
+
+    /**
+     * 设置 Display Entity 的 Billboard 模式
+     *
+     * @param billboard Billboard 模式
+     * @return this
+     */
+    public EntityMetadataBuilder withBillboard(Billboard billboard) {
+        if (billboard == null) {
+            billboard = Billboard.CENTER;
+        }
+        int billboardValue;
+        switch (billboard) {
+            case FIXED:
+                billboardValue = 0;
+                break;
+            case VERTICAL:
+                billboardValue = 1;
+                break;
+            case HORIZONTAL:
+                billboardValue = 2;
+                break;
+            case CENTER:
+            default:
+                billboardValue = 3;
+                break;
+        }
+        watchableObjects.add(EntityMetadataType.DISPLAY_BILLBOARD.construct(billboardValue));
+        return this;
+    }
+
+    /**
+     *设置 TextDisplay Entity 的文本内容
+     *
+     * @param text 文本内容
+     * @return this
+     */
+    public EntityMetadataBuilder withTextDisplayText(String text) {
+        Component component = CraftChatMessage.fromStringOrNull(text);
+        watchableObjects.add(EntityMetadataType.TEXT_DISPLAY_TEXT.construct(component != null ? component : Component.empty()));
+        return this;
+    }
+
+    /**
+     * 设置 TextDisplay Entity 的文本对齐方式
+     *
+     * @param alignment 文本对齐方式
+     * @return this
+     */
+    public EntityMetadataBuilder withTextAlignment(TextAlignment alignment) {
+        if (alignment == null) {
+            alignment = TextAlignment.LEFT;
+        }
+        byte styleFlags;
+        switch (alignment) {
+            case CENTER:
+                styleFlags = 1;
+                break;
+            case RIGHT:
+                styleFlags = 2;
+                break;
+            case LEFT:
+            default:
+                styleFlags = 0;
+                break;
+        }
+        watchableObjects.add(EntityMetadataType.TEXT_DISPLAY_STYLE_FLAGS.construct(styleFlags));
+        return this;
+    }
+
+    /**
+     * 设置 TextDisplay Entity 的线宽
+     *
+     * @param lineWidth 线宽（默认 200）
+     * @return this
+     */
+    public EntityMetadataBuilder withTextLineWidth(int lineWidth) {
+        watchableObjects.add(EntityMetadataType.TEXT_DISPLAY_LINE_WIDTH.construct(lineWidth));
+        return this;
+    }
+
+    /**
+     * 设置 TextDisplay Entity 的背景颜色
+     *
+     * @param argb ARGB 颜色值（0xAA000000 为默认透明黑色）
+     * @return this
+     */
+    public EntityMetadataBuilder withTextBackgroundColor(int argb) {
+        watchableObjects.add(EntityMetadataType.TEXT_DISPLAY_BACKGROUND_COLOR.construct(argb));
+        return this;
+    }
+
+    /**
+     * 设置 TextDisplay Entity 的文本不透明度
+     *
+     * @param opacity 不透明度（0-255，-1 表示默认）
+     * @return this
+     */
+    public EntityMetadataBuilder withTextOpacity(byte opacity) {
+        watchableObjects.add(EntityMetadataType.TEXT_DISPLAY_OPACITY.construct(opacity));
         return this;
     }
 

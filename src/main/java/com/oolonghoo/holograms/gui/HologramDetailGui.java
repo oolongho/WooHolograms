@@ -426,7 +426,7 @@ public class HologramDetailGui extends GuiScreen {
     private GuiButton createLineButton(Hologram hologram, int lineIndex, HologramLine line) {
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add("&7内容: &f" + ColorUtil.stripColor(line.getContent()));
+        lore.add("&7内容: " + line.getContent());
         lore.add("&7偏移: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()));
         lore.add("&7高度: &f" + line.getHeight());
         lore.add("");

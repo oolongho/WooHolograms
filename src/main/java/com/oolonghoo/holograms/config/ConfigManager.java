@@ -51,6 +51,10 @@ public class ConfigManager {
     private int maxHologramsPerWorld;
     private int maxLinesPerHologram;
 
+    // 渲染器缓存池设置
+    private boolean rendererPoolEnabled;
+    private int rendererPoolMaxSize;
+
     public ConfigManager(WooHolograms plugin) {
         this.plugin = plugin;
     }
@@ -100,6 +104,10 @@ public class ConfigManager {
         // 限制设置
         maxHologramsPerWorld = config.getInt("limits.max-holograms-per-world", 100);
         maxLinesPerHologram = config.getInt("limits.max-lines-per-hologram", 20);
+
+        // 渲染器缓存池设置
+        rendererPoolEnabled = config.getBoolean("renderer-pool.enabled", true);
+        rendererPoolMaxSize = config.getInt("renderer-pool.max-size", 100);
     }
 
     /**
@@ -208,6 +216,14 @@ public class ConfigManager {
 
     public int getMaxLinesPerHologram() {
         return maxLinesPerHologram;
+    }
+
+    public boolean isRendererPoolEnabled() {
+        return rendererPoolEnabled;
+    }
+
+    public int getRendererPoolMaxSize() {
+        return rendererPoolMaxSize;
     }
 
     /**

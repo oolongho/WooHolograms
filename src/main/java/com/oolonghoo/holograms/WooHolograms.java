@@ -6,7 +6,6 @@ import com.oolonghoo.holograms.command.HologramCommand;
 import com.oolonghoo.holograms.config.ConfigManager;
 import com.oolonghoo.holograms.config.Messages;
 import com.oolonghoo.holograms.gui.ChatInputManager;
-import com.oolonghoo.holograms.gui.GuiListener;
 import com.oolonghoo.holograms.gui.GuiManager;
 import com.oolonghoo.holograms.hologram.HologramManager;
 import com.oolonghoo.holograms.hook.PlaceholderHook;
@@ -14,6 +13,7 @@ import com.oolonghoo.holograms.listener.PacketListener;
 import com.oolonghoo.holograms.listener.PlayerListener;
 import com.oolonghoo.holograms.listener.WorldListener;
 import com.oolonghoo.holograms.nms.NmsHologramRendererFactory;
+import com.oolonghoo.holograms.nms.HologramRendererPool;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.HologramRendererFactoryImpl;
 import com.oolonghoo.holograms.storage.HologramStorage;
@@ -48,6 +48,7 @@ public class WooHolograms extends JavaPlugin {
     private PacketListener packetListener;
     private HologramStorage storage;
     private NmsHologramRendererFactory rendererFactory;
+    private HologramRendererPool rendererPool;
     private PlaceholderHook placeholderHook;
     
     // 状态
@@ -84,6 +85,13 @@ public class WooHolograms extends JavaPlugin {
         // 初始化渲染器工厂
         EntityIdGenerator entityIdGenerator = new EntityIdGenerator();
         rendererFactory = new HologramRendererFactoryImpl(entityIdGenerator);
+        
+        // 初始化渲染器缓存池
+        rendererPool = new HologramRendererPool(
+            rendererFactory,
+            configManager.getRendererPoolMaxSize(),
+            configManager.isRendererPoolEnabled()
+        );
         
         // 初始化全息图管理器
         hologramManager = new HologramManager(this, storage);
@@ -156,6 +164,11 @@ public class WooHolograms extends JavaPlugin {
         
         // 清理动画
         animationManager.clear();
+        
+        // 清理渲染器缓存池
+        if (rendererPool != null) {
+            rendererPool.clear();
+        }
         
         pluginEnabled = false;
         getLogger().info("WooHolograms 已禁用");
@@ -266,6 +279,16 @@ public class WooHolograms extends JavaPlugin {
     }
     
     /**
+     * 获取渲染器缓存池
+     * 
+     * @return 渲染器缓存池
+     */
+    @NotNull
+    public HologramRendererPool getRendererPool() {
+        return rendererPool;
+    }
+    
+    /**
      * 获取占位符钩子
      * 
      * @return 占位符钩子
@@ -286,7 +309,6 @@ public class WooHolograms extends JavaPlugin {
     private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new GuiListener(this), this);
     }
     
     private boolean checkVersion() {

@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -57,6 +58,35 @@ class EntityMetadataType<T> {
     private static final EntityDataAccessor<net.minecraft.core.Rotations> ARMOR_STAND_BODY_POSE_OBJECT
             = ReflectUtil.getFieldValue(ArmorStand.class, "DATA_BODY_POSE");
 
+    // Display Entity - Billboard 渲染约束
+    private static final EntityDataAccessor<Integer> DISPLAY_BILLBOARD_OBJECT
+            = ReflectUtil.getFieldValue(Display.class, "DATA_BILLBOARD_RENDER_CONSTRAINTS_ID");
+
+    // Display Entity - 亮度覆盖
+    @SuppressWarnings("unchecked")
+    private static final EntityDataAccessor<Optional<?>> DISPLAY_BRIGHTNESS_OBJECT
+            = ReflectUtil.getFieldValue(Display.class, "DATA_BRIGHTNESS_OVERRIDE_ID");
+
+    // TextDisplay Entity - 文本内容
+    private static final EntityDataAccessor<Component> TEXT_DISPLAY_TEXT_OBJECT
+            = ReflectUtil.getFieldValue(Display.TextDisplay.class, "DATA_TEXT_ID");
+
+    // TextDisplay Entity - 线宽
+    private static final EntityDataAccessor<Integer> TEXT_DISPLAY_LINE_WIDTH_OBJECT
+            = ReflectUtil.getFieldValue(Display.TextDisplay.class, "DATA_LINE_WIDTH_ID");
+
+    // TextDisplay Entity - 文本不透明度
+    private static final EntityDataAccessor<Byte> TEXT_DISPLAY_OPACITY_OBJECT
+            = ReflectUtil.getFieldValue(Display.TextDisplay.class, "DATA_TEXT_OPACITY_ID");
+
+    // TextDisplay Entity - 背景颜色
+    private static final EntityDataAccessor<Integer> TEXT_DISPLAY_BACKGROUND_COLOR_OBJECT
+            = ReflectUtil.getFieldValue(Display.TextDisplay.class, "DATA_BACKGROUND_COLOR_ID");
+
+    // TextDisplay Entity - 样式标志（包含对齐方式）
+    private static final EntityDataAccessor<Byte> TEXT_DISPLAY_STYLE_FLAGS_OBJECT
+            = ReflectUtil.getFieldValue(Display.TextDisplay.class, "DATA_STYLE_FLAGS_ID");
+
     // 静态实例
     static final EntityMetadataType<Byte> ENTITY_PROPERTIES = new EntityMetadataType<>(ENTITY_PROPERTIES_OBJECT);
     static final EntityMetadataType<Optional<Component>> ENTITY_CUSTOM_NAME = new EntityMetadataType<>(ENTITY_CUSTOM_NAME_OBJECT);
@@ -67,6 +97,18 @@ class EntityMetadataType<T> {
     static final EntityMetadataType<ItemStack> ITEM_STACK = new EntityMetadataType<>(ITEM_STACK_OBJECT);
     static final EntityMetadataType<net.minecraft.core.Rotations> ARMOR_STAND_HEAD_POSE = new EntityMetadataType<>(ARMOR_STAND_HEAD_POSE_OBJECT);
     static final EntityMetadataType<net.minecraft.core.Rotations> ARMOR_STAND_BODY_POSE = new EntityMetadataType<>(ARMOR_STAND_BODY_POSE_OBJECT);
+
+    // Display Entity 静态实例
+    static final EntityMetadataType<Integer> DISPLAY_BILLBOARD = new EntityMetadataType<>(DISPLAY_BILLBOARD_OBJECT);
+    @SuppressWarnings("unchecked")
+    static final EntityMetadataType<Optional<?>> DISPLAY_BRIGHTNESS = new EntityMetadataType<>(DISPLAY_BRIGHTNESS_OBJECT);
+
+    // TextDisplay Entity 静态实例
+    static final EntityMetadataType<Component> TEXT_DISPLAY_TEXT = new EntityMetadataType<>(TEXT_DISPLAY_TEXT_OBJECT);
+    static final EntityMetadataType<Integer> TEXT_DISPLAY_LINE_WIDTH = new EntityMetadataType<>(TEXT_DISPLAY_LINE_WIDTH_OBJECT);
+    static final EntityMetadataType<Byte> TEXT_DISPLAY_OPACITY = new EntityMetadataType<>(TEXT_DISPLAY_OPACITY_OBJECT);
+    static final EntityMetadataType<Integer> TEXT_DISPLAY_BACKGROUND_COLOR = new EntityMetadataType<>(TEXT_DISPLAY_BACKGROUND_COLOR_OBJECT);
+    static final EntityMetadataType<Byte> TEXT_DISPLAY_STYLE_FLAGS = new EntityMetadataType<>(TEXT_DISPLAY_STYLE_FLAGS_OBJECT);
 
     private final EntityDataAccessor<T> entityDataAccessor;
 
