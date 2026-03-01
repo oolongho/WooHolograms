@@ -305,7 +305,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(43, GuiButton.builder(Material.REDSTONE_BLOCK)
+        setButton(46, GuiButton.builder(Material.REDSTONE_BLOCK)
                 .name("&f删除")
                 .lore(Arrays.asList(
                         "&7删除此全息图",
@@ -326,7 +326,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(44, GuiButton.builder(Material.TRIPWIRE_HOOK)
+        setButton(48, GuiButton.builder(Material.TRIPWIRE_HOOK)
                 .name("&f设置权限")
                 .lore(Arrays.asList(
                         "&7当前权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
@@ -355,7 +355,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(43, GuiButton.builder(Material.ENDER_EYE)
+        setButton(47, GuiButton.builder(Material.ENDER_EYE)
                 .name("&f设置范围")
                 .lore(Arrays.asList(
                         "&7当前范围: &f" + hologram.getDisplayRange() + " 格",
@@ -384,7 +384,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(44, GuiButton.builder(Material.CLOCK)
+        setButton(50, GuiButton.builder(Material.CLOCK)
                 .name("&f设置间隔")
                 .lore(Arrays.asList(
                         "&7当前间隔: &f" + hologram.getUpdateInterval() + " tick",
