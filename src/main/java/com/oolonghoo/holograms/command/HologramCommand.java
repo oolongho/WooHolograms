@@ -8,6 +8,7 @@ import com.oolonghoo.holograms.gui.ChatInputManager;
 import com.oolonghoo.holograms.gui.GuiManager;
 import com.oolonghoo.holograms.gui.HologramDetailGui;
 import com.oolonghoo.holograms.gui.HologramListGui;
+import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
@@ -60,6 +61,7 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
         subcommands.add(new SetRangeCommand());
         subcommands.add(new SetIntervalCommand());
         subcommands.add(new SetPermissionCommand());
+        subcommands.add(new SetFacingCommand());
         subcommands.add(new AddActionCommand());
         subcommands.add(new DeleteActionCommand());
         subcommands.add(new ActionsCommand());
@@ -1303,6 +1305,91 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
             if (args.length == 1) {
                 return plugin.getHologramManager().getHologramNames().stream()
                         .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+            return new ArrayList<>();
+        }
+    }
+
+    private class SetFacingCommand extends Subcommand {
+        public SetFacingCommand() {
+            super("setfacing", "设置行朝向", "wooholograms.admin", Collections.emptyList());
+        }
+
+        @Override
+        public boolean execute(CommandSender sender, String[] args) {
+            if (args.length < 3) {
+                sender.sendMessage(ColorUtil.colorize("&c用法: /wh setfacing <名称> <行号> <模式> [角度]"));
+                sender.sendMessage(ColorUtil.colorize("&7模式: fixed_angle(固定角度), horizontal(水平跟随), vertical(垂直跟随), all(完全跟随)"));
+                sender.sendMessage(ColorUtil.colorize("&7角度: 仅 fixed_angle 模式需要，0-360度"));
+                return true;
+            }
+
+            String name = args[0];
+            Hologram hologram = plugin.getHologramManager().getHologram(name);
+
+            if (hologram == null) {
+                sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+                return true;
+            }
+
+            try {
+                int lineIndex = Integer.parseInt(args[1]) - 1;
+                if (lineIndex < 0) {
+                    sender.sendMessage(ColorUtil.colorize("&c行号必须大于0！"));
+                    return true;
+                }
+
+                HologramPage page = hologram.getPage(0);
+                if (page == null || lineIndex >= page.size()) {
+                    sender.sendMessage(ColorUtil.colorize("&c行号超出范围！"));
+                    return true;
+                }
+
+                Billboard billboard = Billboard.fromId(args[2].toLowerCase());
+                HologramLine line = page.getLine(lineIndex);
+                
+                if (line != null) {
+                    line.setBillboard(billboard);
+                    
+                    if (billboard == Billboard.FIXED_ANGLE && args.length > 3) {
+                        float facing = Float.parseFloat(args[3]);
+                        line.setFacing(facing);
+                    }
+                    
+                    hologram.save();
+                    hologram.showToNearby();
+                    
+                    String modeDisplay = billboard.getDisplayName();
+                    if (billboard == Billboard.FIXED_ANGLE) {
+                        modeDisplay += " (" + line.getFacing() + "度)";
+                    }
+                    sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 第 " + (lineIndex + 1) + " 行的朝向设置为 " + modeDisplay + "！"));
+                }
+            } catch (NumberFormatException e) {
+                sender.sendMessage(ColorUtil.colorize("&c行号和角度必须是数字！"));
+            }
+
+            return true;
+        }
+
+        @Override
+        public List<String> tabComplete(CommandSender sender, String[] args) {
+            if (args.length == 1) {
+                return plugin.getHologramManager().getHologramNames().stream()
+                        .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                        .collect(Collectors.toList());
+            } else if (args.length == 2) {
+                return Arrays.asList("1", "2", "3", "4", "5").stream()
+                        .filter(n -> n.startsWith(args[1]))
+                        .collect(Collectors.toList());
+            } else if (args.length == 3) {
+                return Arrays.asList("fixed_angle", "horizontal", "vertical", "all").stream()
+                        .filter(m -> m.startsWith(args[2].toLowerCase()))
+                        .collect(Collectors.toList());
+            } else if (args.length == 4 && args[2].equalsIgnoreCase("fixed_angle")) {
+                return Arrays.asList("0", "45", "90", "180", "270", "360").stream()
+                        .filter(a -> a.startsWith(args[3]))
                         .collect(Collectors.toList());
             }
             return new ArrayList<>();

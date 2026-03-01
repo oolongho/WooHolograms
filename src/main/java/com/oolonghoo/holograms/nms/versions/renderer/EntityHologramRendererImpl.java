@@ -16,17 +16,13 @@ import org.bukkit.entity.Player;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
-/**
- * 实体全息图渲染器实现
- *
- * @author oolongho
- * @since 1.0.0
- */
 public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
     private final int entityId;
     private boolean destroyed = false;
+    private EntityType currentEntityType;
 
     public EntityHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.entityId = entityIdGenerator.getFreeEntityId();
@@ -35,12 +31,14 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
     public void display(Player player, NmsHologramPartData<EntityType> data) {
         DecentPosition position = data.getPosition();
         EntityType content = data.getContent();
-        DecentPosition offsetPosition = offsetPosition(position);
+        this.currentEntityType = content;
+        DecentPosition offsetPosition = offsetPosition(position, content);
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, content, offsetPosition)
                 .withEntityMetadata(entityId, EntityMetadataBuilder.create()
                         .withSilent()
                         .withNoGravity()
+                        .withInvisible()
                         .toWatchableObjects())
                 .sendTo(player);
     }
@@ -51,8 +49,10 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
     }
 
     public void move(Player player, NmsHologramPartData<EntityType> data) {
-        hide(player);
-        display(player, data);
+        DecentPosition offsetPosition = offsetPosition(data.getPosition(), data.getContent());
+        EntityPacketsBuilder.create()
+                .withTeleportEntity(entityId, offsetPosition)
+                .sendTo(player);
     }
 
     public void hide(Player player) {
@@ -77,7 +77,23 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
     @Override
     public void render(Player player, Location location, HologramLine line) {
-        // Entity renderer uses display() method with NmsHologramPartData
+        if (location == null || line == null) {
+            return;
+        }
+
+        EntityType entityType = parseEntityType(line.getContent());
+        this.currentEntityType = entityType;
+        DecentPosition position = DecentPosition.fromLocation(location);
+        DecentPosition offsetPosition = offsetPosition(position, entityType);
+
+        EntityPacketsBuilder.create()
+                .withSpawnEntity(entityId, entityType, offsetPosition)
+                .withEntityMetadata(entityId, EntityMetadataBuilder.create()
+                        .withSilent()
+                        .withNoGravity()
+                        .withInvisible()
+                        .toWatchableObjects())
+                .sendTo(player);
     }
 
     @Override
@@ -89,7 +105,21 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
     @Override
     public void updateText(Player player, HologramLine line) {
-        // Entity renderer uses updateContent() method
+        EntityType newType = parseEntityType(line.getContent());
+        if (newType != currentEntityType) {
+            hide(player);
+            this.currentEntityType = newType;
+            DecentPosition position = DecentPosition.fromLocation(line.getLocation());
+            DecentPosition offsetPosition = offsetPosition(position, newType);
+            EntityPacketsBuilder.create()
+                    .withSpawnEntity(entityId, newType, offsetPosition)
+                    .withEntityMetadata(entityId, EntityMetadataBuilder.create()
+                            .withSilent()
+                            .withNoGravity()
+                            .withInvisible()
+                            .toWatchableObjects())
+                    .sendTo(player);
+        }
     }
 
     @Override
@@ -113,7 +143,14 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
     @Override
     public void teleport(Player player, Location location) {
-        // Entity renderer uses move() method
+        if (location == null) {
+            return;
+        }
+        DecentPosition position = DecentPosition.fromLocation(location);
+        DecentPosition offsetPosition = offsetPosition(position, currentEntityType);
+        EntityPacketsBuilder.create()
+                .withTeleportEntity(entityId, offsetPosition)
+                .sendTo(player);
     }
 
     @Override
@@ -128,7 +165,30 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
         return null;
     }
 
-    private DecentPosition offsetPosition(DecentPosition position) {
-        return position.subtractY(0.25d);
+    private DecentPosition offsetPosition(DecentPosition position, EntityType entityType) {
+        double height = EntityTypeRegistry.getEntityTypeHeight(entityType != null ? entityType : EntityType.ZOMBIE);
+        return position.subtractY(height / 2);
+    }
+
+    private EntityType parseEntityType(String content) {
+        if (content == null || content.isEmpty()) {
+            return EntityType.ZOMBIE;
+        }
+
+        String upperContent = content.toUpperCase(Locale.ROOT);
+        if (upperContent.startsWith("#ENTITY:")) {
+            String entityName = content.substring(8).trim().toUpperCase(Locale.ROOT);
+            try {
+                return EntityType.valueOf(entityName);
+            } catch (IllegalArgumentException e) {
+                for (EntityType type : EntityType.values()) {
+                    if (type.name().contains(entityName) || entityName.contains(type.name())) {
+                        return type;
+                    }
+                }
+            }
+        }
+
+        return EntityType.ZOMBIE;
     }
 }

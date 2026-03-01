@@ -170,7 +170,7 @@ public class EntityMetadataBuilder {
      * @param z Z 轴旋转（弧度）
      * @return this
      */
-    EntityMetadataBuilder withHeadRotation(float x, float y, float z) {
+    public EntityMetadataBuilder withHeadRotation(float x, float y, float z) {
         watchableObjects.add(EntityMetadataType.ARMOR_STAND_HEAD_POSE.construct(new Rotations(x, y, z)));
         return this;
     }
@@ -183,7 +183,7 @@ public class EntityMetadataBuilder {
      * @param z Z 轴旋转（弧度）
      * @return this
      */
-    EntityMetadataBuilder withBodyRotation(float x, float y, float z) {
+    public EntityMetadataBuilder withBodyRotation(float x, float y, float z) {
         watchableObjects.add(EntityMetadataType.ARMOR_STAND_BODY_POSE.construct(new Rotations(x, y, z)));
         return this;
     }
@@ -261,7 +261,7 @@ public class EntityMetadataBuilder {
         }
         byte billboardValue;
         switch (billboard) {
-            case FIXED:
+            case FIXED_ANGLE:
                 billboardValue = 0;
                 break;
             case VERTICAL:

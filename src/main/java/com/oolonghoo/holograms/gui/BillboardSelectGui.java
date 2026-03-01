@@ -79,7 +79,6 @@ public class BillboardSelectGui extends GuiScreen {
         HologramLine line = page.getLine(lineIndex);
         Billboard currentBillboard = line.getBillboard();
 
-        // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
                 .name("&f返回")
                 .lore(Arrays.asList(
@@ -92,76 +91,90 @@ public class BillboardSelectGui extends GuiScreen {
                 })
                 .build());
 
-        // 当前设置显示
+        String currentDisplay = currentBillboard.getDisplayName();
+        if (currentBillboard == Billboard.FIXED_ANGLE) {
+            currentDisplay += " (" + line.getFacing() + "度)";
+        }
         setButton(4, GuiButton.builder(Material.COMPASS)
                 .name("&f当前朝向模式")
                 .lore(Arrays.asList(
                         "",
-                        "&7" + currentBillboard.getDisplayName(),
+                        "&7" + currentDisplay,
                         ""
                 ))
                 .build());
 
-        // 固定选项
-        setButton(10, GuiButton.builder(Material.STONE)
-                .name("&f固定")
+        setButton(10, GuiButton.builder(Material.STONE_BUTTON)
+                .name("&f固定角度")
                 .lore(Arrays.asList(
-                        "&7固定朝向，不随视角变化",
+                        "&7使用固定角度朝向",
+                        "&7需要设置具体角度值",
                         "",
-                        currentBillboard == Billboard.FIXED ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.FIXED_ANGLE ? "&a当前选择" : "&e点击选择"
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.FIXED);
+                    player.closeInventory();
+                    
+                    chatInputManager.requestInput(player, "&a请输入固定角度 (0-360度):", 
+                            ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                        try {
+                            float angle = Float.parseFloat(input);
+                            setBillboard(player, Billboard.FIXED_ANGLE, angle);
+                        } catch (NumberFormatException e) {
+                            player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                            guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                        }
+                    });
                 })
                 .build());
 
-        // 垂直选项
         setButton(12, GuiButton.builder(Material.END_ROD)
-                .name("&f垂直")
+                .name("&f垂直跟随")
                 .lore(Arrays.asList(
                         "&7垂直方向跟随玩家视角",
+                        "&7水平方向固定",
                         "",
                         currentBillboard == Billboard.VERTICAL ? "&a当前选择" : "&e点击选择"
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.VERTICAL);
+                    setBillboard(player, Billboard.VERTICAL, 0);
                 })
                 .build());
 
-        // 水平选项
         setButton(14, GuiButton.builder(Material.RAIL)
-                .name("&f水平")
+                .name("&f水平跟随")
                 .lore(Arrays.asList(
                         "&7水平方向跟随玩家视角",
+                        "&7垂直方向固定",
                         "",
                         currentBillboard == Billboard.HORIZONTAL ? "&a当前选择" : "&e点击选择"
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.HORIZONTAL);
+                    setBillboard(player, Billboard.HORIZONTAL, 0);
                 })
                 .build());
 
-        // 居中选项
         setButton(16, GuiButton.builder(Material.END_CRYSTAL)
-                .name("&f中心")
+                .name("&f完全跟随")
                 .lore(Arrays.asList(
                         "&7完全跟随玩家视角",
+                        "&7默认模式",
                         "",
                         currentBillboard == Billboard.CENTER ? "&a当前选择" : "&e点击选择"
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.CENTER);
+                    setBillboard(player, Billboard.CENTER, 0);
                 })
                 .build());
 
         fillBackground();
     }
 
-    private void setBillboard(Player player, Billboard billboard) {
+    private void setBillboard(Player player, Billboard billboard, float facing) {
         Hologram h = plugin.getHologramManager().getHologram(hologramName);
         if (h != null) {
             HologramPage p = h.getPage(pageIndex);
@@ -169,9 +182,17 @@ public class BillboardSelectGui extends GuiScreen {
                 HologramLine l = p.getLine(lineIndex);
                 if (l != null) {
                     l.setBillboard(billboard);
+                    if (billboard == Billboard.FIXED_ANGLE) {
+                        l.setFacing(facing);
+                    }
                     h.save();
                     h.showToNearby();
-                    player.sendMessage(ColorUtil.colorize("&a已设置朝向模式为 " + billboard.getDisplayName() + "！"));
+                    
+                    String modeDisplay = billboard.getDisplayName();
+                    if (billboard == Billboard.FIXED_ANGLE) {
+                        modeDisplay += " (" + facing + "度)";
+                    }
+                    player.sendMessage(ColorUtil.colorize("&a已设置朝向模式为 " + modeDisplay + "！"));
                 }
             }
         }

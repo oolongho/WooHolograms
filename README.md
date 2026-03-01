@@ -1,6 +1,6 @@
 # WooHolograms
 
-✨一款现代化的 Minecraft 全息图插件，基于 Display Entity 技术
+✨一款现代化的 Minecraft 全息图插件，基于 Display Entity
 
 ## 特色
 
@@ -64,6 +64,7 @@
 | `/wh setrange <名称> <范围>` | 设置显示范围 | `wooholograms.admin` |
 | `/wh setinterval <名称> <间隔>` | 设置更新间隔 | `wooholograms.admin` |
 | `/wh setpermission <名称> [权限]` | 设置查看权限 | `wooholograms.admin` |
+| `/wh setfacing <名称> <行号> <模式> [角度]` | 设置行朝向 | `wooholograms.admin` |
 | `/wh addaction <名称> <行号> <点击类型> <动作>` | 添加点击动作 | `wooholograms.admin` |
 | `/wh near [范围]` | 显示附近全息图 | `wooholograms.admin` |
 | `/wh reload` | 重载配置 | `wooholograms.admin` |
@@ -90,30 +91,28 @@
 | `<#ANIM:scroll>文本</#ANIM>` | 滚动动画 | `<#ANIM:scroll>公告</#ANIM>` |
 | `<#ANIM:gradient:色1:色2>文本</#ANIM>` | 渐变动画 | `<#ANIM:gradient:#FF0000:#0000FF>彩虹</#ANIM>` |
 
+## 朝向模式
+
+| 模式 | 描述 | 使用场景 |
+|------|------|----------|
+| `fixed_angle` | 固定角度 | 全息图固定朝向某个方向，需要指定角度（0-360度） |
+| `horizontal` | 水平跟随 | 水平方向跟随玩家视角，垂直方向固定 |
+| `vertical` | 垂直跟随 | 垂直方向跟随玩家视角，水平方向固定 |
+| `all` | 完全跟随 | 完全跟随玩家视角（默认） |
+
+**命令示例**:
+```
+/wh setfacing testholo 1 fixed_angle 45   # 固定45度角
+/wh setfacing testholo 1 horizontal       # 水平跟随
+/wh setfacing testholo 1 all              # 完全跟随（默认）
+```
+
 ## PlaceholderAPI 变量
 
 | 变量 | 描述 |
 |------|------|
 | `%wooholograms_count%` | 全息图总数 |
 | `%wooholograms_player_page%` | 玩家当前查看的页面 |
-
-## 配置文件
-
-### config.yml
-```yaml
-settings:
-  debug: false
-  language: zh-CN
-  auto-save-interval: 300
-
-renderer-pool:
-  enabled: true
-  max-size: 100
-
-default:
-  display-range: 48
-  update-interval: 20
-```
 
 ## API 使用示例
 
@@ -140,22 +139,6 @@ public void onHologramClick(HologramClickEvent event) {
     Hologram hologram = event.getHologram();
     // 你的逻辑
 }
-```
-
-## GUI 预览
-
-```
-┌─────────────────────────────────────┐
-│          全息图列表                  │
-├─────────────────────────────────────┤
-│ [创建]              [重载] [附近]    │
-│                                     │
-│  📄 spawn        世界: world        │
-│  📄 shop         世界: world        │
-│  📄 spawn        世界: world        │
-│                                     │
-│           [上一页] [下一页]          │
-└─────────────────────────────────────┘
 ```
 
 ---

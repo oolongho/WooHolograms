@@ -2,10 +2,12 @@ package com.oolonghoo.holograms.nms.versions.renderer;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.HeadTexture;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramPartData;
+import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsHeadHologramRenderer;
 import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
@@ -97,14 +99,23 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         ItemStack headItem = createHeadItem(line);
         DecentPosition position = DecentPosition.fromLocation(location);
         DecentPosition offsetPosition = offsetPosition(position);
+        
+        Billboard billboard = line.getBillboard();
+        EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
+                .withInvisible()
+                .withNoGravity()
+                .withArmorStandProperties(small, true);
+        
+        if (billboard == Billboard.FIXED_ANGLE) {
+            float facing = line.getFacing();
+            float yaw = location.getYaw() + facing;
+            float pitch = location.getPitch();
+            metadataBuilder.withHeadRotation(pitch, yaw, 0);
+        }
 
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, EntityType.ARMOR_STAND, offsetPosition)
-                .withEntityMetadata(entityId, EntityMetadataBuilder.create()
-                        .withInvisible()
-                        .withNoGravity()
-                        .withArmorStandProperties(small, true)
-                        .toWatchableObjects())
+                .withEntityMetadata(entityId, metadataBuilder.toWatchableObjects())
                 .withHelmet(entityId, headItem)
                 .sendTo(player);
     }
@@ -176,12 +187,16 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         
         if (headTexture == null) {
             String content = line.getContent();
-            return createHeadFromContent(content);
+            headTexture = HeadTexture.parse(content);
+        }
+
+        if (headTexture == null) {
+            return new ItemStack(Material.PLAYER_HEAD);
         }
 
         switch (headTexture.getType()) {
             case BASE64:
-                return createHeadFromBase64(headTexture.getTextureValue());
+                return createHeadFromBase64(headTexture.getValue());
             case PLAYER:
                 return createHeadFromPlayerName(headTexture.getValue());
             case HDB:
@@ -191,48 +206,11 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         }
     }
 
-    protected ItemStack createHeadFromContent(String content) {
-        if (content == null || content.isEmpty()) {
-            return new ItemStack(Material.PLAYER_HEAD);
-        }
-
-        String upperContent = content.toUpperCase();
-        if (upperContent.startsWith("#HEAD:") || upperContent.startsWith("#SMALLHEAD:")) {
-            String textureData = extractTextureData(content);
-            if (textureData != null && !textureData.isEmpty()) {
-                if (isBase64Texture(textureData)) {
-                    return createHeadFromBase64(textureData);
-                } else {
-                    return createHeadFromPlayerName(textureData);
-                }
-            }
-        }
-
-        return new ItemStack(Material.PLAYER_HEAD);
-    }
-
-    protected String extractTextureData(String content) {
-        String upperContent = content.toUpperCase();
-        if (upperContent.startsWith("#HEAD:")) {
-            return content.substring(6);
-        } else if (upperContent.startsWith("#SMALLHEAD:")) {
-            return content.substring(11);
-        }
-        return null;
-    }
-
-    protected boolean isBase64Texture(String data) {
-        if (data == null || data.isEmpty()) {
-            return false;
-        }
-        return data.length() > 50;
-    }
-
     protected ItemStack createHeadFromBase64(String base64) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         
-        if (meta != null) {
+        if (meta != null && base64 != null && !base64.isEmpty()) {
             GameProfile profile = new GameProfile(UUID.randomUUID(), null);
             profile.getProperties().put("textures", new Property("textures", base64));
             
@@ -259,7 +237,7 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         
-        if (meta != null) {
+        if (meta != null && playerName != null && !playerName.isEmpty()) {
             meta.setOwner(playerName);
             head.setItemMeta(meta);
         }
@@ -268,6 +246,17 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
     }
 
     protected ItemStack createHeadFromHDB(String hdbId) {
+        if (Bukkit.getPluginManager().getPlugin("HeadDatabase") != null) {
+            try {
+                Object api = Class.forName("ar.com.zir.libs.headdatabase.api.HeadDatabaseAPI").newInstance();
+                Method getItemMethod = api.getClass().getMethod("getItem", String.class);
+                ItemStack head = (ItemStack) getItemMethod.invoke(api, hdbId);
+                if (head != null) {
+                    return head;
+                }
+            } catch (Exception ignored) {
+            }
+        }
         return new ItemStack(Material.PLAYER_HEAD);
     }
 }

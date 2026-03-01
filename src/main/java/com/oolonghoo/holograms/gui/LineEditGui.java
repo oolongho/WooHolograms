@@ -262,11 +262,21 @@ public class LineEditGui extends GuiScreen {
         
         // 朝向设置
         Billboard billboard = line.getBillboard();
+        String facingDisplay = billboard.getDisplayName();
+        if (billboard == Billboard.FIXED_ANGLE) {
+            facingDisplay += " (" + line.getFacing() + "度)";
+        }
         setButton(20, GuiButton.builder(Material.COMPASS)
                 .name("&f朝向设置")
                 .lore(Arrays.asList(
                         "&7设置显示的朝向模式",
-                        "&7当前: &f" + billboard.getDisplayName(),
+                        "&7当前: &f" + facingDisplay,
+                        "",
+                        "&7模式说明:",
+                        "&7- 固定角度: 使用固定朝向",
+                        "&7- 水平跟随: 水平方向跟随玩家",
+                        "&7- 垂直跟随: 垂直方向跟随玩家",
+                        "&7- 完全跟随: 完全跟随玩家视角",
                         "",
                         "&e点击设置"
                 ))

@@ -138,7 +138,7 @@ public class DisplayHologramData {
      */
     public static DisplayHologramData createFixed() {
         DisplayHologramData data = new DisplayHologramData();
-        data.setBillboard(Billboard.FIXED);
+        data.setBillboard(Billboard.FIXED_ANGLE);
         return data;
     }
 

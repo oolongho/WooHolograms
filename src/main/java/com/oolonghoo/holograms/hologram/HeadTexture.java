@@ -47,24 +47,59 @@ public class HeadTexture {
 
         String upperInput = input.toUpperCase(Locale.ROOT);
         
-        if (upperInput.startsWith("#HEAD:URL:")) {
-            String base64 = input.substring("#HEAD:URL:".length());
+        if (upperInput.startsWith("#HEAD:URL:") || upperInput.startsWith("#SMALLHEAD:URL:")) {
+            String base64 = extractValue(input, "URL:");
             if (!base64.isEmpty()) {
                 return new HeadTexture(Type.BASE64, base64);
             }
-        } else if (upperInput.startsWith("#HEAD:PLAYER:")) {
-            String playerName = input.substring("#HEAD:PLAYER:".length());
+        } else if (upperInput.startsWith("#HEAD:PLAYER:") || upperInput.startsWith("#SMALLHEAD:PLAYER:")) {
+            String playerName = extractValue(input, "PLAYER:");
             if (!playerName.isEmpty()) {
                 return new HeadTexture(Type.PLAYER, playerName);
             }
-        } else if (upperInput.startsWith("#HEAD:HDB:")) {
-            String hdbId = input.substring("#HEAD:HDB:".length());
+        } else if (upperInput.startsWith("#HEAD:HDB:") || upperInput.startsWith("#SMALLHEAD:HDB:")) {
+            String hdbId = extractValue(input, "HDB:");
             if (!hdbId.isEmpty()) {
                 return new HeadTexture(Type.HDB, hdbId);
+            }
+        } else if (upperInput.startsWith("#HEAD:") || upperInput.startsWith("#SMALLHEAD:")) {
+            String data = extractRawData(input);
+            if (!data.isEmpty()) {
+                if (isBase64Texture(data)) {
+                    return new HeadTexture(Type.BASE64, data);
+                } else {
+                    return new HeadTexture(Type.PLAYER, data);
+                }
             }
         }
 
         return null;
+    }
+
+    private static String extractValue(String input, String prefix) {
+        String upperInput = input.toUpperCase(Locale.ROOT);
+        int prefixIndex = upperInput.indexOf(prefix);
+        if (prefixIndex == -1) {
+            return "";
+        }
+        return input.substring(prefixIndex + prefix.length());
+    }
+
+    private static String extractRawData(String input) {
+        String upperInput = input.toUpperCase(Locale.ROOT);
+        if (upperInput.startsWith("#HEAD:")) {
+            return input.substring(6);
+        } else if (upperInput.startsWith("#SMALLHEAD:")) {
+            return input.substring(11);
+        }
+        return "";
+    }
+
+    private static boolean isBase64Texture(String data) {
+        if (data == null || data.isEmpty()) {
+            return false;
+        }
+        return data.length() > 50;
     }
 
     public static boolean isHeadTexture(String input) {
@@ -72,9 +107,7 @@ public class HeadTexture {
             return false;
         }
         String upperInput = input.toUpperCase(Locale.ROOT);
-        return upperInput.startsWith("#HEAD:URL:") 
-            || upperInput.startsWith("#HEAD:PLAYER:") 
-            || upperInput.startsWith("#HEAD:HDB:");
+        return upperInput.startsWith("#HEAD:") || upperInput.startsWith("#SMALLHEAD:");
     }
 
     @Override
