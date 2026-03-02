@@ -81,7 +81,8 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         if (doubleSided) {
             packetsBuilder.withSpawnEntity(backEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
                             new DecentPosition(
-                                    location.getX(), location.getY(), location.getZ()))
+                                    location.getX(), location.getY(), location.getZ()),
+                            180.0f, 0.0f)
                     .withEntityMetadata(backEntityId, metadata);
         }
  

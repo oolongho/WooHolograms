@@ -220,7 +220,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(41, GuiButton.builder(Material.GLASS)
+        setButton(41, GuiButton.builder(Material.WHITE_BANNER)
                 .name("&f双面显示")
                 .lore(Arrays.asList(
                         "&7设置全息图是否双面可见",
