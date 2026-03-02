@@ -57,26 +57,35 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
  
         String text = line.getContent();
         text = ColorUtil.colorize(text);
- 
+
         Hologram hologram = line.getHologram();
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
         boolean doubleSided = hologram != null && hologram.isDoubleSided();
- 
+        float facing = hologram != null ? hologram.getFacing() : 0f;
+
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withInvisible()
                 .withNoGravity()
                 .withTextDisplayText(text)
                 .withBillboard(billboard)
                 .withTextAlignment(line.getAlignment());
- 
+
         if (line.getBrightness() != null && !line.getBrightness().isDefault()) {
             metadataBuilder.withDisplayBrightness(line.getBrightness());
         }
- 
+
         List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
 
-        float pitch = location.getPitch();
-        float yaw = location.getYaw();
+        float pitch;
+        float yaw;
+        
+        if (billboard == Billboard.FIXED_ANGLE) {
+            pitch = 0;
+            yaw = facing;
+        } else {
+            pitch = location.getPitch();
+            yaw = location.getYaw();
+        }
         
         this.currentYaw = yaw;
         this.currentPitch = pitch;

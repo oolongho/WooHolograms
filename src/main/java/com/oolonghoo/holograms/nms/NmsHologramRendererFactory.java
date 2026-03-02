@@ -40,19 +40,5 @@ public interface NmsHologramRendererFactory {
      */
     NmsSmallHeadHologramRenderer createSmallHeadRenderer();
 
-    /**
-     * 创建用于显示实体全息图的渲染器
-     *
-     * @return 新的 {@link NmsEntityHologramRenderer} 实例
-     */
-    NmsEntityHologramRenderer createEntityRenderer();
-
-    /**
-     * 创建用于显示可点击全息图的渲染器
-     *
-     * <p>这些全息图支持玩家交互，启用点击时的操作。</p>
-     *
-     * @return 新的 {@link NmsClickableHologramRenderer} 实例
-     */
     NmsClickableHologramRenderer createClickableRenderer();
 }

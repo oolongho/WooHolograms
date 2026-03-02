@@ -33,16 +33,6 @@ public enum HologramType {
      */
     SMALLHEAD("SMALLHEAD", "小头颅", 0.4, -1.1875),
 
-    /**
-     * 实体类型
-     * 显示为自定义实体
-     */
-    ENTITY("ENTITY", "实体", 0.7, 0),
-
-    /**
-     * 未知类型
-     * 默认类型，用于错误处理
-     */
     UNKNOWN("UNKNOWN", "未知", 0.25, 0);
 
     private final String id;
@@ -107,8 +97,6 @@ public enum HologramType {
             return SMALLHEAD;
         } else if (upperContent.startsWith("#HEAD:")) {
             return HEAD;
-        } else if (upperContent.startsWith("#ENTITY:")) {
-            return ENTITY;
         }
 
         return TEXT;
@@ -144,8 +132,6 @@ public enum HologramType {
                 return "#HEAD:";
             case SMALLHEAD:
                 return "#SMALLHEAD:";
-            case ENTITY:
-                return "#ENTITY:";
             default:
                 return "";
         }
@@ -159,18 +145,6 @@ public enum HologramType {
         return this == ICON || this == HEAD || this == SMALLHEAD;
     }
 
-    /**
-     * 检查是否为实体类型
-     * @return 是否为实体类型
-     */
-    public boolean isEntityType() {
-        return this == ENTITY;
-    }
-
-    /**
-     * 检查是否为文本类型
-     * @return 是否为文本类型
-     */
     public boolean isTextType() {
         return this == TEXT;
     }
