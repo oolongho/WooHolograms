@@ -119,12 +119,24 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         float yaw;
         float pitch;
         
-        if (billboard == Billboard.FIXED_ANGLE) {
-            yaw = facing;
-            pitch = 0;
-        } else {
-            yaw = calculateYawToPlayer(location, player);
-            pitch = calculatePitchToPlayer(location, player);
+        switch (billboard) {
+            case FIXED_ANGLE:
+                yaw = facing;
+                pitch = 0;
+                break;
+            case HORIZONTAL:
+                yaw = calculateYawToPlayer(location, player);
+                pitch = 0;
+                break;
+            case VERTICAL:
+                yaw = facing;
+                pitch = calculatePitchToPlayer(location, player);
+                break;
+            case CENTER:
+            default:
+                yaw = calculateYawToPlayer(location, player);
+                pitch = calculatePitchToPlayer(location, player);
+                break;
         }
         
         metadataBuilder.withHeadRotation(pitch, yaw, 0);
