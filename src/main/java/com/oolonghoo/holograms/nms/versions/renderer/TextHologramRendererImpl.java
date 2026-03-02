@@ -33,6 +33,9 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
     private final UUID frontEntityUUID;
     private final UUID backEntityUUID;
     private boolean destroyed = false;
+    private float currentYaw = 0.0f;
+    private float currentPitch = 0.0f;
+    private boolean currentDoubleSided = false;
  
     public TextHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.frontEntityId = entityIdGenerator.getFreeEntityId();
@@ -71,18 +74,26 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         }
  
         List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
- 
+
+        float pitch = location.getPitch();
+        float yaw = location.getYaw();
+        
+        this.currentYaw = yaw;
+        this.currentPitch = pitch;
+        this.currentDoubleSided = doubleSided;
+
         EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
                 .withSpawnEntity(frontEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
                         new DecentPosition(
-                                location.getX(), location.getY(), location.getZ()))
+                                location.getX(), location.getY(), location.getZ()),
+                        yaw, pitch)
                 .withEntityMetadata(frontEntityId, metadata);
- 
+
         if (doubleSided) {
             packetsBuilder.withSpawnEntity(backEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
                             new DecentPosition(
                                     location.getX(), location.getY(), location.getZ()),
-                            180.0f, 0.0f)
+                            yaw + 180.0f, pitch)
                     .withEntityMetadata(backEntityId, metadata);
         }
  
@@ -157,13 +168,19 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         if (destroyed || location == null) {
             return;
         }
- 
-        EntityPacketsBuilder.create()
+
+        EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
                 .withTeleportEntity(frontEntityId, new DecentPosition(
-                        location.getX(), location.getY(), location.getZ()))
-                .withTeleportEntity(backEntityId, new DecentPosition(
-                        location.getX(), location.getY(), location.getZ()))
-                .sendTo(player);
+                        location.getX(), location.getY(), location.getZ(),
+                        currentYaw, currentPitch));
+        
+        if (currentDoubleSided) {
+            packetsBuilder.withTeleportEntity(backEntityId, new DecentPosition(
+                    location.getX(), location.getY(), location.getZ(),
+                    currentYaw + 180.0f, currentPitch));
+        }
+        
+        packetsBuilder.sendTo(player);
     }
  
     @Override
