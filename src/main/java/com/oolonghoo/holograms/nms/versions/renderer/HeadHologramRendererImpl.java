@@ -116,16 +116,8 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
                 .withNoGravity()
                 .withArmorStandProperties(small, true);
         
-        float yaw;
-        float pitch;
-        
-        if (billboard == Billboard.FIXED_ANGLE) {
-            yaw = location.getYaw() + facing;
-            pitch = location.getPitch();
-        } else {
-            yaw = calculateYawToPlayer(location, player);
-            pitch = calculatePitchToPlayer(location, player);
-        }
+        float yaw = facing;
+        float pitch = 0;
         
         metadataBuilder.withHeadRotation(pitch, yaw, 0);
 
