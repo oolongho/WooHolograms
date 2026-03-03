@@ -422,7 +422,9 @@ public class TabCompleteUtil {
             String varPrefix = lastPart.substring(1).toLowerCase();
             for (String placeholder : PLACEHOLDERS.keySet()) {
                 String varName = placeholder.substring(1, placeholder.length() - 1).toLowerCase();
-                // 空字符串是任何字符串的前缀，所以 varPrefix 为空时会显示所有变量
+                // Java String.startsWith("") 返回 true，所以：
+                // - varPrefix 为空（用户刚输入 { 或 %）时，显示所有变量
+                // - varPrefix 非空时，只显示匹配前缀的变量
                 if (varName.startsWith(varPrefix)) {
                     completions.add(placeholder);
                     completions.add("%" + placeholder.substring(1, placeholder.length() - 1) + "%");

@@ -87,6 +87,14 @@ public class YamlHologramStorage implements HologramStorage {
                 storage.set(linePath + ".text", line.getContent());
                 storage.set(linePath + ".type", line.getType().getId());
                 storage.set(linePath + ".offsetY", line.getOffsetY());
+                
+                // 保存行自定义朝向
+                if (line.getCustomYaw() != null) {
+                    storage.set(linePath + ".customYaw", line.getCustomYaw());
+                }
+                if (line.getCustomPitch() != null) {
+                    storage.set(linePath + ".customPitch", line.getCustomPitch());
+                }
             }
         }
         
@@ -206,6 +214,14 @@ public class YamlHologramStorage implements HologramStorage {
                                 
                                 HologramLine line = page.addLine(text);
                                 line.setOffsetY(offsetY);
+                                
+                                // 加载行自定义朝向
+                                if (lineSection.contains("customYaw")) {
+                                    line.setCustomYaw((float) lineSection.getDouble("customYaw"));
+                                }
+                                if (lineSection.contains("customPitch")) {
+                                    line.setCustomPitch((float) lineSection.getDouble("customPitch"));
+                                }
                             }
                         }
                     }
