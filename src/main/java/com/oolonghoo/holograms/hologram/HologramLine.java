@@ -1083,12 +1083,7 @@ public class HologramLine {
     // ==================== 行级别动作方法 ====================
 
     public boolean hasActions() {
-        for (List<Action> actionList : actions.values()) {
-            if (actionList != null && !actionList.isEmpty()) {
-                return true;
-            }
-        }
-        return false;
+        return actions.values().stream().anyMatch(list -> list != null && !list.isEmpty());
     }
 
     public void addAction(ClickType clickType, Action action) {
@@ -1124,6 +1119,10 @@ public class HologramLine {
         }
         
         List<Action> actionList = actions.get(clickType);
+        if (actionList == null || actionList.isEmpty()) {
+            return;
+        }
+        
         for (Action action : actionList) {
             if (!action.execute(player)) {
                 break;

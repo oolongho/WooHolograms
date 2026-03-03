@@ -1,7 +1,6 @@
 package com.oolonghoo.holograms.gui;
 
 import com.oolonghoo.holograms.WooHolograms;
-import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Brightness;
 import com.oolonghoo.holograms.hologram.HeadTexture;
 import com.oolonghoo.holograms.hologram.Hologram;
@@ -404,6 +403,24 @@ public class LineEditGui extends GuiScreen {
                     })
                     .build());
         }
+        
+        // 动作管理按钮
+        boolean hasActions = line.hasActions();
+        setButton(23, GuiButton.builder(Material.COMMAND_BLOCK)
+                .name("&f动作管理")
+                .lore(Arrays.asList(
+                        "&7管理此行的点击动作",
+                        "&7当前: " + (hasActions ? "&a已设置动作" : "&c未设置动作"),
+                        "",
+                        "&7可以为行添加点击动作",
+                        "&7如执行命令、发送消息、翻页等",
+                        "",
+                        "&e点击管理"
+                ))
+                .onClick(context -> {
+                    guiManager.openGui(context.getPlayer(), new LineActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                })
+                .build());
         
         // 删除行按钮
         setButton(31, GuiButton.builder(Material.BARRIER)
