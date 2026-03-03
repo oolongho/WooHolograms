@@ -39,6 +39,11 @@ public class HologramRendererFactoryImpl implements NmsHologramRendererFactory {
     }
 
     @Override
+    public NmsEntityHologramRenderer createEntityRenderer() {
+        return new EntityHologramRendererImpl(entityIdGenerator);
+    }
+
+    @Override
     public NmsClickableHologramRenderer createClickableRenderer() {
         return new ClickableHologramRendererImpl(entityIdGenerator);
     }

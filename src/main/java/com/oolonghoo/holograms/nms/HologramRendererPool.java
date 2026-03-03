@@ -5,6 +5,7 @@ import com.oolonghoo.holograms.nms.renderer.NmsTextHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsIconHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsHeadHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsSmallHeadHologramRenderer;
+import com.oolonghoo.holograms.nms.renderer.NmsEntityHologramRenderer;
 
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -94,6 +95,8 @@ public class HologramRendererPool {
                 return factory.createHeadRenderer();
             case SMALLHEAD:
                 return factory.createSmallHeadRenderer();
+            case ENTITY:
+                return factory.createEntityRenderer();
             default:
                 return factory.createTextRenderer();
         }
@@ -108,6 +111,8 @@ public class HologramRendererPool {
             return HologramType.HEAD;
         } else if (renderer instanceof NmsSmallHeadHologramRenderer) {
             return HologramType.SMALLHEAD;
+        } else if (renderer instanceof NmsEntityHologramRenderer) {
+            return HologramType.ENTITY;
         }
         return HologramType.TEXT;
     }

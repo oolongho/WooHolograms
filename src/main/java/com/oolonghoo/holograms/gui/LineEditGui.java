@@ -12,6 +12,7 @@ import com.oolonghoo.holograms.hologram.TextAlignment;
 import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -257,6 +258,85 @@ public class LineEditGui extends GuiScreen {
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new AlignmentSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                })
+                .build());
+        
+        // 朝向设置
+        Float customYaw = line.getCustomYaw();
+        Float customPitch = line.getCustomPitch();
+        String facingDisplay;
+        if (customYaw != null || customPitch != null) {
+            facingDisplay = "自定义: " + 
+                    (customYaw != null ? String.format("%.1f", customYaw) : "-") + " / " + 
+                    (customPitch != null ? String.format("%.1f", customPitch) : "-");
+        } else {
+            facingDisplay = "跟随整体";
+        }
+        
+        setButton(20, GuiButton.builder(Material.COMPASS)
+                .name("&f朝向设置")
+                .lore(Arrays.asList(
+                        "&7设置此行的独立朝向",
+                        "&7当前: &f" + facingDisplay,
+                        "",
+                        "&7左键: &e设置朝向",
+                        "&7右键: &c清空设置",
+                        "",
+                        "&7格式: yaw pitch",
+                        "&7例如: 90 0"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    
+                    if (context.getClickType() == ClickType.RIGHT || context.getClickType() == ClickType.SHIFT_RIGHT) {
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h != null) {
+                            HologramPage p = h.getPage(pageIndex);
+                            if (p != null && lineIndex < p.size()) {
+                                HologramLine l = p.getLine(lineIndex);
+                                if (l != null) {
+                                    l.clearCustomFacing();
+                                    h.save();
+                                    h.showToNearby();
+                                    player.sendMessage(ColorUtil.colorize("&a已清空朝向设置，现在跟随整体！"));
+                                }
+                            }
+                        }
+                        guiManager.openGui(player, new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                    } else {
+                        player.closeInventory();
+                        
+                        chatInputManager.requestInput(player, "&a请输入朝向 (yaw pitch):", 
+                                ChatInputManager.InputType.LINE_FACING, hologramName, lineIndex, pageIndex, input -> {
+                            try {
+                                String[] parts = input.split(" ");
+                                if (parts.length >= 1) {
+                                    float yaw = Float.parseFloat(parts[0]);
+                                    float pitch = parts.length >= 2 ? Float.parseFloat(parts[1]) : 0;
+                                    
+                                    Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                                    if (h != null) {
+                                        HologramPage p = h.getPage(pageIndex);
+                                        if (p != null && lineIndex < p.size()) {
+                                            HologramLine l = p.getLine(lineIndex);
+                                            if (l != null) {
+                                                l.setCustomYaw(yaw);
+                                                l.setCustomPitch(pitch);
+                                                h.save();
+                                                h.showToNearby();
+                                                player.sendMessage(ColorUtil.colorize("&a已设置朝向为 (" + yaw + ", " + pitch + ")！"));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    player.sendMessage(ColorUtil.colorize("&c请输入 yaw pitch 格式！"));
+                                }
+                            } catch (NumberFormatException e) {
+                                player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                            }
+                            guiManager.openGui(player, new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                        });
+                    }
                 })
                 .build());
         

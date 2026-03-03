@@ -100,16 +100,16 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
             return;
         }
 
-        ItemStack headItem = createHeadItem(line);
+        ItemStack headItem = createHeadItem(line, player);
         DecentPosition position = DecentPosition.fromLocation(location);
         DecentPosition offsetPosition = offsetPosition(position);
         
         Hologram hologram = line.getHologram();
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
-        float facing = hologram != null ? hologram.getFacing() : 0f;
+        float hologramFacing = hologram != null ? hologram.getFacing() : 0f;
         
         this.currentBillboard = billboard;
-        this.currentFacing = facing;
+        this.currentFacing = hologramFacing;
         
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withInvisible()
@@ -119,23 +119,26 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         float yaw;
         float pitch;
         
+        Float customYaw = line.getCustomYaw();
+        Float customPitch = line.getCustomPitch();
+        
         switch (billboard) {
             case FIXED_ANGLE:
-                yaw = facing;
-                pitch = 0;
+                yaw = customYaw != null ? customYaw : hologramFacing;
+                pitch = customPitch != null ? customPitch : 0;
                 break;
             case HORIZONTAL:
-                yaw = calculateYawToPlayer(location, player);
-                pitch = 0;
+                yaw = customYaw != null ? customYaw : calculateYawToPlayer(location, player);
+                pitch = customPitch != null ? customPitch : 0;
                 break;
             case VERTICAL:
-                yaw = facing;
-                pitch = calculatePitchToPlayer(location, player);
+                yaw = customYaw != null ? customYaw : hologramFacing;
+                pitch = customPitch != null ? customPitch : calculatePitchToPlayer(location, player);
                 break;
             case CENTER:
             default:
-                yaw = calculateYawToPlayer(location, player);
-                pitch = calculatePitchToPlayer(location, player);
+                yaw = customYaw != null ? customYaw : calculateYawToPlayer(location, player);
+                pitch = customPitch != null ? customPitch : calculatePitchToPlayer(location, player);
                 break;
         }
         
@@ -157,7 +160,7 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
 
     @Override
     public void updateText(Player player, HologramLine line) {
-        ItemStack headItem = createHeadItem(line);
+        ItemStack headItem = createHeadItem(line, player);
         EntityPacketsBuilder.create()
                 .withHelmet(entityId, headItem)
                 .sendTo(player);
@@ -229,6 +232,36 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
                 return createHeadFromPlayerName(headTexture.getValue());
             case HDB:
                 return createHeadFromHDB(headTexture.getValue());
+            default:
+                return new ItemStack(Material.PLAYER_HEAD);
+        }
+    }
+    
+    protected ItemStack createHeadItem(HologramLine line, Player player) {
+        HeadTexture headTexture = line.getHeadTexture();
+        String content = line.getContent();
+        
+        if (headTexture == null && content != null) {
+            content = com.oolonghoo.holograms.util.PlaceholderUtil.replace(content, player);
+            headTexture = HeadTexture.parse(content);
+        }
+
+        if (headTexture == null) {
+            return new ItemStack(Material.PLAYER_HEAD);
+        }
+
+        String value = headTexture.getValue();
+        if (value != null) {
+            value = com.oolonghoo.holograms.util.PlaceholderUtil.replace(value, player);
+        }
+
+        switch (headTexture.getType()) {
+            case BASE64:
+                return createHeadFromBase64(value);
+            case PLAYER:
+                return createHeadFromPlayerName(value);
+            case HDB:
+                return createHeadFromHDB(value);
             default:
                 return new ItemStack(Material.PLAYER_HEAD);
         }

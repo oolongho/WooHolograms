@@ -33,6 +33,8 @@ public enum HologramType {
      */
     SMALLHEAD("SMALLHEAD", "小头颅", 0.4, -1.1875),
 
+    ENTITY("ENTITY", "实体", 0.7, 0),
+
     UNKNOWN("UNKNOWN", "未知", 0.25, 0);
 
     private final String id;
@@ -97,6 +99,8 @@ public enum HologramType {
             return SMALLHEAD;
         } else if (upperContent.startsWith("#HEAD:")) {
             return HEAD;
+        } else if (upperContent.startsWith("#ENTITY:")) {
+            return ENTITY;
         }
 
         return TEXT;
@@ -132,6 +136,8 @@ public enum HologramType {
                 return "#HEAD:";
             case SMALLHEAD:
                 return "#SMALLHEAD:";
+            case ENTITY:
+                return "#ENTITY:";
             default:
                 return "";
         }

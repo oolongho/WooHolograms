@@ -40,5 +40,7 @@ public interface NmsHologramRendererFactory {
      */
     NmsSmallHeadHologramRenderer createSmallHeadRenderer();
 
+    NmsEntityHologramRenderer createEntityRenderer();
+
     NmsClickableHologramRenderer createClickableRenderer();
 }

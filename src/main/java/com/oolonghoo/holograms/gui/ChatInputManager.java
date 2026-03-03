@@ -193,6 +193,7 @@ public class ChatInputManager implements Listener {
         LINE_TEXT,          // 行文本
         LINE_OFFSET,        // 行偏移
         LINE_HEIGHT,        // 行高度
+        LINE_FACING,        // 行朝向
         DISPLAY_RANGE,      // 显示范围
         UPDATE_INTERVAL,    // 更新间隔
         PERMISSION,         // 权限

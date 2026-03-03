@@ -48,6 +48,10 @@ public class HologramLine {
 
     // 朝向
     private float facing;
+    
+    // 自定义朝向（null 表示跟随整体）
+    private Float customYaw = null;
+    private Float customPitch = null;
 
     // 亮度
     private Brightness brightness;
@@ -150,6 +154,12 @@ public class HologramLine {
                     this.renderer = null;
                 }
                 this.headTexture = HeadTexture.parse(content);
+            } else if (upperContent.startsWith("#ENTITY:")) {
+                this.type = HologramType.ENTITY;
+                if (prevType != this.type) {
+                    this.previousRenderer = this.renderer;
+                    this.renderer = null;
+                }
             } else {
                 this.type = HologramType.TEXT;
                 if (prevType != this.type) {
@@ -303,6 +313,9 @@ public class HologramLine {
                 break;
             case SMALLHEAD:
                 renderer = factory.createSmallHeadRenderer();
+                break;
+            case ENTITY:
+                renderer = factory.createEntityRenderer();
                 break;
             default:
                 renderer = factory.createTextRenderer();
@@ -1005,6 +1018,31 @@ public class HologramLine {
 
     public void setFacing(float facing) {
         this.facing = facing;
+    }
+
+    public Float getCustomYaw() {
+        return customYaw;
+    }
+
+    public void setCustomYaw(Float customYaw) {
+        this.customYaw = customYaw;
+    }
+
+    public Float getCustomPitch() {
+        return customPitch;
+    }
+
+    public void setCustomPitch(Float customPitch) {
+        this.customPitch = customPitch;
+    }
+
+    public boolean hasCustomFacing() {
+        return customYaw != null || customPitch != null;
+    }
+
+    public void clearCustomFacing() {
+        this.customYaw = null;
+        this.customPitch = null;
     }
 
     public String getPermission() {

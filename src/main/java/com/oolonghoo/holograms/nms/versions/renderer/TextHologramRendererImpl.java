@@ -61,7 +61,7 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         Hologram hologram = line.getHologram();
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
         boolean doubleSided = hologram != null && hologram.isDoubleSided();
-        float facing = hologram != null ? hologram.getFacing() : 0f;
+        float hologramFacing = hologram != null ? hologram.getFacing() : 0f;
 
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withInvisible()
@@ -78,13 +78,13 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
 
         float pitch;
         float yaw;
-        
+
         if (billboard == Billboard.FIXED_ANGLE) {
-            pitch = 0;
-            yaw = facing;
+            yaw = line.getCustomYaw() != null ? line.getCustomYaw() : hologramFacing;
+            pitch = line.getCustomPitch() != null ? line.getCustomPitch() : 0;
         } else {
-            pitch = location.getPitch();
-            yaw = location.getYaw();
+            yaw = line.getCustomYaw() != null ? line.getCustomYaw() : location.getYaw();
+            pitch = line.getCustomPitch() != null ? line.getCustomPitch() : location.getPitch();
         }
         
         this.currentYaw = yaw;
