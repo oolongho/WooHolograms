@@ -30,3 +30,4 @@ Thumbs.db
 *.log
 *.jar
 !gradle-wrapper.jar
+参考项目/
