@@ -412,10 +412,20 @@ public class TabCompleteUtil {
         }
 
         // 补全变量
-        for (String placeholder : PLACEHOLDERS.keySet()) {
-            if (input.contains("{") || input.contains("%")) {
-                completions.add(placeholder);
-                completions.add("%" + placeholder.substring(1, placeholder.length() - 1) + "%");
+        String lastPart = input;
+        int lastSpace = input.lastIndexOf(' ');
+        if (lastSpace >= 0) {
+            lastPart = input.substring(lastSpace + 1);
+        }
+        
+        if (lastPart.startsWith("{") || lastPart.startsWith("%")) {
+            String varPrefix = lastPart.substring(1).toLowerCase();
+            for (String placeholder : PLACEHOLDERS.keySet()) {
+                String varName = placeholder.substring(1, placeholder.length() - 1).toLowerCase();
+                if (varName.startsWith(varPrefix) || varPrefix.isEmpty()) {
+                    completions.add(placeholder);
+                    completions.add("%" + placeholder.substring(1, placeholder.length() - 1) + "%");
+                }
             }
         }
 
