@@ -4,7 +4,6 @@ import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
-import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsEntityHologramRenderer;
 import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
@@ -19,13 +18,11 @@ import java.util.*;
 public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
     private final int entityId;
-    private final UUID entityUUID;
     private EntityType entityType = EntityType.ZOMBIE;
     private boolean destroyed = false;
 
     public EntityHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.entityId = entityIdGenerator.getFreeEntityId();
-        this.entityUUID = UUID.randomUUID();
     }
 
     @Override

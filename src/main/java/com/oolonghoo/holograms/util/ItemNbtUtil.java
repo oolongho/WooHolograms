@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 public class ItemNbtUtil {
 
     private static final Pattern NBT_PATTERN = Pattern.compile("\\{([^}]+)\\}");
-    private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("([a-zA-Z0-9_-]+):([^\\s]+)");
     
     /**
      * 解析物品参数

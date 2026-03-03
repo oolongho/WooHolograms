@@ -9,7 +9,6 @@ import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
 import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;

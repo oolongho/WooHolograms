@@ -1,7 +1,6 @@
 package com.oolonghoo.holograms.animation.text;
 
 import com.oolonghoo.holograms.animation.TextAnimation;
-import com.oolonghoo.holograms.util.TextUtil;
 
 /**
  * 滚动动画

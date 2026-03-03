@@ -5,7 +5,6 @@ import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
-import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsTextHologramRenderer;
 import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
@@ -30,20 +29,16 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
  
     private final int frontEntityId;
     private final int backEntityId;
-    private final UUID frontEntityUUID;
-    private final UUID backEntityUUID;
     private boolean destroyed = false;
     private float currentYaw = 0.0f;
     private float currentPitch = 0.0f;
     private boolean currentDoubleSided = false;
- 
+
     public TextHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.frontEntityId = entityIdGenerator.getFreeEntityId();
         this.backEntityId = entityIdGenerator.getFreeEntityId();
-        this.frontEntityUUID = UUID.randomUUID();
-        this.backEntityUUID = UUID.randomUUID();
     }
- 
+
     @Override
     public List<Integer> getEntityIds() {
         return Arrays.asList(frontEntityId, backEntityId);

@@ -8,7 +8,6 @@ import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramPartData;
-import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsHeadHologramRenderer;
 import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
@@ -21,7 +20,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.util.EulerAngle;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -35,8 +33,6 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
     protected final int entityId;
     protected final boolean small;
     protected boolean destroyed = false;
-    private Billboard currentBillboard;
-    private float currentFacing;
 
     public HeadHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this(entityIdGenerator, false);
@@ -107,9 +103,6 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         Hologram hologram = line.getHologram();
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
         float hologramFacing = hologram != null ? hologram.getFacing() : 0f;
-        
-        this.currentBillboard = billboard;
-        this.currentFacing = hologramFacing;
         
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withInvisible()
