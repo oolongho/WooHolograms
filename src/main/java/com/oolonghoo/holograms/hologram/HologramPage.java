@@ -617,6 +617,23 @@ public class HologramPage {
 
         return false;
     }
+    
+    /**
+     * 根据实体 ID 获取行
+     * 
+     * @param entityId 实体 ID
+     * @return 行，如果不存在返回 null
+     */
+    public HologramLine getLineByEntityId(int entityId) {
+        for (HologramLine line : lines) {
+            for (int id : line.getEntityIds()) {
+                if (id == entityId) {
+                    return line;
+                }
+            }
+        }
+        return null;
+    }
 
     /**
      * 获取可点击渲染器

@@ -1,6 +1,9 @@
 package com.oolonghoo.holograms.hologram;
 
 import com.oolonghoo.holograms.WooHolograms;
+import com.oolonghoo.holograms.action.Action;
+import com.oolonghoo.holograms.action.ActionType;
+import com.oolonghoo.holograms.action.ClickType;
 import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.NmsHologramRendererFactory;
 import com.oolonghoo.holograms.nms.HologramRendererPool;
@@ -68,6 +71,9 @@ public class HologramLine {
 
     // 标志
     private final Set<EnumFlag> flags;
+    
+    // 行级别动作
+    private final Map<ClickType, List<Action>> actions;
 
     // 渲染器
     private NmsHologramRenderer renderer;
@@ -111,6 +117,7 @@ public class HologramLine {
         this.facing = 0.0f;
         this.permission = null;
         this.flags = ConcurrentHashMap.newKeySet();
+        this.actions = new EnumMap<>(ClickType.class);
         this.viewers = ConcurrentHashMap.newKeySet();
         this.playerTextCache = new ConcurrentHashMap<>();
         this.lastTextCache = new ConcurrentHashMap<>();
@@ -161,6 +168,32 @@ public class HologramLine {
                     this.height = DEFAULT_HEIGHT_ENTITY;
                     this.previousRenderer = this.renderer;
                     this.renderer = null;
+                }
+            } else if (upperContent.equals("#NEXT") || upperContent.startsWith("#NEXT ")) {
+                this.type = HologramType.NEXT;
+                if (prevType != this.type) {
+                    this.height = DEFAULT_HEIGHT_TEXT;
+                    this.previousRenderer = this.renderer;
+                    this.renderer = null;
+                }
+                // 自动添加 NEXT_PAGE 动作
+                Hologram hologram = getHologram();
+                if (hologram != null) {
+                    this.actions.computeIfAbsent(ClickType.ANY, k -> new ArrayList<>())
+                            .add(new Action(ActionType.NEXT_PAGE, hologram.getName()));
+                }
+            } else if (upperContent.equals("#PREV") || upperContent.startsWith("#PREV ")) {
+                this.type = HologramType.PREV;
+                if (prevType != this.type) {
+                    this.height = DEFAULT_HEIGHT_TEXT;
+                    this.previousRenderer = this.renderer;
+                    this.renderer = null;
+                }
+                // 自动添加 PREV_PAGE 动作
+                Hologram hologram = getHologram();
+                if (hologram != null) {
+                    this.actions.computeIfAbsent(ClickType.ANY, k -> new ArrayList<>())
+                            .add(new Action(ActionType.PREV_PAGE, hologram.getName()));
                 }
             } else {
                 this.type = HologramType.TEXT;
@@ -1045,6 +1078,57 @@ public class HologramLine {
     public void clearCustomFacing() {
         this.customYaw = null;
         this.customPitch = null;
+    }
+
+    // ==================== 行级别动作方法 ====================
+
+    public boolean hasActions() {
+        for (List<Action> actionList : actions.values()) {
+            if (actionList != null && !actionList.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addAction(ClickType clickType, Action action) {
+        actions.computeIfAbsent(clickType, k -> new ArrayList<>()).add(action);
+    }
+
+    public List<Action> getActions(ClickType clickType) {
+        return actions.getOrDefault(clickType, new ArrayList<>());
+    }
+
+    public Map<ClickType, List<Action>> getActions() {
+        return Collections.unmodifiableMap(actions);
+    }
+
+    public void clearActions(ClickType clickType) {
+        actions.remove(clickType);
+    }
+
+    public void clearAllActions() {
+        actions.clear();
+    }
+
+    public void removeAction(ClickType clickType, int index) {
+        List<Action> actionList = actions.get(clickType);
+        if (actionList != null && index >= 0 && index < actionList.size()) {
+            actionList.remove(index);
+        }
+    }
+
+    public void executeActions(Player player, ClickType clickType) {
+        if (!actions.containsKey(clickType)) {
+            return;
+        }
+        
+        List<Action> actionList = actions.get(clickType);
+        for (Action action : actionList) {
+            if (!action.execute(player)) {
+                break;
+            }
+        }
     }
 
     public String getPermission() {

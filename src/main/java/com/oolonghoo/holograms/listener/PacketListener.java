@@ -4,6 +4,8 @@ import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.action.ClickType;
 import com.oolonghoo.holograms.api.event.HologramClickEvent;
 import com.oolonghoo.holograms.hologram.Hologram;
+import com.oolonghoo.holograms.hologram.HologramLine;
+import com.oolonghoo.holograms.hologram.HologramPage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -273,7 +275,18 @@ public class PacketListener {
                 return true;
             }
             
-            // 执行动作
+            // 查找被点击的行
+            HologramPage page = hologram.getPageByEntityId(entityId);
+            if (page != null) {
+                HologramLine line = page.getLineByEntityId(entityId);
+                if (line != null && line.hasActions()) {
+                    // 执行行级别动作
+                    line.executeActions(player, clickType);
+                    return false;
+                }
+            }
+            
+            // 执行页面级别动作
             hologram.executeActions(player, clickType);
             
             return false;

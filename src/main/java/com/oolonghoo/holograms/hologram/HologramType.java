@@ -35,6 +35,10 @@ public enum HologramType {
 
     ENTITY("ENTITY", "实体", 0.7, 0),
 
+    NEXT("NEXT", "下一页", 0.25, -0.5),
+
+    PREV("PREV", "上一页", 0.25, -0.5),
+
     UNKNOWN("UNKNOWN", "未知", 0.25, 0);
 
     private final String id;
@@ -101,6 +105,10 @@ public enum HologramType {
             return HEAD;
         } else if (upperContent.startsWith("#ENTITY:")) {
             return ENTITY;
+        } else if (upperContent.equals("#NEXT") || upperContent.startsWith("#NEXT ")) {
+            return NEXT;
+        } else if (upperContent.equals("#PREV") || upperContent.startsWith("#PREV ")) {
+            return PREV;
         }
 
         return TEXT;
