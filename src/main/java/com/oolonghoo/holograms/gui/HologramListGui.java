@@ -143,6 +143,18 @@ public class HologramListGui extends GuiScreen {
                 })
                 .build());
         
+        setButton(49, GuiButton.builder(Material.KNOWLEDGE_BOOK)
+                .name("&f帮助手册")
+                .lore(Arrays.asList(
+                        "&7查看插件使用说明",
+                        "",
+                        "&e点击查看"
+                ))
+                .onClick(context -> {
+                    guiManager.openGui(context.getPlayer(), new HelpGui(plugin, guiManager, chatInputManager, 0));
+                })
+                .build());
+        
         setButton(52, GuiButton.builder(Material.OAK_SIGN)
                 .name("&f附近全息图")
                 .lore(Arrays.asList(

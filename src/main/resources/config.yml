@@ -7,7 +7,7 @@ settings:
   debug: false
   # 语言设置 (zh-CN, en-US)
   language: zh-CN
-  # 自动保存间隔（秒）
+  # 自动保存间隔（秒），0 表示禁用自动保存
   auto-save-interval: 300
 
 # 默认设置
@@ -16,8 +16,8 @@ defaults:
   display-range: 48
   # 默认更新距离（方块）
   update-range: 48
-  # 默认更新间隔（tick）
-  update-interval: 3
+  # 默认更新间隔（tick），0 表示禁用自动更新
+  update-interval: 0
   # 是否从下往上构建
   down-origin: true
   # 默认行高
@@ -60,13 +60,6 @@ limits:
   max-holograms-per-world: 100
   # 每个全息图最大行数
   max-lines-per-hologram: 20
-
-# 存储设置
-storage:
-  # 保存间隔（秒）
-  save-interval: 300
-  # 自动保存
-  auto-save: true
 
 # 渲染器缓存池设置
 renderer-pool:

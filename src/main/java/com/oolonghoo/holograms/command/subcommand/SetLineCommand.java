@@ -5,6 +5,7 @@ import com.oolonghoo.holograms.command.Subcommand;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramPage;
 import com.oolonghoo.holograms.util.ColorUtil;
+import com.oolonghoo.holograms.util.TabCompleteUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -87,6 +88,13 @@ public class SetLineCommand extends Subcommand {
                 }
             }
         }
+        
+        // 为内容参数提供补全
+        if (args.length >= 3) {
+            String currentInput = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+            return TabCompleteUtil.getLineContentCompletions(currentInput);
+        }
+        
         return new ArrayList<>();
     }
 }
