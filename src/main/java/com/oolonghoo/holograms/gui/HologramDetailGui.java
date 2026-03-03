@@ -8,8 +8,10 @@ import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
 import com.oolonghoo.holograms.util.ColorUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -301,6 +303,108 @@ public class HologramDetailGui extends GuiScreen {
                             player.sendMessage(ColorUtil.colorize("&c克隆失败！"));
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                         }
+                    });
+                })
+                .build());
+        
+        setButton(43, GuiButton.builder(Material.ENDER_PEARL)
+                .name("&f移动到坐标")
+                .lore(Arrays.asList(
+                        "&7将全息图移动到指定坐标",
+                        "&7格式: x y z [世界]",
+                        "",
+                        "&e点击输入"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    player.closeInventory();
+                    
+                    chatInputManager.requestInput(player, "&a请输入坐标 (x y z [世界]):", 
+                            ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h == null) {
+                            player.sendMessage(ColorUtil.colorize("&c全息图不存在！"));
+                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                            return;
+                        }
+                        
+                        String[] parts = input.split(" ");
+                        if (parts.length < 3) {
+                            player.sendMessage(ColorUtil.colorize("&c格式错误！请输入: x y z [世界]"));
+                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                            return;
+                        }
+                        
+                        try {
+                            double x = Double.parseDouble(parts[0]);
+                            double y = Double.parseDouble(parts[1]);
+                            double z = Double.parseDouble(parts[2]);
+                            World world = parts.length > 3 ? Bukkit.getWorld(parts[3]) : h.getLocation().getWorld();
+                            
+                            if (world == null) {
+                                player.sendMessage(ColorUtil.colorize("&c世界不存在！"));
+                            } else {
+                                Location loc = new Location(world, x, y, z, h.getLocation().getYaw(), h.getLocation().getPitch());
+                                h.setLocation(loc);
+                                h.save();
+                                h.showToNearby();
+                                player.sendMessage(ColorUtil.colorize("&a已移动到 " + world.getName() + " (" + x + ", " + y + ", " + z + ")！"));
+                            }
+                        } catch (NumberFormatException e) {
+                            player.sendMessage(ColorUtil.colorize("&c坐标格式错误！"));
+                        }
+                        guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                    });
+                })
+                .build());
+        
+        setButton(44, GuiButton.builder(Material.WRITABLE_BOOK)
+                .name("&f插入行")
+                .lore(Arrays.asList(
+                        "&7在指定位置插入行",
+                        "&7格式: 行号 内容",
+                        "",
+                        "&e点击输入"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    player.closeInventory();
+                    
+                    chatInputManager.requestInput(player, "&a请输入 (行号 内容):", 
+                            ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h == null) {
+                            player.sendMessage(ColorUtil.colorize("&c全息图不存在！"));
+                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                            return;
+                        }
+                        
+                        int spaceIndex = input.indexOf(' ');
+                        if (spaceIndex <= 0) {
+                            player.sendMessage(ColorUtil.colorize("&c格式错误！请输入: 行号 内容"));
+                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                            return;
+                        }
+                        
+                        try {
+                            int lineNum = Integer.parseInt(input.substring(0, spaceIndex));
+                            String content = input.substring(spaceIndex + 1);
+                            
+                            HologramPage p = h.getPage(currentPageIndex);
+                            if (p == null) {
+                                player.sendMessage(ColorUtil.colorize("&c页面不存在！"));
+                            } else if (lineNum < 1 || lineNum > p.size() + 1) {
+                                player.sendMessage(ColorUtil.colorize("&c行号必须在 1 到 " + (p.size() + 1) + " 之间！"));
+                            } else {
+                                p.insertLine(lineNum - 1, content);
+                                h.save();
+                                h.showToNearby();
+                                player.sendMessage(ColorUtil.colorize("&a已在第 " + lineNum + " 行插入内容！"));
+                            }
+                        } catch (NumberFormatException e) {
+                            player.sendMessage(ColorUtil.colorize("&c行号必须是数字！"));
+                        }
+                        guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     });
                 })
                 .build());

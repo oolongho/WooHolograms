@@ -21,6 +21,8 @@ public class PageManageGui extends GuiScreen {
     private final GuiManager guiManager;
     private final ChatInputManager chatInputManager;
     private final String hologramName;
+    private boolean sortMode = false;
+    private int selectedPage = -1;
 
     public PageManageGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName) {
         super("page_manage", ColorUtil.colorize("&8页面管理: " + hologramName), 54);
@@ -82,38 +84,82 @@ public class PageManageGui extends GuiScreen {
             HologramPage page = hologram.getPage(i);
             int lineCount = page != null ? page.size() : 0;
             
-            setButton(slot, GuiButton.builder(Material.BOOK)
-                    .name("&f第 " + (i + 1) + " 页")
-                    .lore(Arrays.asList(
-                            "",
-                            "&7行数: &f" + lineCount,
-                            "",
-                            "&e左键点击查看",
-                            "&c右键点击删除"
-                    ))
+            Material buttonMaterial = Material.BOOK;
+            if (sortMode && selectedPage == i) {
+                buttonMaterial = Material.LIME_STAINED_GLASS_PANE;
+            }
+            
+            java.util.List<String> lore = new java.util.ArrayList<>();
+            lore.add("");
+            lore.add("&7行数: &f" + lineCount);
+            lore.add("");
+            if (sortMode) {
+                if (selectedPage == -1) {
+                    lore.add("&e点击选中此页");
+                } else if (selectedPage == i) {
+                    lore.add("&a已选中 - 点击另一个页面交换");
+                } else {
+                    lore.add("&e点击与此页交换");
+                }
+            } else {
+                lore.add("&e左键点击查看");
+                lore.add("&c右键点击删除");
+            }
+            
+            setButton(slot, GuiButton.builder(buttonMaterial)
+                    .name((sortMode && selectedPage == i ? "&a" : "&f") + "第 " + (i + 1) + " 页")
+                    .lore(lore)
                     .onClick(context -> {
                         Player player = context.getPlayer();
-                        if (context.getClickType().isRightClick()) {
-                            if (pageCount <= 1) {
-                                player.sendMessage(ColorUtil.colorize("&c至少需要保留一页！"));
-                                return;
-                            }
-                            guiManager.openGui(player, ConfirmGui.createDeletePageConfirm(hologramName, pageIndex + 1, confirmed -> {
-                                if (confirmed) {
-                                    Hologram h = plugin.getHologramManager().getHologram(hologramName);
-                                    if (h != null) {
-                                        h.removePage(pageIndex);
+                        
+                        if (sortMode) {
+                            // 排序模式逻辑
+                            if (selectedPage == -1) {
+                                // 选中第一个页面
+                                selectedPage = pageIndex;
+                                player.sendMessage(ColorUtil.colorize("&a已选中第 " + (pageIndex + 1) + " 页，请点击另一个页面进行交换"));
+                                render();
+                                guiManager.openGui(player, this);
+                            } else if (selectedPage != pageIndex) {
+                                // 交换两个页面
+                                Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                                if (h != null) {
+                                    if (h.swapPages(selectedPage, pageIndex)) {
                                         h.save();
                                         h.showToNearby();
-                                        player.sendMessage(ColorUtil.colorize("&a已删除第 " + (pageIndex + 1) + " 页！"));
+                                        player.sendMessage(ColorUtil.colorize("&a已交换第 " + (selectedPage + 1) + " 页和第 " + (pageIndex + 1) + " 页！"));
+                                    } else {
+                                        player.sendMessage(ColorUtil.colorize("&c交换失败！"));
                                     }
-                                    guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
-                                } else {
-                                    guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
                                 }
-                            }));
+                                selectedPage = -1;
+                                render();
+                                guiManager.openGui(player, this);
+                            }
                         } else {
-                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
+                            // 普通模式逻辑
+                            if (context.getClickType().isRightClick()) {
+                                if (pageCount <= 1) {
+                                    player.sendMessage(ColorUtil.colorize("&c至少需要保留一页！"));
+                                    return;
+                                }
+                                guiManager.openGui(player, ConfirmGui.createDeletePageConfirm(hologramName, pageIndex + 1, confirmed -> {
+                                    if (confirmed) {
+                                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                                        if (h != null) {
+                                            h.removePage(pageIndex);
+                                            h.save();
+                                            h.showToNearby();
+                                            player.sendMessage(ColorUtil.colorize("&a已删除第 " + (pageIndex + 1) + " 页！"));
+                                        }
+                                        guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
+                                    } else {
+                                        guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
+                                    }
+                                }));
+                            } else {
+                                guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
+                            }
                         }
                     })
                     .build());
@@ -139,6 +185,22 @@ public class PageManageGui extends GuiScreen {
                             player.sendMessage(ColorUtil.colorize("&c添加页面失败！"));
                         }
                     }
+                })
+                .build());
+        
+        setButton(46, GuiButton.builder(sortMode ? Material.LIME_STAINED_GLASS_PANE : Material.HOPPER)
+                .name(sortMode ? "&c退出排序模式" : "&f排序模式")
+                .lore(Arrays.asList(
+                        sortMode ? "&7点击退出排序模式" : "&7进入页面排序模式",
+                        sortMode ? "&7点击两个页面进行交换" : "&7交换页面的顺序",
+                        "",
+                        sortMode ? "&e点击退出" : "&e点击进入"
+                ))
+                .onClick(context -> {
+                    sortMode = !sortMode;
+                    selectedPage = -1;
+                    render();
+                    guiManager.openGui(context.getPlayer(), this);
                 })
                 .build());
         
@@ -182,7 +244,7 @@ public class PageManageGui extends GuiScreen {
                 .name(" ")
                 .build();
         
-        int[] backgroundSlots = {1, 2, 3, 5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 50, 51, 52, 53};
+        int[] backgroundSlots = {1, 2, 3, 5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44, 47, 48, 50, 51, 52, 53};
         for (int slot : backgroundSlots) {
             if (getButton(slot) == null) {
                 setButton(slot, background);
