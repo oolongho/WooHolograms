@@ -27,6 +27,7 @@ public class HologramLine {
     private static final double DEFAULT_HEIGHT_ICON = 0.5;
     private static final double DEFAULT_HEIGHT_HEAD = 0.6;
     private static final double DEFAULT_HEIGHT_SMALLHEAD = 0.4;
+    private static final double DEFAULT_HEIGHT_ENTITY = 0.7;
 
     /*
      * 字段
@@ -157,6 +158,7 @@ public class HologramLine {
             } else if (upperContent.startsWith("#ENTITY:")) {
                 this.type = HologramType.ENTITY;
                 if (prevType != this.type) {
+                    this.height = DEFAULT_HEIGHT_ENTITY;
                     this.previousRenderer = this.renderer;
                     this.renderer = null;
                 }

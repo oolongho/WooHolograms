@@ -314,6 +314,12 @@ public class LineEditGui extends GuiScreen {
                                     float yaw = Float.parseFloat(parts[0]);
                                     float pitch = parts.length >= 2 ? Float.parseFloat(parts[1]) : 0;
                                     
+                                    if (yaw < -180 || yaw > 180 || pitch < -90 || pitch > 90) {
+                                        player.sendMessage(ColorUtil.colorize("&c角度范围无效！yaw: -180~180, pitch: -90~90"));
+                                        guiManager.openGui(player, new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                                        return;
+                                    }
+                                    
                                     Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                     if (h != null) {
                                         HologramPage p = h.getPage(pageIndex);
