@@ -216,10 +216,10 @@ public class YamlHologramStorage implements HologramStorage {
                                 line.setOffsetY(offsetY);
                                 
                                 // 加载行自定义朝向
-                                if (lineSection.contains("customYaw")) {
+                                if (lineSection.contains("customYaw") && lineSection.get("customYaw") != null) {
                                     line.setCustomYaw((float) lineSection.getDouble("customYaw"));
                                 }
-                                if (lineSection.contains("customPitch")) {
+                                if (lineSection.contains("customPitch") && lineSection.get("customPitch") != null) {
                                     line.setCustomPitch((float) lineSection.getDouble("customPitch"));
                                 }
                             }
