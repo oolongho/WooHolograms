@@ -74,10 +74,12 @@ public class WooHolograms extends JavaPlugin {
         // 初始化配置
         configManager = new ConfigManager(this);
         configManager.initialize();
+        getLogger().info("配置加载完成");
         
         // 初始化消息
         messages = new Messages(this);
         messages.initialize();
+        getLogger().info("消息文件加载完成");
         
         // 初始化存储器
         storage = new YamlHologramStorage(this);
@@ -124,6 +126,7 @@ public class WooHolograms extends JavaPlugin {
         
         // 加载全息图
         hologramManager.loadAll();
+        getLogger().info("已加载 " + hologramManager.getHologramCount() + " 个全息图");
         
         // 注册数据包监听器
         packetListener.register();
@@ -136,7 +139,7 @@ public class WooHolograms extends JavaPlugin {
         }
         
         pluginEnabled = true;
-        getLogger().info("WooHolograms 已启用");
+        getLogger().info("WooHolograms v" + getPluginMeta().getVersion() + " 已启用!");
     }
     
     @Override
