@@ -369,7 +369,7 @@ public class ActionManageGui extends GuiScreen {
                 .name(" ")
                 .build();
         
-        int[] backgroundSlots = {1, 2, 3, 5, 6, 7, 8, 40, 41, 42, 43, 44, 48, 50, 52, 53};
+        int[] backgroundSlots = {1, 2, 3, 5, 6, 7, 8, 40, 41, 42, 43, 44, 47, 48, 50, 51, 52, 53};
         for (int slot : backgroundSlots) {
             if (getButton(slot) == null) {
                 setButton(slot, background);
