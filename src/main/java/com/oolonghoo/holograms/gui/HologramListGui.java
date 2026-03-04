@@ -124,7 +124,7 @@ public class HologramListGui extends GuiScreen {
                     .build());
         }
         
-        setButton(46, GuiButton.builder(Material.CLOCK)
+        setButton(45, GuiButton.builder(Material.CLOCK)
                 .name("&f重载配置")
                 .lore(Arrays.asList(
                         "&7重载所有配置和全息图",
@@ -143,7 +143,7 @@ public class HologramListGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(49, GuiButton.builder(Material.KNOWLEDGE_BOOK)
+        setButton(47, GuiButton.builder(Material.KNOWLEDGE_BOOK)
                 .name("&f帮助手册")
                 .lore(Arrays.asList(
                         "&7查看插件使用说明",
@@ -155,7 +155,7 @@ public class HologramListGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(52, GuiButton.builder(Material.OAK_SIGN)
+        setButton(51, GuiButton.builder(Material.OAK_SIGN)
                 .name("&f附近全息图")
                 .lore(Arrays.asList(
                         "&7查看附近的全息图",

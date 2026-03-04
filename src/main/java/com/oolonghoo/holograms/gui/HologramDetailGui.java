@@ -555,19 +555,19 @@ public class HologramDetailGui extends GuiScreen {
                         })
                         .build());
             }
-            
-            setButton(51, GuiButton.builder(Material.COMMAND_BLOCK)
-                    .name("&f动作管理")
-                    .lore(Arrays.asList(
-                            "&7管理点击动作",
-                            "",
-                            "&e点击管理"
-                    ))
-                    .onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
-                    })
-                    .build());
         }
+        
+        setButton(51, GuiButton.builder(Material.COMMAND_BLOCK)
+                .name("&f动作管理")
+                .lore(Arrays.asList(
+                        "&7管理点击动作",
+                        "",
+                        "&e点击管理"
+                ))
+                .onClick(context -> {
+                    guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                })
+                .build());
     }
 
     private GuiButton createLineButton(Hologram hologram, int lineIndex, HologramLine line) {
