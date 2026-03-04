@@ -89,9 +89,22 @@ public class PageManageGui extends GuiScreen {
                 buttonMaterial = Material.LIME_STAINED_GLASS_PANE;
             }
             
+            String previewText = "";
+            if (page != null && page.size() > 0) {
+                String firstLine = page.getLine(0).getContent();
+                if (firstLine.length() > 20) {
+                    previewText = firstLine.substring(0, 20) + "...";
+                } else {
+                    previewText = firstLine;
+                }
+            }
+            
             java.util.List<String> lore = new java.util.ArrayList<>();
             lore.add("");
             lore.add("&7行数: &f" + lineCount);
+            if (!previewText.isEmpty()) {
+                lore.add("&7首行: &f" + previewText);
+            }
             lore.add("");
             if (sortMode) {
                 if (selectedPage == -1) {

@@ -230,6 +230,54 @@ public class ActionManageGui extends GuiScreen {
                 ))
                 .build());
         
+        if (hologram.getPageCount() > 1) {
+            setButton(47, GuiButton.builder(Material.SPECTRAL_ARROW)
+                    .name("&f添加下一页动作")
+                    .lore(Arrays.asList(
+                            "&7快速添加下一页翻页动作",
+                            "",
+                            "&e点击添加"
+                    ))
+                    .onClick(context -> {
+                        Player player = context.getPlayer();
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h != null) {
+                            HologramPage p = h.getPage(pageIndex);
+                            if (p != null) {
+                                Action action = new Action(ActionType.NEXT_PAGE, hologramName);
+                                p.addAction(currentClickType, action);
+                                h.save();
+                                player.sendMessage(ColorUtil.colorize("&a已添加下一页动作！"));
+                                guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
+                            }
+                        }
+                    })
+                    .build());
+            
+            setButton(51, GuiButton.builder(Material.TIPPED_ARROW)
+                    .name("&f添加上一页动作")
+                    .lore(Arrays.asList(
+                            "&7快速添加上一页翻页动作",
+                            "",
+                            "&e点击添加"
+                    ))
+                    .onClick(context -> {
+                        Player player = context.getPlayer();
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h != null) {
+                            HologramPage p = h.getPage(pageIndex);
+                            if (p != null) {
+                                Action action = new Action(ActionType.PREV_PAGE, hologramName);
+                                p.addAction(currentClickType, action);
+                                h.save();
+                                player.sendMessage(ColorUtil.colorize("&a已添加上一页动作！"));
+                                guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
+                            }
+                        }
+                    })
+                    .build());
+        }
+        
         fillBackground();
     }
 
@@ -321,7 +369,7 @@ public class ActionManageGui extends GuiScreen {
                 .name(" ")
                 .build();
         
-        int[] backgroundSlots = {1, 2, 3, 5, 6, 7, 8, 40, 41, 42, 43, 44, 46, 47, 48, 50, 51, 52, 53};
+        int[] backgroundSlots = {1, 2, 3, 5, 6, 7, 8, 40, 41, 42, 43, 44, 48, 50, 52, 53};
         for (int slot : backgroundSlots) {
             if (getButton(slot) == null) {
                 setButton(slot, background);
