@@ -197,7 +197,7 @@ public abstract class ActionType {
     /**
      * 连接到其他服务器（BungeeCord）
      */
-    public static final ActionType CONNECT = new ActionType("CONNECT") {
+    public static final ActionType SERVER = new ActionType("SERVER") {
         @Override
         public boolean execute(Player player, String... args) {
             if (player == null || args == null || args.length == 0) {

@@ -198,7 +198,7 @@ public class HelpGui extends GuiScreen {
                         "&7传送玩家",
                         "&7例: TELEPORT:world,100,64,200",
                         "",
-                        "&fCONNECT:<服务器>",
+                        "&fSERVER:<服务器>",
                         "&7连接到其他服务器 (BungeeCord)"
                 ))
                 .build());
