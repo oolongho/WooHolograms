@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +25,9 @@ import java.util.stream.Collectors;
  * @author oolongho
  */
 public class HologramLine {
+
+    // 动画匹配模式 - 与 AnimationManager 保持一致
+    private static final Pattern ANIMATION_PATTERN = Pattern.compile("[<{]#?ANIM:(\\w+)(:\\S+)?[}>](.*?)[<{]/#?ANIM[}>]");
 
     // 默认配置值
     private static final double DEFAULT_HEIGHT_TEXT = 0.25;
@@ -44,6 +48,7 @@ public class HologramLine {
     private HologramType type;
     private double height;
     private HeadTexture headTexture;
+    private org.bukkit.entity.EntityType entityType;
 
     // 偏移
     private double offsetX;
@@ -169,6 +174,7 @@ public class HologramLine {
                     this.previousRenderer = this.renderer;
                     this.renderer = null;
                 }
+                parseEntityType(content);
             } else if (upperContent.equals("#NEXT") || upperContent.startsWith("#NEXT ")) {
                 this.type = HologramType.NEXT;
                 if (prevType != this.type) {
@@ -219,8 +225,7 @@ public class HologramLine {
         if (text == null || text.isEmpty()) {
             return false;
         }
-        return text.contains("<anim:") || text.contains("<animation:") ||
-               text.contains("<#ANIM:") || text.contains("{#ANIM:");
+        return ANIMATION_PATTERN.matcher(text).find();
     }
 
     /**
@@ -234,6 +239,29 @@ public class HologramLine {
         }
         // 检查 PlaceholderAPI 占位符
         return text.contains("%");
+    }
+    
+    /**
+     * 解析实体类型
+     * @param content 内容
+     */
+    private void parseEntityType(String content) {
+        if (content == null || content.isEmpty()) {
+            this.entityType = org.bukkit.entity.EntityType.ZOMBIE;
+            return;
+        }
+        
+        String upperContent = content.toUpperCase(Locale.ROOT);
+        if (upperContent.startsWith("#ENTITY:")) {
+            String entityName = content.substring(8).trim().toUpperCase(Locale.ROOT);
+            try {
+                this.entityType = org.bukkit.entity.EntityType.valueOf(entityName);
+            } catch (IllegalArgumentException e) {
+                this.entityType = org.bukkit.entity.EntityType.ZOMBIE;
+            }
+        } else {
+            this.entityType = org.bukkit.entity.EntityType.ZOMBIE;
+        }
     }
 
     /*
@@ -491,8 +519,9 @@ public class HologramLine {
 
         if (!updatedText.equals(lastText)) {
             lastTextCache.put(uuid, updatedText);
-            // 这里需要通过渲染器更新文本
-            // 具体实现依赖 NMS 渲染器
+            if (renderer != null) {
+                renderer.updateText(player, this);
+            }
         }
     }
 
@@ -1001,6 +1030,10 @@ public class HologramLine {
 
     public HeadTexture getHeadTexture() {
         return headTexture;
+    }
+    
+    public org.bukkit.entity.EntityType getEntityType() {
+        return entityType != null ? entityType : org.bukkit.entity.EntityType.ZOMBIE;
     }
 
     public double getHeight() {

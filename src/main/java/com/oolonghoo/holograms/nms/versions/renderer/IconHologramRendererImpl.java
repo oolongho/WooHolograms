@@ -1,5 +1,7 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.NmsAdapter;
 import com.oolonghoo.holograms.nms.NmsHologramPartData;
@@ -8,16 +10,22 @@ import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
+import com.oolonghoo.holograms.util.PlaceholderUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class IconHologramRendererImpl implements NmsIconHologramRenderer {
 
@@ -91,7 +99,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
             return;
         }
 
-        ItemStack item = parseItem(line.getContent());
+        ItemStack item = parseItem(line.getContent(), player);
         DecentPosition position = DecentPosition.fromLocation(location);
 
         EntityPacketsBuilder.create()
@@ -118,7 +126,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
 
     @Override
     public void updateText(Player player, HologramLine line) {
-        ItemStack item = parseItem(line.getContent());
+        ItemStack item = parseItem(line.getContent(), player);
         EntityPacketsBuilder.create()
                 .withEntityMetadata(itemEntityId, EntityMetadataBuilder.create()
                         .withItemStack(item)
@@ -172,7 +180,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
         return position.subtractY(0.55);
     }
 
-    private ItemStack parseItem(String content) {
+    private ItemStack parseItem(String content, Player player) {
         if (content == null || content.isEmpty()) {
             return new ItemStack(Material.STONE);
         }
@@ -180,6 +188,34 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
         String upperContent = content.toUpperCase(Locale.ROOT);
         if (upperContent.startsWith("#ICON:")) {
             String itemName = content.substring(6).trim();
+            
+            if (player != null) {
+                itemName = PlaceholderUtil.replace(itemName, player);
+            }
+            
+            String upperItemName = itemName.toUpperCase(Locale.ROOT);
+            
+            if (upperItemName.equals("PLAYER_HEAD") || upperItemName.startsWith("PLAYER_HEAD(") || upperItemName.startsWith("PLAYER_HEAD ")) {
+                String playerName = extractPlayerName(itemName);
+                if (playerName != null && !playerName.isEmpty()) {
+                    return createPlayerHead(playerName);
+                } else if (player != null) {
+                    return createPlayerHead(player.getName());
+                }
+                return new ItemStack(Material.PLAYER_HEAD);
+            }
+            
+            if (upperItemName.startsWith("SKULL:") || upperItemName.startsWith("HEAD:")) {
+                String skullValue = itemName.substring(itemName.indexOf(':') + 1).trim();
+                if (player != null) {
+                    skullValue = PlaceholderUtil.replace(skullValue, player);
+                }
+                if (skullValue.length() > 50) {
+                    return createHeadFromBase64(skullValue);
+                }
+                return createPlayerHead(skullValue);
+            }
+            
             Material material = Material.matchMaterial(itemName);
             if (material != null) {
                 return new ItemStack(material);
@@ -208,5 +244,62 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
         }
 
         return new ItemStack(Material.STONE);
+    }
+    
+    private String extractPlayerName(String itemName) {
+        String upperName = itemName.toUpperCase(Locale.ROOT);
+        if (upperName.startsWith("PLAYER_HEAD(")) {
+            int start = itemName.indexOf('(');
+            int end = itemName.indexOf(')');
+            if (start != -1 && end != -1 && end > start) {
+                return itemName.substring(start + 1, end).trim();
+            }
+        } else if (upperName.startsWith("PLAYER_HEAD ")) {
+            return itemName.substring(12).trim();
+        } else if (upperName.equals("PLAYER_HEAD")) {
+            return null;
+        }
+        return itemName;
+    }
+    
+    private ItemStack createPlayerHead(String playerName) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        if (playerName == null || playerName.isEmpty()) {
+            return head;
+        }
+        
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        if (meta != null) {
+            meta.setOwner(playerName);
+            head.setItemMeta(meta);
+        }
+        return head;
+    }
+    
+    private ItemStack createHeadFromBase64(String base64) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        
+        if (meta != null && base64 != null && !base64.isEmpty()) {
+            GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+            profile.getProperties().put("textures", new Property("textures", base64));
+            
+            try {
+                Field profileField = meta.getClass().getDeclaredField("profile");
+                profileField.setAccessible(true);
+                profileField.set(meta, profile);
+            } catch (Exception e) {
+                try {
+                    Method setProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
+                    setProfileMethod.setAccessible(true);
+                    setProfileMethod.invoke(meta, profile);
+                } catch (Exception ignored) {
+                }
+            }
+            
+            head.setItemMeta(meta);
+        }
+        
+        return head;
     }
 }

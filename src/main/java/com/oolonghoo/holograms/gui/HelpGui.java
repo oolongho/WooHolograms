@@ -6,25 +6,17 @@ import org.bukkit.Material;
 
 import java.util.Arrays;
 
-/**
- * 帮助 GUI
- * 显示插件使用说明
- *
- * @author oolongho
- */
 public class HelpGui extends GuiScreen {
 
     private final WooHolograms plugin;
     private final GuiManager guiManager;
     private final ChatInputManager chatInputManager;
-    private int page;
 
-    public HelpGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, int page) {
+    public HelpGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager) {
         super("help", ColorUtil.colorize("&8帮助手册"), 54);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
-        this.page = page;
         
         render();
     }
@@ -32,46 +24,16 @@ public class HelpGui extends GuiScreen {
     private void render() {
         clearButtons();
         
-        // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
                 .name("&f返回")
                 .lore(Arrays.asList("&7返回上一页", "", "&e点击返回"))
                 .onClick(context -> {
-                    if (page > 0) {
-                        guiManager.openGui(context.getPlayer(), new HelpGui(plugin, guiManager, chatInputManager, page - 1));
-                    }
+                    guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                 })
                 .build());
         
-        // 页码显示
-        setButton(4, GuiButton.builder(Material.PAPER)
-                .name("&f第 " + (page + 1) + " 页")
-                .build());
+        fillFirstRow();
         
-        if (page == 0) {
-            // 第一页：行类型说明
-            renderLineTypesHelp();
-        } else if (page == 1) {
-            // 第二页：变量和参数说明
-            renderVariablesHelp();
-        } else if (page == 2) {
-            // 第三页：动作说明
-            renderActionsHelp();
-        }
-        
-        // 下一页按钮
-        if (page < 2) {
-            setButton(53, GuiButton.builder(Material.ARROW)
-                    .name("&f下一页")
-                    .lore(Arrays.asList("&7查看更多帮助", "", "&e点击翻页"))
-                    .onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), new HelpGui(plugin, guiManager, chatInputManager, page + 1));
-                    })
-                    .build());
-        }
-    }
-    
-    private void renderLineTypesHelp() {
         setButton(9, GuiButton.builder(Material.PAPER)
                 .name("&e行类型格式")
                 .lore(Arrays.asList(
@@ -81,36 +43,37 @@ public class HelpGui extends GuiScreen {
                         "&7显示物品图标",
                         "&7例: #ICON:DIAMOND_SWORD",
                         "",
-                        "&f#HEAD:<类型>",
+                        "&f#HEAD:<玩家名>",
                         "&7显示大头颅（0.6格高）",
-                        "&7例: #HEAD:PLAYER_HEAD (玩家名)",
+                        "&7例: #HEAD:Notch",
                         "",
-                        "&f#SMALLHEAD:<类型>",
+                        "&f#SMALLHEAD:<玩家名>",
                         "&7显示小头颅（0.4格高）",
-                        "&7例: #SMALLHEAD:PLAYER_HEAD (玩家名)"
+                        "&7例: #SMALLHEAD:Notch"
                 ))
                 .build());
         
-        setButton(18, GuiButton.builder(Material.PLAYER_HEAD)
+        setButton(10, GuiButton.builder(Material.PLAYER_HEAD)
                 .name("&e头颅类型")
                 .lore(Arrays.asList(
                         "&7头颅支持以下格式：",
                         "",
-                        "&fPLAYER_HEAD (玩家名)",
+                        "&f#HEAD:PLAYER_HEAD (玩家名)",
                         "&7显示玩家头颅",
-                        "&7例: #HEAD:PLAYER_HEAD (Notch)",
+                        "&7例: #HEAD:Notch",
                         "",
-                        "&fPLAYER_HEAD ({player})",
+                        "&f#HEAD:PLAYER_HEAD ({player})",
                         "&7显示查看者的头颅",
                         "",
-                        "&fURL (Base64)",
+                        "&f#HEAD:URL (Base64)",
                         "&7使用 URL 材质",
-                        "&fHDB (ID)",
+                        "",
+                        "&f#HEAD:HDB (ID)",
                         "&7使用 HeadDatabase"
                 ))
                 .build());
         
-        setButton(27, GuiButton.builder(Material.ZOMBIE_HEAD)
+        setButton(11, GuiButton.builder(Material.ZOMBIE_HEAD)
                 .name("&e实体和翻页")
                 .lore(Arrays.asList(
                         "&f#ENTITY:<类型>",
@@ -127,7 +90,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(36, GuiButton.builder(Material.OAK_SIGN)
+        setButton(12, GuiButton.builder(Material.OAK_SIGN)
                 .name("&e普通文本")
                 .lore(Arrays.asList(
                         "&7不以 # 开头的内容",
@@ -143,10 +106,8 @@ public class HelpGui extends GuiScreen {
                         "&7例: &a欢迎&a&l{player}!"
                 ))
                 .build());
-    }
-    
-    private void renderVariablesHelp() {
-        setButton(9, GuiButton.builder(Material.NAME_TAG)
+        
+        setButton(13, GuiButton.builder(Material.NAME_TAG)
                 .name("&e内置变量")
                 .lore(Arrays.asList(
                         "&7在内容中使用变量：",
@@ -163,7 +124,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(18, GuiButton.builder(Material.COMMAND_BLOCK)
+        setButton(14, GuiButton.builder(Material.COMMAND_BLOCK)
                 .name("&e物品参数")
                 .lore(Arrays.asList(
                         "&7在 #ICON 后添加参数：",
@@ -183,7 +144,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(27, GuiButton.builder(Material.ENCHANTED_BOOK)
+        setButton(15, GuiButton.builder(Material.ENCHANTED_BOOK)
                 .name("&e更多物品参数")
                 .lore(Arrays.asList(
                         "&flore:<描述>",
@@ -200,7 +161,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(36, GuiButton.builder(Material.KNOWLEDGE_BOOK)
+        setButton(16, GuiButton.builder(Material.KNOWLEDGE_BOOK)
                 .name("&eNBT 格式")
                 .lore(Arrays.asList(
                         "&7也支持原生 NBT 格式：",
@@ -215,10 +176,8 @@ public class HelpGui extends GuiScreen {
                         "{Enchantments:[{id:\"sharpness\",lvl:5}]}"
                 ))
                 .build());
-    }
-    
-    private void renderActionsHelp() {
-        setButton(9, GuiButton.builder(Material.COMMAND_BLOCK)
+        
+        setButton(18, GuiButton.builder(Material.COMMAND_BLOCK)
                 .name("&e动作类型")
                 .lore(Arrays.asList(
                         "&7为行添加点击动作：",
@@ -235,7 +194,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(18, GuiButton.builder(Material.NOTE_BLOCK)
+        setButton(19, GuiButton.builder(Material.NOTE_BLOCK)
                 .name("&e更多动作")
                 .lore(Arrays.asList(
                         "&fSOUND:<音效>",
@@ -251,7 +210,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(27, GuiButton.builder(Material.ARROW)
+        setButton(20, GuiButton.builder(Material.ARROW)
                 .name("&e翻页动作")
                 .lore(Arrays.asList(
                         "&fNEXT_PAGE",
@@ -268,7 +227,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(36, GuiButton.builder(Material.STONE_BUTTON)
+        setButton(21, GuiButton.builder(Material.STONE_BUTTON)
                 .name("&e点击类型")
                 .lore(Arrays.asList(
                         "&7可为不同点击设置不同动作：",
@@ -283,7 +242,7 @@ public class HelpGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(45, GuiButton.builder(Material.REDSTONE_TORCH)
+        setButton(22, GuiButton.builder(Material.REDSTONE_TORCH)
                 .name("&e变量支持")
                 .lore(Arrays.asList(
                         "&7动作中支持变量：",
@@ -294,5 +253,98 @@ public class HelpGui extends GuiScreen {
                         "&7例: COMMAND:tp {player} 100 64 100"
                 ))
                 .build());
+        
+        setButton(23, GuiButton.builder(Material.BLAZE_POWDER)
+                .name("&e动画效果")
+                .lore(Arrays.asList(
+                        "&7使用动画让文本动起来：",
+                        "",
+                        "&f<#ANIM:wave>文本</#ANIM>",
+                        "&7波浪动画",
+                        "",
+                        "&f<#ANIM:typewriter>文本</#ANIM>",
+                        "&7打字机效果",
+                        "",
+                        "&f<#ANIM:blink>文本</#ANIM>",
+                        "&7闪烁效果",
+                        "",
+                        "&f<#ANIM:gradient>文本</#ANIM>",
+                        "&7渐变色效果"
+                ))
+                .build());
+        
+        setButton(24, GuiButton.builder(Material.GLOW_INK_SAC)
+                .name("&e全息图属性")
+                .lore(Arrays.asList(
+                        "&7在详情 GUI 中可设置：",
+                        "",
+                        "&f朝向模式:",
+                        "&7- 固定角度 (自定义朝向)",
+                        "&7- 水平/垂直跟随",
+                        "&7- 完全跟随玩家",
+                        "",
+                        "&f其他属性:",
+                        "&7- 显示范围、更新间隔",
+                        "&7- 双面显示、权限控制"
+                ))
+                .build());
+        
+        setButton(25, GuiButton.builder(Material.EMERALD)
+                .name("&e快捷命令")
+                .lore(Arrays.asList(
+                        "&7常用命令：",
+                        "",
+                        "&f/wh create <名称>",
+                        "&7创建全息图",
+                        "",
+                        "&f/wh edit <名称>",
+                        "&7打开编辑 GUI",
+                        "",
+                        "&f/wh delete <名称>",
+                        "&7删除全息图",
+                        "",
+                        "&f/wh reload",
+                        "&7重载配置"
+                ))
+                .build());
+        
+        setButton(26, GuiButton.builder(Material.BOOKSHELF)
+                .name("&ePlaceholderAPI")
+                .lore(Arrays.asList(
+                        "&7支持 PAPI 占位符：",
+                        "",
+                        "&f%player_name%",
+                        "&f%player_health%",
+                        "&f%server_online%",
+                        "",
+                        "&7需安装 PlaceholderAPI"
+                ))
+                .build());
+        
+        fillLastRow();
+    }
+    
+    private void fillFirstRow() {
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
+                .name(" ")
+                .build();
+        
+        for (int i = 1; i < 9; i++) {
+            if (getButton(i) == null) {
+                setButton(i, background);
+            }
+        }
+    }
+    
+    private void fillLastRow() {
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
+                .name(" ")
+                .build();
+        
+        for (int i = 45; i < 54; i++) {
+            if (getButton(i) == null) {
+                setButton(i, background);
+            }
+        }
     }
 }

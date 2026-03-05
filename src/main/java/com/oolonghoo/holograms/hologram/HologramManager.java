@@ -552,6 +552,8 @@ public class HologramManager {
     private class UpdateTask extends BukkitRunnable {
         @Override
         public void run() {
+            plugin.getAnimationManager().tick();
+            
             for (Hologram hologram : holograms.values()) {
                 if (!hologram.isEnabled()) {
                     continue;

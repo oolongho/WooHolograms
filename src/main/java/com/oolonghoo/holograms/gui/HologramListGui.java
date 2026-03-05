@@ -12,12 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * 全息图列表 GUI
- * 主菜单，显示所有全息图
- * 
- * @author oolongho
- */
 public class HologramListGui extends GuiScreen {
 
     private final WooHolograms plugin;
@@ -25,6 +19,7 @@ public class HologramListGui extends GuiScreen {
     private final ChatInputManager chatInputManager;
     private int currentPage;
     private static final int ITEMS_PER_PAGE = 45;
+    private static final int START_SLOT = 9;
 
     public HologramListGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, int page) {
         super("hologram_list", ColorUtil.colorize("&8全息图列表"), 54);
@@ -39,45 +34,32 @@ public class HologramListGui extends GuiScreen {
     private void render() {
         clearButtons();
         
-        List<Hologram> holograms = new ArrayList<>(plugin.getHologramManager().getHolograms());
-        int totalPages = (int) Math.ceil((double) holograms.size() / ITEMS_PER_PAGE);
-        if (totalPages == 0) totalPages = 1;
+        setButton(0, GuiButton.builder(Material.CLOCK)
+                .name("&f重载配置")
+                .lore(Arrays.asList(
+                        "&7重载所有配置和全息图",
+                        "",
+                        "&e点击重载"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    plugin.getConfigManager().reload();
+                    plugin.getMessages().reload();
+                    plugin.getStorage().reload();
+                    plugin.getHologramManager().reload();
+                    
+                    player.sendMessage(ColorUtil.colorize("&a配置已重新加载！"));
+                    guiManager.openGui(player, new HologramListGui(plugin, guiManager, chatInputManager, 0));
+                })
+                .build());
         
-        if (currentPage >= totalPages) {
-            currentPage = totalPages - 1;
-        }
-        
-        int startIndex = currentPage * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, holograms.size());
-        
-        for (int i = startIndex; i < endIndex; i++) {
-            Hologram hologram = holograms.get(i);
-            int slot = i - startIndex;
-            
-            setButton(slot, createHologramButton(hologram));
-        }
-        
-        if (currentPage > 0) {
-            setButton(45, GuiButton.builder(Material.ARROW)
-                    .name("&f上一页")
-                    .lore(Arrays.asList(
-                            "&7当前: 第 " + (currentPage + 1) + " 页",
-                            "&7点击查看上一页"
-                    ))
-                    .onClick(context -> {
-                        Player player = context.getPlayer();
-                        guiManager.openGui(player, new HologramListGui(plugin, guiManager, chatInputManager, currentPage - 1));
-                    })
-                    .build());
-        }
-        
-        setButton(49, GuiButton.builder(Material.EMERALD)
+        setButton(4, GuiButton.builder(Material.EMERALD)
                 .name("&f创建全息图")
                 .lore(Arrays.asList(
-                            "&7点击创建一个新的全息图",
-                            "",
-                            "&e点击创建"
-                    ))
+                        "&7点击创建一个新的全息图",
+                        "",
+                        "&e点击创建"
+                ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
@@ -110,6 +92,69 @@ public class HologramListGui extends GuiScreen {
                 })
                 .build());
         
+        setButton(6, GuiButton.builder(Material.KNOWLEDGE_BOOK)
+                .name("&f帮助手册")
+                .lore(Arrays.asList(
+                        "&7查看插件使用说明",
+                        "",
+                        "&e点击查看"
+                ))
+                .onClick(context -> {
+                    guiManager.openGui(context.getPlayer(), new HelpGui(plugin, guiManager, chatInputManager));
+                })
+                .build());
+        
+        setButton(8, GuiButton.builder(Material.OAK_SIGN)
+                .name("&f附近全息图")
+                .lore(Arrays.asList(
+                        "&7查看附近的全息图",
+                        "",
+                        "&e点击查看"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    showNearbyHolograms(player);
+                })
+                .build());
+        
+        fillFirstRow();
+        
+        List<Hologram> holograms = new ArrayList<>(plugin.getHologramManager().getHolograms());
+        int totalPages = (int) Math.ceil((double) holograms.size() / ITEMS_PER_PAGE);
+        if (totalPages == 0) totalPages = 1;
+        
+        if (currentPage >= totalPages) {
+            currentPage = totalPages - 1;
+        }
+        
+        int startIndex = currentPage * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, holograms.size());
+        
+        for (int i = startIndex; i < endIndex; i++) {
+            Hologram hologram = holograms.get(i);
+            int slot = START_SLOT + (i - startIndex);
+            
+            setButton(slot, createHologramButton(hologram));
+        }
+        
+        if (currentPage > 0) {
+            setButton(45, GuiButton.builder(Material.ARROW)
+                    .name("&f上一页")
+                    .lore(Arrays.asList(
+                            "&7当前: 第 " + (currentPage + 1) + " 页",
+                            "&7点击查看上一页"
+                    ))
+                    .onClick(context -> {
+                        Player player = context.getPlayer();
+                        guiManager.openGui(player, new HologramListGui(plugin, guiManager, chatInputManager, currentPage - 1));
+                    })
+                    .build());
+        }
+        
+        setButton(49, GuiButton.builder(Material.PAPER)
+                .name("&f第 " + (currentPage + 1) + "/" + totalPages + " 页")
+                .build());
+        
         if (currentPage < totalPages - 1) {
             setButton(53, GuiButton.builder(Material.ARROW)
                     .name("&f下一页")
@@ -124,49 +169,7 @@ public class HologramListGui extends GuiScreen {
                     .build());
         }
         
-        setButton(45, GuiButton.builder(Material.CLOCK)
-                .name("&f重载配置")
-                .lore(Arrays.asList(
-                        "&7重载所有配置和全息图",
-                        "",
-                        "&e点击重载"
-                ))
-                .onClick(context -> {
-                    Player player = context.getPlayer();
-                    plugin.getConfigManager().reload();
-                    plugin.getMessages().reload();
-                    plugin.getStorage().reload();
-                    plugin.getHologramManager().reload();
-                    
-                    player.sendMessage(ColorUtil.colorize("&a配置已重新加载！"));
-                    guiManager.openGui(player, new HologramListGui(plugin, guiManager, chatInputManager, 0));
-                })
-                .build());
-        
-        setButton(47, GuiButton.builder(Material.KNOWLEDGE_BOOK)
-                .name("&f帮助手册")
-                .lore(Arrays.asList(
-                        "&7查看插件使用说明",
-                        "",
-                        "&e点击查看"
-                ))
-                .onClick(context -> {
-                    guiManager.openGui(context.getPlayer(), new HelpGui(plugin, guiManager, chatInputManager, 0));
-                })
-                .build());
-        
-        setButton(51, GuiButton.builder(Material.OAK_SIGN)
-                .name("&f附近全息图")
-                .lore(Arrays.asList(
-                        "&7查看附近的全息图",
-                        "",
-                        "&e点击查看"
-                ))
-                .onClick(context -> {
-                    Player player = context.getPlayer();
-                    showNearbyHolograms(player);
-                })
-                .build());
+        fillLastRow();
     }
 
     private GuiButton createHologramButton(Hologram hologram) {
@@ -227,6 +230,30 @@ public class HologramListGui extends GuiScreen {
                         " &7- 距离: " + String.format("%.1f", distance) + " 格"));
             }
             player.sendMessage(ColorUtil.colorize("&e总计: &f" + nearbyHolograms.size() + " 个全息图"));
+        }
+    }
+    
+    private void fillFirstRow() {
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
+                .name(" ")
+                .build();
+        
+        for (int i = 1; i < 9; i++) {
+            if (getButton(i) == null) {
+                setButton(i, background);
+            }
+        }
+    }
+    
+    private void fillLastRow() {
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
+                .name(" ")
+                .build();
+        
+        for (int i = 45; i < 54; i++) {
+            if (getButton(i) == null) {
+                setButton(i, background);
+            }
         }
     }
 }

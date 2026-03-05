@@ -46,16 +46,20 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
             return;
         }
 
-        Hologram hologram = line.getHologram();
+        if (line != null && line.getEntityType() != null) {
+            this.entityType = line.getEntityType();
+        }
+
+        Hologram hologram = line != null ? line.getHologram() : null;
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
         float hologramFacing = hologram != null ? hologram.getFacing() : 0f;
 
-        float yaw = line.getCustomYaw() != null ? line.getCustomYaw() : hologramFacing;
-        float pitch = line.getCustomPitch() != null ? line.getCustomPitch() : 0;
+        float yaw = line != null && line.getCustomYaw() != null ? line.getCustomYaw() : hologramFacing;
+        float pitch = line != null && line.getCustomPitch() != null ? line.getCustomPitch() : 0;
 
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
-                .withInvisible()
-                .withNoGravity();
+                .withNoGravity()
+                .withSilent();
 
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, entityType,

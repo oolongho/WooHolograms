@@ -135,10 +135,10 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
                 break;
         }
         
-        metadataBuilder.withHeadRotation(pitch, yaw, 0);
+        metadataBuilder.withHeadRotation(pitch, 0, 0);
 
         EntityPacketsBuilder.create()
-                .withSpawnEntity(entityId, EntityType.ARMOR_STAND, offsetPosition)
+                .withSpawnEntity(entityId, EntityType.ARMOR_STAND, offsetPosition, yaw, 0)
                 .withEntityMetadata(entityId, metadataBuilder.toWatchableObjects())
                 .withHelmet(entityId, headItem)
                 .sendTo(player);

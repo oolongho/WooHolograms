@@ -289,8 +289,7 @@ public class Hologram {
      */
     public void setFacing(float facing) {
         this.facing = facing;
-        hideClickableEntitiesAll();
-        showClickableEntitiesAll();
+        refreshAllViewers();
     }
 
     /**
@@ -309,8 +308,7 @@ public class Hologram {
      */
     public void setBillboard(Billboard billboard) {
         this.billboard = billboard;
-        hideClickableEntitiesAll();
-        showClickableEntitiesAll();
+        refreshAllViewers();
     }
 
     /**
@@ -329,8 +327,7 @@ public class Hologram {
      */
     public void setDoubleSided(boolean doubleSided) {
         this.doubleSided = doubleSided;
-        hideClickableEntitiesAll();
-        showClickableEntitiesAll();
+        refreshAllViewers();
     }
 
     /**
@@ -349,8 +346,33 @@ public class Hologram {
      */
     public void setDownOrigin(boolean downOrigin) {
         this.downOrigin = downOrigin;
-        hideClickableEntitiesAll();
-        showClickableEntitiesAll();
+        refreshAllViewers();
+    }
+    
+    /**
+     * 刷新所有观看者的全息图显示
+     * 重新渲染所有行和可点击实体
+     */
+    public void refreshAllViewers() {
+        synchronized (visibilityMutex) {
+            if (!enabled) {
+                return;
+            }
+            
+            for (Player player : getViewerPlayers()) {
+                int pageIndex = getPlayerPage(player);
+                HologramPage page = getPage(pageIndex);
+                if (page != null) {
+                    for (HologramLine line : page.getLines()) {
+                        line.hide(player);
+                        line.show(player);
+                    }
+                }
+            }
+            
+            hideClickableEntitiesAll();
+            showClickableEntitiesAll();
+        }
     }
 
     /*
