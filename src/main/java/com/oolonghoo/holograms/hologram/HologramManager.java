@@ -106,8 +106,24 @@ public class HologramManager {
      * @return 创建的全息图，如果名称已存在则返回 null
      */
     public Hologram createHologram(String name, Location location, boolean saveToFile) {
+        if (!isValidName(name)) {
+            return null;
+        }
+        
         if (holograms.containsKey(name)) {
             return null;
+        }
+        
+        if (location == null || location.getWorld() == null) {
+            return null;
+        }
+        
+        int maxPerWorld = plugin.getConfigManager().getMaxHologramsPerWorld();
+        if (maxPerWorld > 0) {
+            int currentCount = getHologramsInWorld(location.getWorld().getName()).size();
+            if (currentCount >= maxPerWorld) {
+                return null;
+            }
         }
 
         Hologram hologram = new Hologram(name, location, saveToFile);
@@ -128,6 +144,34 @@ public class HologramManager {
         showToNearby(hologram);
 
         return hologram;
+    }
+    
+    /**
+     * 验证全息图名称是否合法
+     * 
+     * @param name 名称
+     * @return 是否合法
+     */
+    public boolean isValidName(String name) {
+        if (name == null || name.isEmpty()) {
+            return false;
+        }
+        
+        if (name.length() > 50) {
+            return false;
+        }
+        
+        if (name.contains(" ") || name.contains("\n") || name.contains("\t")) {
+            return false;
+        }
+        
+        for (char c : name.toCharArray()) {
+            if (!Character.isLetterOrDigit(c) && c != '_' && c != '-') {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     /*
@@ -510,26 +554,42 @@ public class HologramManager {
                     continue;
                 }
                 
-                Location holoLoc = hologram.getLocation();
-                if (holoLoc == null || holoLoc.getWorld() == null) {
+                hologram.updateAnimationsAll();
+            }
+            
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                updateVisibilityForAllPlayers();
+            });
+        }
+    }
+    
+    private void updateVisibilityForAllPlayers() {
+        for (Hologram hologram : holograms.values()) {
+            if (!hologram.isEnabled()) {
+                continue;
+            }
+            
+            Location holoLoc = hologram.getLocation();
+            if (holoLoc == null || holoLoc.getWorld() == null) {
+                continue;
+            }
+            
+            double displayRange = hologram.getDisplayRange();
+            double displayRangeSq = displayRange * displayRange;
+            
+            for (Player player : holoLoc.getWorld().getPlayers()) {
+                if (!player.isOnline()) {
                     continue;
                 }
                 
-                double displayRange = hologram.getDisplayRange();
-                double displayRangeSq = displayRange * displayRange;
+                boolean inRange = player.getLocation().distanceSquared(holoLoc) <= displayRangeSq;
+                boolean isVisible = hologram.isVisible(player);
                 
-                for (Player player : holoLoc.getWorld().getPlayers()) {
-                    boolean inRange = player.getLocation().distanceSquared(holoLoc) <= displayRangeSq;
-                    boolean isVisible = hologram.isVisible(player);
-                    
-                    if (inRange && !isVisible) {
-                        hologram.show(player, 0);
-                    } else if (!inRange && isVisible) {
-                        hologram.hide(player);
-                    }
+                if (inRange && !isVisible) {
+                    hologram.show(player, 0);
+                } else if (!inRange && isVisible) {
+                    hologram.hide(player);
                 }
-                
-                hologram.updateAnimationsAll();
             }
         }
     }

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +39,7 @@ public class YamlHologramStorage implements HologramStorage {
     private final File dataFolder;
     private final File hologramsFile;
     private FileConfiguration storage;
+    private final ReentrantLock saveLock = new ReentrantLock();
 
     public YamlHologramStorage(WooHolograms plugin) {
         this.plugin = plugin;
@@ -61,103 +63,108 @@ public class YamlHologramStorage implements HologramStorage {
 
     @Override
     public boolean save(Hologram hologram) {
-        String id = hologram.getId();
-        String path = "holograms." + id;
-        
-        storage.set(path, null);
-        
-        Location loc = hologram.getLocation();
-        if (loc == null) {
-            plugin.getLogger().warning("无法保存全息图 " + id + ": 位置为空");
-            return false;
-        }
-        
-        World world = loc.getWorld();
-        if (world == null) {
-            plugin.getLogger().warning("无法保存全息图 " + id + ": 世界为空");
-            return false;
-        }
-        
-        storage.set(path + ".world", world.getName());
-        storage.set(path + ".x", loc.getX());
-        storage.set(path + ".y", loc.getY());
-        storage.set(path + ".z", loc.getZ());
-        storage.set(path + ".yaw", loc.getYaw());
-        storage.set(path + ".pitch", loc.getPitch());
-        
-        storage.set(path + ".enabled", hologram.isEnabled());
-        storage.set(path + ".type", hologram.getType().getId());
-        storage.set(path + ".visible", hologram.isVisible());
-        storage.set(path + ".persistent", hologram.isPersistent());
-        storage.set(path + ".lineHeight", hologram.getLineHeight());
-        storage.set(path + ".billboard", hologram.getBillboard().getId());
-        storage.set(path + ".facing", hologram.getFacing());
-        storage.set(path + ".doubleSided", hologram.isDoubleSided());
-        storage.set(path + ".displayRange", hologram.getDisplayRange());
-        storage.set(path + ".updateRange", hologram.getUpdateRange());
-        storage.set(path + ".updateInterval", hologram.getUpdateInterval());
-        storage.set(path + ".downOrigin", hologram.isDownOrigin());
-        
-        if (hologram.getPermission() != null && !hologram.getPermission().isEmpty()) {
-            storage.set(path + ".permission", hologram.getPermission());
-        }
-        
-        if (!hologram.getFlags().isEmpty()) {
-            storage.set(path + ".flags", hologram.getFlags().stream()
-                    .map(EnumFlag::name)
-                    .collect(Collectors.toList()));
-        }
-        
-        List<HologramPage> pages = hologram.getPages();
-        for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
-            HologramPage page = pages.get(pageIndex);
-            String pagePath = path + ".pages." + pageIndex;
+        saveLock.lock();
+        try {
+            String id = hologram.getId();
+            String path = "holograms." + id;
             
-            savePageActions(pagePath + ".actions", page);
+            storage.set(path, null);
             
-            List<HologramLine> lines = page.getLines();
-            for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-                HologramLine line = lines.get(lineIndex);
-                String linePath = pagePath + ".lines." + lineIndex;
+            Location loc = hologram.getLocation();
+            if (loc == null) {
+                plugin.getLogger().warning("无法保存全息图 " + id + ": 位置为空");
+                return false;
+            }
+            
+            World world = loc.getWorld();
+            if (world == null) {
+                plugin.getLogger().warning("无法保存全息图 " + id + ": 世界为空");
+                return false;
+            }
+            
+            storage.set(path + ".world", world.getName());
+            storage.set(path + ".x", loc.getX());
+            storage.set(path + ".y", loc.getY());
+            storage.set(path + ".z", loc.getZ());
+            storage.set(path + ".yaw", loc.getYaw());
+            storage.set(path + ".pitch", loc.getPitch());
+            
+            storage.set(path + ".enabled", hologram.isEnabled());
+            storage.set(path + ".type", hologram.getType().getId());
+            storage.set(path + ".visible", hologram.isVisible());
+            storage.set(path + ".persistent", hologram.isPersistent());
+            storage.set(path + ".lineHeight", hologram.getLineHeight());
+            storage.set(path + ".billboard", hologram.getBillboard().getId());
+            storage.set(path + ".facing", hologram.getFacing());
+            storage.set(path + ".doubleSided", hologram.isDoubleSided());
+            storage.set(path + ".displayRange", hologram.getDisplayRange());
+            storage.set(path + ".updateRange", hologram.getUpdateRange());
+            storage.set(path + ".updateInterval", hologram.getUpdateInterval());
+            storage.set(path + ".downOrigin", hologram.isDownOrigin());
+            
+            if (hologram.getPermission() != null && !hologram.getPermission().isEmpty()) {
+                storage.set(path + ".permission", hologram.getPermission());
+            }
+            
+            if (!hologram.getFlags().isEmpty()) {
+                storage.set(path + ".flags", hologram.getFlags().stream()
+                        .map(EnumFlag::name)
+                        .collect(Collectors.toList()));
+            }
+            
+            List<HologramPage> pages = hologram.getPages();
+            for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
+                HologramPage page = pages.get(pageIndex);
+                String pagePath = path + ".pages." + pageIndex;
                 
-                storage.set(linePath + ".content", line.getContent());
-                storage.set(linePath + ".type", line.getType().getId());
-                storage.set(linePath + ".height", line.getHeight());
-                storage.set(linePath + ".offsetX", line.getOffsetX());
-                storage.set(linePath + ".offsetY", line.getOffsetY());
-                storage.set(linePath + ".offsetZ", line.getOffsetZ());
-                storage.set(linePath + ".facing", line.getFacing());
+                savePageActions(pagePath + ".actions", page);
                 
-                if (line.getBrightness() != null) {
-                    storage.set(linePath + ".brightness", 
-                            line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
-                }
-                
-                if (line.getAlignment() != null) {
-                    storage.set(linePath + ".alignment", line.getAlignment().getId());
-                }
-                
-                if (line.getBillboard() != null) {
-                    storage.set(linePath + ".billboard", line.getBillboard().getId());
-                }
-                
-                if (line.getPermission() != null && !line.getPermission().isEmpty()) {
-                    storage.set(linePath + ".permission", line.getPermission());
-                }
-                
-                if (!line.getFlags().isEmpty()) {
-                    storage.set(linePath + ".flags", line.getFlags().stream()
-                            .map(EnumFlag::name)
-                            .collect(Collectors.toList()));
-                }
-                
-                if (line.hasActions()) {
-                    saveLineActions(linePath + ".actions", line);
+                List<HologramLine> lines = page.getLines();
+                for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
+                    HologramLine line = lines.get(lineIndex);
+                    String linePath = pagePath + ".lines." + lineIndex;
+                    
+                    storage.set(linePath + ".content", line.getContent());
+                    storage.set(linePath + ".type", line.getType().getId());
+                    storage.set(linePath + ".height", line.getHeight());
+                    storage.set(linePath + ".offsetX", line.getOffsetX());
+                    storage.set(linePath + ".offsetY", line.getOffsetY());
+                    storage.set(linePath + ".offsetZ", line.getOffsetZ());
+                    storage.set(linePath + ".facing", line.getFacing());
+                    
+                    if (line.getBrightness() != null) {
+                        storage.set(linePath + ".brightness", 
+                                line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
+                    }
+                    
+                    if (line.getAlignment() != null) {
+                        storage.set(linePath + ".alignment", line.getAlignment().getId());
+                    }
+                    
+                    if (line.getBillboard() != null) {
+                        storage.set(linePath + ".billboard", line.getBillboard().getId());
+                    }
+                    
+                    if (line.getPermission() != null && !line.getPermission().isEmpty()) {
+                        storage.set(linePath + ".permission", line.getPermission());
+                    }
+                    
+                    if (!line.getFlags().isEmpty()) {
+                        storage.set(linePath + ".flags", line.getFlags().stream()
+                                .map(EnumFlag::name)
+                                .collect(Collectors.toList()));
+                    }
+                    
+                    if (line.hasActions()) {
+                        saveLineActions(linePath + ".actions", line);
+                    }
                 }
             }
+            
+            return saveStorage();
+        } finally {
+            saveLock.unlock();
         }
-        
-        return saveStorage();
     }
     
     private void savePageActions(String path, HologramPage page) {

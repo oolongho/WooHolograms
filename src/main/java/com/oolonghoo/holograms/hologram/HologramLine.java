@@ -219,8 +219,8 @@ public class HologramLine {
         if (text == null || text.isEmpty()) {
             return false;
         }
-        // 简单检查是否包含动画标记
-        return text.contains("<anim:") || text.contains("<animation:");
+        return text.contains("<anim:") || text.contains("<animation:") ||
+               text.contains("<#ANIM:") || text.contains("{#ANIM:");
     }
 
     /**

@@ -24,12 +24,6 @@ import java.util.stream.Collectors;
  */
 public class Hologram {
 
-    // 默认配置值
-    private static final double DEFAULT_DISPLAY_RANGE = 48.0;
-    private static final double DEFAULT_UPDATE_RANGE = 48.0;
-    private static final int DEFAULT_UPDATE_INTERVAL = 3;
-    private static final boolean DEFAULT_DOWN_ORIGIN = true;
-
     /*
      * 字段
      */
@@ -109,15 +103,26 @@ public class Hologram {
         this.location = location != null ? location.clone() : null;
         this.saveToFile = saveToFile;
         this.enabled = true;
-        this.displayRange = DEFAULT_DISPLAY_RANGE;
-        this.updateRange = DEFAULT_UPDATE_RANGE;
-        this.updateInterval = DEFAULT_UPDATE_INTERVAL;
+        
+        WooHolograms plugin = WooHolograms.getInstance();
+        if (plugin != null && plugin.getConfigManager() != null) {
+            this.displayRange = plugin.getConfigManager().getDefaultDisplayRange();
+            this.updateRange = plugin.getConfigManager().getDefaultUpdateRange();
+            this.updateInterval = plugin.getConfigManager().getDefaultUpdateInterval();
+            this.downOrigin = plugin.getConfigManager().isDefaultDownOrigin();
+            this.lineHeight = plugin.getConfigManager().getDefaultLineHeight();
+        } else {
+            this.displayRange = 48.0;
+            this.updateRange = 48.0;
+            this.updateInterval = 3;
+            this.downOrigin = true;
+            this.lineHeight = 0.25;
+        }
+        
         this.facing = 0.0f;
-        this.downOrigin = DEFAULT_DOWN_ORIGIN;
         this.type = HologramType.TEXT;
         this.visible = true;
         this.persistent = saveToFile;
-        this.lineHeight = 0.25;
         this.permission = null;
         this.flags = ConcurrentHashMap.newKeySet();
         this.pages = new ArrayList<>();
