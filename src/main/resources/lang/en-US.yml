@@ -63,6 +63,9 @@ line:
   removed: "&aRemoved line {line}"
   inserted: "&aInserted at line {line}: {content}"
   invalid-index: "&cInvalid line index!"
+  offset-set: "&aSet line {line} offset to {offset}!"
+  yaw-set: "&aSet line {line} yaw to {yaw}!"
+  pitch-set: "&aSet line {line} pitch to {pitch}!"
 
 # Page related
 page:
@@ -93,6 +96,11 @@ gui:
   edit-position: "&eMove Position"
   edit-settings: "&7Settings"
   back: "&7Back"
+  line-offset: "&eSet Offset"
+  line-rotation: "&eSet Rotation"
+  line-height: "&eSet Height"
+  line-brightness: "&eSet Brightness"
+  line-permission: "&eSet Permission"
 
 # Type names
 types:
@@ -110,6 +118,15 @@ action:
   list-header: "&eAction List:"
   list-format: "&7{index}. &f{action}"
   invalid-click-type: "&cInvalid click type!"
+  type-command: "Command"
+  type-console: "Console Command"
+  type-message: "Message"
+  type-sound: "Sound"
+  type-teleport: "Teleport"
+  type-server: "Server Connect"
+  type-next-page: "Next Page"
+  type-prev-page: "Previous Page"
+  type-page: "Go to Page"
 
 # Click types
 click-types:
@@ -118,6 +135,15 @@ click-types:
   shift_left: "Shift+Left Click"
   shift_right: "Shift+Right Click"
   any: "Any"
+
+# Animation related
+animation:
+  wave: "Wave"
+  typewriter: "Typewriter"
+  blink: "Blink"
+  scroll: "Scroll"
+  gradient: "Gradient"
+  custom: "Custom"
 
 # Debug messages
 debug:

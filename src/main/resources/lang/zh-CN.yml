@@ -63,6 +63,9 @@ line:
   removed: "&a已移除第 {line} 行"
   inserted: "&a已在第 {line} 行插入: {content}"
   invalid-index: "&c无效的行号！"
+  offset-set: "&a已设置第 {line} 行偏移为 {offset}！"
+  yaw-set: "&a已设置第 {line} 行 yaw 为 {yaw}！"
+  pitch-set: "&a已设置第 {line} 行 pitch 为 {pitch}！"
 
 # 页面操作相关
 page:
@@ -93,6 +96,11 @@ gui:
   edit-position: "&e移动位置"
   edit-settings: "&7设置"
   back: "&7返回"
+  line-offset: "&e设置偏移"
+  line-rotation: "&e设置朝向"
+  line-height: "&e设置高度"
+  line-brightness: "&e设置亮度"
+  line-permission: "&e设置权限"
 
 # 类型名称
 types:
@@ -110,6 +118,15 @@ action:
   list-header: "&e动作列表:"
   list-format: "&7{index}. &f{action}"
   invalid-click-type: "&c无效的点击类型！"
+  type-command: "命令"
+  type-console: "控制台命令"
+  type-message: "消息"
+  type-sound: "音效"
+  type-teleport: "传送"
+  type-server: "服务器连接"
+  type-next-page: "下一页"
+  type-prev-page: "上一页"
+  type-page: "跳转页面"
 
 # 点击类型
 click-types:
@@ -118,6 +135,15 @@ click-types:
   shift_left: "Shift+左键"
   shift_right: "Shift+右键"
   any: "任意"
+
+# 动画相关
+animation:
+  wave: "波浪"
+  typewriter: "打字机"
+  blink: "闪烁"
+  scroll: "滚动"
+  gradient: "渐变"
+  custom: "自定义"
 
 # 调试消息
 debug:
