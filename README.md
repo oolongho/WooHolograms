@@ -19,8 +19,11 @@
 - **双面显示**：文本可双面渲染
 
 ### 🎭 动画系统
-- **内置动画**：波浪、闪烁、打字机、滚动效果
-- **渐变动画**：多色渐变，支持自定义速度
+- **波浪动画**：`<#ANIM:wave>文本</#ANIM>`，支持自定义颜色参数
+- **打字机动画**：`<#ANIM:typewriter>文本</#ANIM>`，逐字显示效果
+- **闪烁动画**：`<#ANIM:blink>文本</#ANIM>`，支持速度参数
+- **滚动动画**：`<#ANIM:scroll>文本</#ANIM>`，支持宽度参数
+- **渐变动画**：`<#ANIM:gradient:red,blue>文本</#ANIM>`，多色渐变效果
 - **自定义动画**：通过配置文件创建个性化动画
 
 ### 🖱️ 交互功能
@@ -30,15 +33,17 @@
 - **动作类型**：命令、消息、音效、传送、翻页等
 
 ### ⚙️ 行级别自定义
-- **独立朝向**：每行可设置独立的 yaw/pitch
-- **独立偏移**：每行可设置独立的 Y 轴偏移
+- **独立朝向**：每行可设置独立的 yaw/pitch，支持不同朝向
+- **独立偏移**：每行可设置独立的 X/Y/Z 轴偏移
 - **独立高度**：每行可设置独立的显示高度
+- **独立亮度**：每行可设置独立的天空光和方块光亮度
+- **独立权限**：每行可设置独立的查看权限
 
 ### 🔧 技术特性
 - **NMS 原生**：1.21+ 原生支持，性能优异
 - **智能更新**：仅更新变更的数据
 - **TAB 补全**：完善的命令补全支持
-- **GUI 管理**：可视化编辑界面
+- **GUI 管理**：可视化编辑界面，使用 lime 玻璃板填充，界面清晰美观
 
 ## 环境
 
@@ -143,12 +148,32 @@
 
 ## 动画格式
 
-| 格式 | 描述 | 示例 |
-|------|------|------|
-| `<#ANIM:wave>文本</#ANIM>` | 波浪动画 | `<#ANIM:wave>Hello</#ANIM>` |
-| `<#ANIM:flash>文本</#ANIM>` | 闪烁动画 | `<#ANIM:flash>重要</#ANIM>` |
-| `<#ANIM:typewriter>文本</#ANIM>` | 打字机效果 | `<#ANIM:typewriter>欢迎</#ANIM>` |
-| `<#ANIM:scroll>文本</#ANIM>` | 滚动动画 | `<#ANIM:scroll>公告</#ANIM>` |
+### 基本语法
+
+支持两种格式：`<#ANIM:名称>文本</#ANIM>` 或 `{#ANIM:名称}文本{/#ANIM}`
+
+### 内置动画
+
+| 动画 | 格式 | 参数说明 | 示例 |
+|------|------|----------|------|
+| 波浪 | `<#ANIM:wave:主色,副色>文本</#ANIM>` | 主色、副色（颜色代码） | `<#ANIM:wave:&e,&f>Hello</#ANIM>` |
+| 打字机 | `<#ANIM:typewriter>文本</#ANIM>` | 无参数 | `<#ANIM:typewriter>欢迎</#ANIM>` |
+| 闪烁 | `<#ANIM:blink:速度>文本</#ANIM>` | 速度（数字，默认10） | `<#ANIM:blink:5>重要</#ANIM>` |
+| 滚动 | `<#ANIM:scroll:宽度>文本</#ANIM>` | 宽度（数字，默认20） | `<#ANIM:scroll:15>公告</#ANIM>` |
+| 渐变 | `<#ANIM:gradient:颜色1,颜色2,...>文本</#ANIM>` | 颜色（颜色名或HEX） | `<#ANIM:gradient:red,blue>渐变</#ANIM>` |
+
+### 渐变动画颜色支持
+
+渐变动画支持以下颜色格式：
+- **颜色名称**：`red`、`blue`、`green`、`yellow`、`cyan`、`magenta`、`white`、`black`、`orange`、`purple`、`pink`、`gold`、`gray`、`aqua`、`lime` 等
+- **HEX 格式**：`#FF0000`、`#00FF00`、`#0000FF` 等
+
+示例：
+```
+<#ANIM:gradient:red,blue>红蓝渐变</#ANIM>
+<#ANIM:gradient:#FF0000,#00FF00,#0000FF>三色渐变</#ANIM>
+<#ANIM:gradient:gold,orange,red>火焰效果</#ANIM>
+```
 
 ## Billboard 模式
 
@@ -168,7 +193,7 @@
 | `MESSAGE` | 发送消息 | `MESSAGE:&a你好 {player}！` |
 | `SOUND` | 播放音效 | `SOUND:ENTITY_PLAYER_LEVELUP` |
 | `TELEPORT` | 传送玩家 | `TELEPORT:world,100,64,200` |
-| `CONNECT` | 连接到其他服务器 | `CONNECT:lobby` |
+| `SERVER` | 连接到其他服务器（BungeeCord） | `SERVER:lobby` |
 | `NEXT_PAGE` | 下一页 | `NEXT_PAGE` |
 | `PREV_PAGE` | 上一页 | `PREV_PAGE` |
 | `PAGE` | 跳转到指定页 | `PAGE:3` |
