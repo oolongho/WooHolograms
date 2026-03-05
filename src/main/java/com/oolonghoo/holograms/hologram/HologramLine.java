@@ -538,26 +538,27 @@ public class HologramLine {
         }
 
         UUID uuid = player.getUniqueId();
-        String cachedText = playerTextCache.get(uuid);
+        String baseText = playerTextCache.get(uuid);
 
         // 更新缓存
-        if (update || cachedText == null) {
-            cachedText = content == null ? "" : content;
+        if (update || baseText == null) {
+            baseText = content == null ? "" : content;
 
             // 解析占位符
             if (!hasFlag(EnumFlag.DISABLE_PLACEHOLDERS)) {
-                cachedText = parsePlaceholders(cachedText, player);
+                baseText = parsePlaceholders(baseText, player);
             }
 
-            playerTextCache.put(uuid, cachedText);
+            playerTextCache.put(uuid, baseText);
         }
 
-        // 解析动画
+        // 动画每次都要重新解析（不使用缓存）
+        String result = baseText;
         if (containsAnimations && !hasFlag(EnumFlag.DISABLE_ANIMATIONS)) {
-            cachedText = parseAnimations(cachedText);
+            result = parseAnimations(baseText);
         }
 
-        return ColorUtil.colorize(cachedText);
+        return ColorUtil.colorize(result);
     }
 
     /**

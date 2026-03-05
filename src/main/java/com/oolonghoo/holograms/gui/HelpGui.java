@@ -253,7 +253,10 @@ public class HelpGui extends GuiScreen {
                         "&7使用动画让文本动起来：",
                         "",
                         "&f<#ANIM:wave>文本</#ANIM>",
-                        "&7波浪动画",
+                        "&7波浪动画（默认黄白）",
+                        "",
+                        "&f<#ANIM:wave:&c,&b>文本</#ANIM>",
+                        "&7自定义颜色波浪",
                         "",
                         "&f<#ANIM:typewriter>文本</#ANIM>",
                         "&7打字机效果",
@@ -261,7 +264,10 @@ public class HelpGui extends GuiScreen {
                         "&f<#ANIM:blink>文本</#ANIM>",
                         "&7闪烁效果",
                         "",
-                        "&f<#ANIM:gradient>文本</#ANIM>",
+                        "&f<#ANIM:scroll>文本</#ANIM>",
+                        "&7滚动效果",
+                        "",
+                        "&f<#ANIM:gradient:red,blue>文本</#ANIM>",
                         "&7渐变色效果"
                 ))
                 .build());

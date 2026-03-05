@@ -392,6 +392,8 @@ public class YamlHologramStorage implements HologramStorage {
             line.setCustomPitch((float) section.getDouble("customPitch"));
         }
         
+        page.realignLines();
+        
         if (section.contains("brightness")) {
             String[] brightnessParts = section.getString("brightness", "15,15").split(",");
             if (brightnessParts.length == 2) {
