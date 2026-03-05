@@ -49,9 +49,8 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         if (destroyed || location == null || location.getWorld() == null) {
             return;
         }
- 
-        String text = line.getContent();
-        text = ColorUtil.colorize(text);
+
+        String text = line.getDisplayText(player);
 
         Hologram hologram = line.getHologram();
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
@@ -116,32 +115,31 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         if (destroyed) {
             return;
         }
- 
-        String text = line.getContent();
-        text = ColorUtil.colorize(text);
- 
+
+        String text = line.getDisplayText(player);
+
         Hologram hologram = line.getHologram();
         Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
         boolean doubleSided = hologram != null && hologram.isDoubleSided();
- 
+
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withTextDisplayText(text)
                 .withTextAlignment(line.getAlignment())
                 .withBillboard(billboard);
- 
+
         if (line.getBrightness() != null && !line.getBrightness().isDefault()) {
             metadataBuilder.withDisplayBrightness(line.getBrightness());
         }
- 
+
         List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
- 
+
         EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
                 .withEntityMetadata(frontEntityId, metadata);
- 
+
         if (doubleSided) {
             packetsBuilder.withEntityMetadata(backEntityId, metadata);
         }
- 
+
         packetsBuilder.sendTo(player);
     }
  

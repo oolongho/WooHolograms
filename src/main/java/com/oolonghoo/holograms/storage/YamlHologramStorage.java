@@ -132,6 +132,14 @@ public class YamlHologramStorage implements HologramStorage {
                     storage.set(linePath + ".offsetZ", line.getOffsetZ());
                     storage.set(linePath + ".facing", line.getFacing());
                     
+                    if (line.getCustomYaw() != null) {
+                        storage.set(linePath + ".customYaw", line.getCustomYaw());
+                    }
+                    
+                    if (line.getCustomPitch() != null) {
+                        storage.set(linePath + ".customPitch", line.getCustomPitch());
+                    }
+                    
                     if (line.getBrightness() != null) {
                         storage.set(linePath + ".brightness", 
                                 line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
@@ -375,6 +383,14 @@ public class YamlHologramStorage implements HologramStorage {
         line.setOffsetY(section.getDouble("offsetY", 0));
         line.setOffsetZ(section.getDouble("offsetZ", 0));
         line.setFacing((float) section.getDouble("facing", 0));
+        
+        if (section.contains("customYaw")) {
+            line.setCustomYaw((float) section.getDouble("customYaw"));
+        }
+        
+        if (section.contains("customPitch")) {
+            line.setCustomPitch((float) section.getDouble("customPitch"));
+        }
         
         if (section.contains("brightness")) {
             String[] brightnessParts = section.getString("brightness", "15,15").split(",");

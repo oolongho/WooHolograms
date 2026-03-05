@@ -603,6 +603,33 @@ public class HologramLine {
 
         return text;
     }
+    
+    /**
+     * 获取处理后的显示文本（包含动画解析）
+     * 用于渲染器更新文本时使用
+     * 
+     * @param player 玩家
+     * @return 处理后的文本
+     */
+    public String getDisplayText(Player player) {
+        if (type != HologramType.TEXT) {
+            return "";
+        }
+        
+        String text = content == null ? "" : content;
+        
+        // 解析占位符
+        if (!hasFlag(EnumFlag.DISABLE_PLACEHOLDERS)) {
+            text = parsePlaceholders(text, player);
+        }
+        
+        // 解析动画
+        if (containsAnimations && !hasFlag(EnumFlag.DISABLE_ANIMATIONS)) {
+            text = parseAnimations(text);
+        }
+        
+        return ColorUtil.colorize(text);
+    }
 
     /*
      * 权限和范围检查
@@ -1081,7 +1108,10 @@ public class HologramLine {
     }
 
     public void setCustomYaw(Float customYaw) {
-        this.customYaw = customYaw;
+        synchronized (renderMutex) {
+            this.customYaw = customYaw;
+            update(true);
+        }
     }
 
     public Float getCustomPitch() {
@@ -1089,7 +1119,10 @@ public class HologramLine {
     }
 
     public void setCustomPitch(Float customPitch) {
-        this.customPitch = customPitch;
+        synchronized (renderMutex) {
+            this.customPitch = customPitch;
+            update(true);
+        }
     }
 
     public boolean hasCustomFacing() {
@@ -1135,16 +1168,27 @@ public class HologramLine {
     }
 
     public void executeActions(Player player, ClickType clickType) {
-        if (!actions.containsKey(clickType)) {
+        List<Action> actionsToExecute = new ArrayList<>();
+        
+        if (actions.containsKey(clickType)) {
+            List<Action> actionList = actions.get(clickType);
+            if (actionList != null) {
+                actionsToExecute.addAll(actionList);
+            }
+        }
+        
+        if (clickType != ClickType.ANY && actions.containsKey(ClickType.ANY)) {
+            List<Action> anyActions = actions.get(ClickType.ANY);
+            if (anyActions != null) {
+                actionsToExecute.addAll(anyActions);
+            }
+        }
+        
+        if (actionsToExecute.isEmpty()) {
             return;
         }
         
-        List<Action> actionList = actions.get(clickType);
-        if (actionList == null || actionList.isEmpty()) {
-            return;
-        }
-        
-        for (Action action : actionList) {
+        for (Action action : actionsToExecute) {
             if (!action.execute(player)) {
                 break;
             }

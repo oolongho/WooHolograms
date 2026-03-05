@@ -576,12 +576,23 @@ public class HologramPage {
      * @param clickType 点击类型
      */
     public void executeActions(Player player, ClickType clickType) {
-        if (!actions.containsKey(clickType)) {
-            return;
+        List<Action> actionsToExecute = new ArrayList<>();
+        
+        if (actions.containsKey(clickType)) {
+            List<Action> actionList = actions.get(clickType);
+            if (actionList != null) {
+                actionsToExecute.addAll(actionList);
+            }
         }
-
-        List<Action> actionList = actions.get(clickType);
-        for (Action action : actionList) {
+        
+        if (clickType != ClickType.ANY && actions.containsKey(ClickType.ANY)) {
+            List<Action> anyActions = actions.get(ClickType.ANY);
+            if (anyActions != null) {
+                actionsToExecute.addAll(anyActions);
+            }
+        }
+        
+        for (Action action : actionsToExecute) {
             if (!action.execute(player)) {
                 return;
             }

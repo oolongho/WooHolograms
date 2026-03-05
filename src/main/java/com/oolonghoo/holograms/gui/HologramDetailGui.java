@@ -181,7 +181,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(39, GuiButton.builder(Material.COMPASS)
+        setButton(39, GuiButton.builder(Material.RECOVERY_COMPASS)
                 .name("&f移动到此处")
                 .lore(Arrays.asList(
                         "&7将全息图移动到你的位置",
@@ -203,7 +203,7 @@ public class HologramDetailGui extends GuiScreen {
         if (billboard == Billboard.FIXED_ANGLE) {
             facingDisplay += " (" + hologram.getFacing() + "度)";
         }
-        setButton(40, GuiButton.builder(Material.RECOVERY_COMPASS)
+        setButton(40, GuiButton.builder(Material.COMPASS)
                 .name("&f朝向设置")
                 .lore(Arrays.asList(
                         "&7设置全息图的朝向模式",
@@ -568,6 +568,33 @@ public class HologramDetailGui extends GuiScreen {
                     guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
                 .build());
+        
+        fillFirstRow();
+        fillLastTwoRows();
+    }
+    
+    private void fillFirstRow() {
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
+                .name(" ")
+                .build();
+        
+        for (int i = 1; i < 9; i++) {
+            if (getButton(i) == null) {
+                setButton(i, background);
+            }
+        }
+    }
+    
+    private void fillLastTwoRows() {
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
+                .name(" ")
+                .build();
+        
+        for (int i = 45; i < 54; i++) {
+            if (getButton(i) == null) {
+                setButton(i, background);
+            }
+        }
     }
 
     private GuiButton createLineButton(Hologram hologram, int lineIndex, HologramLine line) {
