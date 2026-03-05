@@ -248,7 +248,6 @@ public class HologramLine {
     public void show(Player... players) {
         synchronized (renderMutex) {
             if (!enabled) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] HologramLine.show: not enabled");
                 return;
             }
 
@@ -264,12 +263,8 @@ public class HologramLine {
                 }
 
                 if (parent != null && parent.getParent() != null && parent.getParent().isHideState(player)) {
-                    WooHolograms.getInstance().getLogger().info("[DEBUG] HologramLine.show: player " + player.getName() + " is in hide state");
                     continue;
                 }
-
-                WooHolograms.getInstance().getLogger().info("[DEBUG] HologramLine.show: checking player " + player.getName() + 
-                    ", isVisible=" + isVisible(player) + ", canShow=" + canShow(player) + ", isInDisplayRange=" + isInDisplayRange(player));
                 
                 if (canShow(player) && isInDisplayRange(player)) {
                     if (isVisible(player)) {
@@ -291,7 +286,6 @@ public class HologramLine {
 
     private void displayToPlayer(Player player) {
         if (location == null) {
-            WooHolograms.getInstance().getLogger().warning("[DEBUG] HologramLine location is null!");
             return;
         }
         
@@ -300,22 +294,17 @@ public class HologramLine {
         }
         
         if (renderer != null) {
-            WooHolograms.getInstance().getLogger().info("[DEBUG] Displaying hologram to " + player.getName() + " at " + location.toString());
             renderer.render(player, location, this);
-        } else {
-            WooHolograms.getInstance().getLogger().warning("[DEBUG] Failed to create renderer for type: " + type);
         }
     }
 
     private void createRenderer() {
         if (parent == null || parent.getParent() == null) {
-            WooHolograms.getInstance().getLogger().warning("[DEBUG] Cannot create renderer: parent is null");
             return;
         }
         
         WooHolograms plugin = WooHolograms.getInstance();
         if (plugin == null) {
-            WooHolograms.getInstance().getLogger().warning("[DEBUG] Cannot create renderer: plugin is null");
             return;
         }
         
@@ -323,18 +312,14 @@ public class HologramLine {
         if (pool != null) {
             renderer = pool.obtain(type);
             if (renderer != null) {
-                WooHolograms.getInstance().getLogger().info("[DEBUG] Renderer obtained from pool for type: " + type);
                 return;
             }
         }
         
         NmsHologramRendererFactory factory = plugin.getRendererFactory();
         if (factory == null) {
-            WooHolograms.getInstance().getLogger().warning("[DEBUG] Cannot create renderer: factory is null");
             return;
         }
-        
-        WooHolograms.getInstance().getLogger().info("[DEBUG] Creating renderer for type: " + type);
         
         switch (type) {
             case TEXT:
@@ -356,8 +341,6 @@ public class HologramLine {
                 renderer = factory.createTextRenderer();
                 break;
         }
-        
-        WooHolograms.getInstance().getLogger().info("[DEBUG] Renderer created: " + (renderer != null));
     }
 
     private String getText(Player player) {

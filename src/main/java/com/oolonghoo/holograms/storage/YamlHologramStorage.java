@@ -1,11 +1,16 @@
 package com.oolonghoo.holograms.storage;
 
 import com.oolonghoo.holograms.WooHolograms;
+import com.oolonghoo.holograms.action.Action;
+import com.oolonghoo.holograms.action.ClickType;
 import com.oolonghoo.holograms.hologram.Billboard;
+import com.oolonghoo.holograms.hologram.Brightness;
+import com.oolonghoo.holograms.hologram.EnumFlag;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
 import com.oolonghoo.holograms.hologram.HologramType;
+import com.oolonghoo.holograms.hologram.TextAlignment;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -14,10 +19,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * YAML 格式的全息图存储实现
@@ -60,12 +67,25 @@ public class YamlHologramStorage implements HologramStorage {
         storage.set(path, null);
         
         Location loc = hologram.getLocation();
-        storage.set(path + ".world", loc.getWorld().getName());
+        if (loc == null) {
+            plugin.getLogger().warning("无法保存全息图 " + id + ": 位置为空");
+            return false;
+        }
+        
+        World world = loc.getWorld();
+        if (world == null) {
+            plugin.getLogger().warning("无法保存全息图 " + id + ": 世界为空");
+            return false;
+        }
+        
+        storage.set(path + ".world", world.getName());
         storage.set(path + ".x", loc.getX());
         storage.set(path + ".y", loc.getY());
         storage.set(path + ".z", loc.getZ());
         storage.set(path + ".yaw", loc.getYaw());
         storage.set(path + ".pitch", loc.getPitch());
+        
+        storage.set(path + ".enabled", hologram.isEnabled());
         storage.set(path + ".type", hologram.getType().getId());
         storage.set(path + ".visible", hologram.isVisible());
         storage.set(path + ".persistent", hologram.isPersistent());
@@ -73,32 +93,103 @@ public class YamlHologramStorage implements HologramStorage {
         storage.set(path + ".billboard", hologram.getBillboard().getId());
         storage.set(path + ".facing", hologram.getFacing());
         storage.set(path + ".doubleSided", hologram.isDoubleSided());
+        storage.set(path + ".displayRange", hologram.getDisplayRange());
+        storage.set(path + ".updateRange", hologram.getUpdateRange());
+        storage.set(path + ".updateInterval", hologram.getUpdateInterval());
+        storage.set(path + ".downOrigin", hologram.isDownOrigin());
+        
+        if (hologram.getPermission() != null && !hologram.getPermission().isEmpty()) {
+            storage.set(path + ".permission", hologram.getPermission());
+        }
+        
+        if (!hologram.getFlags().isEmpty()) {
+            storage.set(path + ".flags", hologram.getFlags().stream()
+                    .map(EnumFlag::name)
+                    .collect(Collectors.toList()));
+        }
         
         List<HologramPage> pages = hologram.getPages();
         for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
             HologramPage page = pages.get(pageIndex);
             String pagePath = path + ".pages." + pageIndex;
             
+            savePageActions(pagePath + ".actions", page);
+            
             List<HologramLine> lines = page.getLines();
             for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
                 HologramLine line = lines.get(lineIndex);
                 String linePath = pagePath + ".lines." + lineIndex;
                 
-                storage.set(linePath + ".text", line.getContent());
+                storage.set(linePath + ".content", line.getContent());
                 storage.set(linePath + ".type", line.getType().getId());
+                storage.set(linePath + ".height", line.getHeight());
+                storage.set(linePath + ".offsetX", line.getOffsetX());
                 storage.set(linePath + ".offsetY", line.getOffsetY());
+                storage.set(linePath + ".offsetZ", line.getOffsetZ());
+                storage.set(linePath + ".facing", line.getFacing());
                 
-                // 保存行自定义朝向
-                if (line.getCustomYaw() != null) {
-                    storage.set(linePath + ".customYaw", line.getCustomYaw());
+                if (line.getBrightness() != null) {
+                    storage.set(linePath + ".brightness", 
+                            line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
                 }
-                if (line.getCustomPitch() != null) {
-                    storage.set(linePath + ".customPitch", line.getCustomPitch());
+                
+                if (line.getAlignment() != null) {
+                    storage.set(linePath + ".alignment", line.getAlignment().getId());
+                }
+                
+                if (line.getBillboard() != null) {
+                    storage.set(linePath + ".billboard", line.getBillboard().getId());
+                }
+                
+                if (line.getPermission() != null && !line.getPermission().isEmpty()) {
+                    storage.set(linePath + ".permission", line.getPermission());
+                }
+                
+                if (!line.getFlags().isEmpty()) {
+                    storage.set(linePath + ".flags", line.getFlags().stream()
+                            .map(EnumFlag::name)
+                            .collect(Collectors.toList()));
+                }
+                
+                if (line.hasActions()) {
+                    saveLineActions(linePath + ".actions", line);
                 }
             }
         }
         
         return saveStorage();
+    }
+    
+    private void savePageActions(String path, HologramPage page) {
+        for (Map.Entry<ClickType, List<Action>> entry : page.getActions().entrySet()) {
+            ClickType clickType = entry.getKey();
+            List<Action> actions = entry.getValue();
+            if (actions == null || actions.isEmpty()) {
+                continue;
+            }
+            
+            List<String> actionStrings = new ArrayList<>();
+            for (Action action : actions) {
+                actionStrings.add(action.toString());
+            }
+            storage.set(path + "." + clickType.name(), actionStrings);
+        }
+    }
+    
+    private void saveLineActions(String path, HologramLine line) {
+        for (Map.Entry<ClickType, List<Action>> entry : line.getActions().entrySet()) {
+            ClickType clickType = entry.getKey();
+            List<Action> actions = entry.getValue();
+            if (actions == null || actions.isEmpty()) {
+                continue;
+            }
+            
+            List<String> actionStrings = new ArrayList<>();
+            for (Action action : actions) {
+                actionStrings.add(action.toString());
+            }
+            storage.set(path + "." + clickType.name(), actionStrings);
+        }
     }
 
     @Override
@@ -169,9 +260,14 @@ public class YamlHologramStorage implements HologramStorage {
         }
         
         String worldName = section.getString("world");
+        if (worldName == null || worldName.isEmpty()) {
+            plugin.getLogger().warning("无法加载全息图 " + id + ": 世界名称为空");
+            return null;
+        }
+        
         World world = plugin.getServer().getWorld(worldName);
         if (world == null) {
-            plugin.getLogger().warning("无法加载全息图 " + id + ": 世界 " + worldName + " 不存在");
+            plugin.getLogger().warning("无法加载全息图 " + id + ": 世界 " + worldName + " 未加载，将在世界加载后自动加载");
             return null;
         }
         
@@ -185,13 +281,34 @@ public class YamlHologramStorage implements HologramStorage {
         Hologram hologram = new Hologram(id, location, true);
         hologram.setStorage(plugin.getHologramManager().getStorage());
         
-        hologram.setType(HologramType.fromId(section.getString("type", "text_display")));
+        hologram.setEnabled(section.getBoolean("enabled", true));
+        hologram.setType(HologramType.fromId(section.getString("type", "TEXT")));
         hologram.setVisible(section.getBoolean("visible", true));
         hologram.setPersistent(section.getBoolean("persistent", true));
         hologram.setLineHeight(section.getDouble("lineHeight", 0.25));
-        hologram.setBillboard(Billboard.fromId(section.getString("billboard", "all")));
+        hologram.setBillboard(Billboard.fromId(section.getString("billboard", "center")));
         hologram.setFacing((float) section.getDouble("facing", 0));
         hologram.setDoubleSided(section.getBoolean("doubleSided", false));
+        hologram.setDisplayRange(section.getDouble("displayRange", 48.0));
+        hologram.setUpdateRange(section.getDouble("updateRange", 48.0));
+        hologram.setUpdateInterval(section.getInt("updateInterval", 3));
+        hologram.setDownOrigin(section.getBoolean("downOrigin", true));
+        
+        String permission = section.getString("permission");
+        if (permission != null && !permission.isEmpty()) {
+            hologram.setPermission(permission);
+        }
+        
+        if (section.contains("flags")) {
+            List<String> flagList = section.getStringList("flags");
+            for (String flagStr : flagList) {
+                try {
+                    EnumFlag flag = EnumFlag.valueOf(flagStr.toUpperCase());
+                    hologram.addFlags(flag);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
         
         ConfigurationSection pagesSection = section.getConfigurationSection("pages");
         if (pagesSection != null) {
@@ -203,25 +320,15 @@ public class YamlHologramStorage implements HologramStorage {
                 ConfigurationSection pageSection = pagesSection.getConfigurationSection(pageIndex);
                 
                 if (pageSection != null) {
+                    loadPageActions(pageSection.getConfigurationSection("actions"), page);
+                    
                     ConfigurationSection linesSection = pageSection.getConfigurationSection("lines");
                     if (linesSection != null) {
                         Set<String> lineKeys = linesSection.getKeys(false);
                         for (String lineIndex : lineKeys) {
                             ConfigurationSection lineSection = linesSection.getConfigurationSection(lineIndex);
                             if (lineSection != null) {
-                                String text = lineSection.getString("text", "");
-                                double offsetY = lineSection.getDouble("offsetY", 0);
-                                
-                                HologramLine line = page.addLine(text);
-                                line.setOffsetY(offsetY);
-                                
-                                // 加载行自定义朝向
-                                if (lineSection.contains("customYaw") && lineSection.get("customYaw") != null) {
-                                    line.setCustomYaw((float) lineSection.getDouble("customYaw"));
-                                }
-                                if (lineSection.contains("customPitch") && lineSection.get("customPitch") != null) {
-                                    line.setCustomPitch((float) lineSection.getDouble("customPitch"));
-                                }
+                                loadHologramLine(lineSection, page);
                             }
                         }
                     }
@@ -230,6 +337,90 @@ public class YamlHologramStorage implements HologramStorage {
         }
         
         return hologram;
+    }
+    
+    private void loadPageActions(ConfigurationSection section, HologramPage page) {
+        if (section == null) {
+            return;
+        }
+        
+        for (ClickType clickType : ClickType.values()) {
+            if (!section.contains(clickType.name())) {
+                continue;
+            }
+            
+            List<String> actionStrings = section.getStringList(clickType.name());
+            for (String actionStr : actionStrings) {
+                Action action = Action.fromString(actionStr);
+                if (action != null) {
+                    page.addAction(clickType, action);
+                }
+            }
+        }
+    }
+    
+    private void loadHologramLine(ConfigurationSection section, HologramPage page) {
+        String content = section.getString("content", "");
+        HologramLine line = page.addLine(content);
+        
+        line.setHeight(section.getDouble("height", 0.25));
+        line.setOffsetX(section.getDouble("offsetX", 0));
+        line.setOffsetY(section.getDouble("offsetY", 0));
+        line.setOffsetZ(section.getDouble("offsetZ", 0));
+        line.setFacing((float) section.getDouble("facing", 0));
+        
+        if (section.contains("brightness")) {
+            String[] brightnessParts = section.getString("brightness", "15,15").split(",");
+            if (brightnessParts.length == 2) {
+                try {
+                    int skyLight = Integer.parseInt(brightnessParts[0]);
+                    int blockLight = Integer.parseInt(brightnessParts[1]);
+                    line.setBrightness(Brightness.of(skyLight, blockLight));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        
+        if (section.contains("alignment")) {
+            line.setAlignment(TextAlignment.fromId(section.getString("alignment")));
+        }
+        
+        if (section.contains("billboard")) {
+            line.setBillboard(Billboard.fromId(section.getString("billboard")));
+        }
+        
+        String linePermission = section.getString("permission");
+        if (linePermission != null && !linePermission.isEmpty()) {
+            line.setPermission(linePermission);
+        }
+        
+        if (section.contains("flags")) {
+            List<String> flagList = section.getStringList("flags");
+            for (String flagStr : flagList) {
+                try {
+                    EnumFlag flag = EnumFlag.valueOf(flagStr.toUpperCase());
+                    line.addFlags(flag);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
+        
+        ConfigurationSection actionsSection = section.getConfigurationSection("actions");
+        if (actionsSection != null) {
+            for (ClickType clickType : ClickType.values()) {
+                if (!actionsSection.contains(clickType.name())) {
+                    continue;
+                }
+                
+                List<String> actionStrings = actionsSection.getStringList(clickType.name());
+                for (String actionStr : actionStrings) {
+                    Action action = Action.fromString(actionStr);
+                    if (action != null) {
+                        line.addAction(clickType, action);
+                    }
+                }
+            }
+        }
     }
 
     private boolean saveStorage() {

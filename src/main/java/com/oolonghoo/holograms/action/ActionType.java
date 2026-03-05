@@ -205,16 +205,16 @@ public abstract class ActionType {
             }
 
             String server = args[0];
-            // BungeeCord 连接逻辑
             try {
-                player.sendPluginMessage(WooHolograms.getInstance(), "BungeeCord",
-                        new java.io.ByteArrayOutputStream() {{
-                            write("Connect".getBytes());
-                            write(0);
-                            write(server.getBytes());
-                        }}.toByteArray());
+                java.io.ByteArrayOutputStream byteArray = new java.io.ByteArrayOutputStream();
+                java.io.DataOutputStream out = new java.io.DataOutputStream(byteArray);
+                out.writeUTF("Connect");
+                out.writeUTF(server);
+                player.sendPluginMessage(WooHolograms.getInstance(), "BungeeCord", byteArray.toByteArray());
             } catch (Exception e) {
-                // 忽略连接错误
+                if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                    WooHolograms.getInstance().getLogger().warning("BungeeCord connect failed: " + e.getMessage());
+                }
             }
             return true;
         }
