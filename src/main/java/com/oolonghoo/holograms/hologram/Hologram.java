@@ -1631,8 +1631,10 @@ public class Hologram {
             if (player.getWorld().equals(location.getWorld())) {
                 return player.getLocation().distanceSquared(location) <= range * range;
             }
-        } catch (Exception ignored) {
-            // 忽略异常
+        } catch (Exception e) {
+            if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                WooHolograms.getInstance().getLogger().warning("isInRange check failed: " + e.getMessage());
+            }
         }
         return false;
     }

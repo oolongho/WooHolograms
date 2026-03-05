@@ -811,8 +811,10 @@ public class HologramLine {
                             line.addFlags(flag);
                         }
                     }
-                } catch (Exception ignored) {
-                    // 忽略无效的标志
+                } catch (Exception e) {
+                    if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                        WooHolograms.getInstance().getLogger().warning("Failed to parse flags: " + e.getMessage());
+                    }
                 }
             }
         }
@@ -851,7 +853,10 @@ public class HologramLine {
                         int sky = Integer.parseInt(parts[0].trim());
                         int block = Integer.parseInt(parts[1].trim());
                         line.setBrightness(Brightness.of(sky, block));
-                    } catch (NumberFormatException ignored) {
+                    } catch (NumberFormatException e) {
+                        if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                            WooHolograms.getInstance().getLogger().warning("Failed to parse brightness: " + brightnessObj);
+                        }
                     }
                 }
             }

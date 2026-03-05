@@ -22,6 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HologramManager {
 
+    private static final long TELEPORT_DELAY_TICKS = 20L;
+    private static final int MAX_NAME_LENGTH = 50;
+
     private final WooHolograms plugin;
     private final HologramStorage storage;
 
@@ -157,7 +160,7 @@ public class HologramManager {
             return false;
         }
         
-        if (name.length() > 50) {
+        if (name.length() > MAX_NAME_LENGTH) {
             return false;
         }
         
@@ -478,7 +481,7 @@ public class HologramManager {
         }
 
         // 延迟显示（等待客户端加载世界）
-        Bukkit.getScheduler().runTaskLater(plugin, () -> onPlayerJoin(player), 20L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> onPlayerJoin(player), TELEPORT_DELAY_TICKS);
     }
 
     /*
