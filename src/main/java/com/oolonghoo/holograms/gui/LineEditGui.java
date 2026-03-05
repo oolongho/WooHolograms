@@ -101,7 +101,7 @@ public class LineEditGui extends GuiScreen {
                 .name("&f当前内容")
                 .lore(Arrays.asList(
                         "",
-                        line.getContent(),
+                        "&r" + line.getContent(),
                         ""
                 ))
                 .build());
@@ -522,7 +522,7 @@ public class LineEditGui extends GuiScreen {
     }
 
     private void fillBackground() {
-        GuiButton background = GuiButton.builder(Material.GRAY_STAINED_GLASS_PANE)
+        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
                 .name(" ")
                 .build();
         
