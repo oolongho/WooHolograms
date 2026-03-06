@@ -152,14 +152,29 @@
 
 支持两种格式：`<#ANIM:名称>文本</#ANIM>` 或 `{#ANIM:名称}文本{/#ANIM}`
 
+### 如何设置动画颜色
+
+**方法一：在动画标签外添加颜色代码**
+```
+&a<#ANIM:typewriter>欢迎来到服务器</#ANIM>
+&c<#ANIM:blink>重要公告</#ANIM>
+&b<#ANIM:scroll:15>这是一条很长的滚动公告内容</#ANIM>
+```
+
+**方法二：使用动画参数（仅部分动画支持）**
+```
+<#ANIM:wave:&c,&e>波浪文字</#ANIM>     <!-- 波浪动画支持颜色参数 -->
+<#ANIM:gradient:red,blue>渐变</#ANIM>  <!-- 渐变动画支持颜色参数 -->
+```
+
 ### 内置动画
 
 | 动画 | 格式 | 参数说明 | 示例 |
 |------|------|----------|------|
 | 波浪 | `<#ANIM:wave:主色,副色>文本</#ANIM>` | 主色、副色（颜色代码） | `<#ANIM:wave:&e,&f>Hello</#ANIM>` |
-| 打字机 | `<#ANIM:typewriter>文本</#ANIM>` | 无参数 | `<#ANIM:typewriter>欢迎</#ANIM>` |
-| 闪烁 | `<#ANIM:blink:速度>文本</#ANIM>` | 速度（数字，默认10） | `<#ANIM:blink:5>重要</#ANIM>` |
-| 滚动 | `<#ANIM:scroll:宽度>文本</#ANIM>` | 宽度（数字，默认20） | `<#ANIM:scroll:15>公告</#ANIM>` |
+| 打字机 | `<#ANIM:typewriter>文本</#ANIM>` | 无参数，在标签外加颜色 | `&a<#ANIM:typewriter>欢迎</#ANIM>` |
+| 闪烁 | `<#ANIM:blink:速度>文本</#ANIM>` | 速度（数字，默认10） | `&c<#ANIM:blink:5>重要</#ANIM>` |
+| 滚动 | `<#ANIM:scroll:宽度>文本</#ANIM>` | 宽度（数字，默认20） | `&b<#ANIM:scroll:15>公告</#ANIM>` |
 | 渐变 | `<#ANIM:gradient:颜色1,颜色2,...>文本</#ANIM>` | 颜色（颜色名或HEX） | `<#ANIM:gradient:red,blue>渐变</#ANIM>` |
 
 ### 渐变动画颜色支持
