@@ -359,11 +359,13 @@ public class Hologram {
                 return;
             }
             
-            for (Player player : getViewerPlayers()) {
+            List<Player> viewerList = new ArrayList<>(getViewerPlayers());
+            for (Player player : viewerList) {
                 int pageIndex = getPlayerPage(player);
                 HologramPage page = getPage(pageIndex);
                 if (page != null) {
-                    for (HologramLine line : page.getLines()) {
+                    List<HologramLine> lines = new ArrayList<>(page.getLines());
+                    for (HologramLine line : lines) {
                         line.hide(player);
                         line.show(player);
                     }
@@ -1124,7 +1126,10 @@ public class Hologram {
     public void hideAll() {
         synchronized (visibilityMutex) {
             if (enabled) {
-                getViewerPlayers().forEach(this::hide);
+                List<Player> viewerList = new ArrayList<>(getViewerPlayers());
+                for (Player player : viewerList) {
+                    hide(player);
+                }
             }
         }
     }
@@ -1184,8 +1189,11 @@ public class Hologram {
                 return;
             }
 
-            // 3. 更新所有观看者
-            getViewerPlayers().forEach(player -> performUpdate(force, player));
+            // 3. 更新所有观看者（复制列表避免并发修改）
+            List<Player> viewerList = new ArrayList<>(getViewerPlayers());
+            for (Player player : viewerList) {
+                performUpdate(force, player);
+            }
         }
     }
 
@@ -1281,8 +1289,11 @@ public class Hologram {
                 return;
             }
 
-            // 3. 更新所有观看者的动画
-            getViewerPlayers().forEach(this::performUpdateAnimations);
+            // 3. 更新所有观看者的动画（复制列表避免并发修改）
+            List<Player> viewerList = new ArrayList<>(getViewerPlayers());
+            for (Player player : viewerList) {
+                performUpdateAnimations(player);
+            }
         }
     }
 
@@ -1313,8 +1324,9 @@ public class Hologram {
             return;
         }
 
-        // 5. 更新动画
-        for (HologramLine line : page.getLines()) {
+        // 5. 更新动画（复制列表避免并发修改）
+        List<HologramLine> lines = new ArrayList<>(page.getLines());
+        for (HologramLine line : lines) {
             line.updateAnimations(player);
         }
     }

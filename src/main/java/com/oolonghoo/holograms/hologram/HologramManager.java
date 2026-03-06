@@ -554,7 +554,8 @@ public class HologramManager {
         public void run() {
             plugin.getAnimationManager().tick();
             
-            for (Hologram hologram : holograms.values()) {
+            List<Hologram> hologramList = new ArrayList<>(holograms.values());
+            for (Hologram hologram : hologramList) {
                 if (!hologram.isEnabled()) {
                     continue;
                 }
@@ -569,7 +570,8 @@ public class HologramManager {
     }
     
     private void updateVisibilityForAllPlayers() {
-        for (Hologram hologram : holograms.values()) {
+        List<Hologram> hologramList = new ArrayList<>(holograms.values());
+        for (Hologram hologram : hologramList) {
             if (!hologram.isEnabled()) {
                 continue;
             }
