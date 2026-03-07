@@ -1,6 +1,6 @@
 # WooHolograms
 
-🍵一款现代化的 Minecraft 全息图插件
+🍵一款多功能、有GUI的 Minecraft 全息文字插件
 
 ## 特色
 
