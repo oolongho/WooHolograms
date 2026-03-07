@@ -18,12 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * 全息图详情 GUI
- * 显示单个全息图的详细信息和操作按钮
- * 
- * @author oolongho
- */
 public class HologramDetailGui extends GuiScreen {
 
     private final WooHolograms plugin;
@@ -32,6 +26,7 @@ public class HologramDetailGui extends GuiScreen {
     private final String hologramName;
     private int currentPageIndex;
     private static final int LINES_PER_PAGE = 27;
+    private static final int MAX_PAGES = 5;
 
     public HologramDetailGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName, int pageIndex) {
         super("hologram_detail", ColorUtil.colorize("&8全息图: " + hologramName), 54);
@@ -64,6 +59,10 @@ public class HologramDetailGui extends GuiScreen {
             return;
         }
         
+        if (currentPageIndex >= hologram.getPageCount()) {
+            currentPageIndex = Math.max(0, hologram.getPageCount() - 1);
+        }
+        
         setButton(0, GuiButton.builder(Material.BOOK)
                 .name("&f返回列表")
                 .lore(Arrays.asList(
@@ -76,14 +75,16 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        setButton(4, GuiButton.builder(Material.NAME_TAG)
+        renderPageButtons(hologram);
+        
+        setButton(8, GuiButton.builder(Material.NAME_TAG)
                 .name("&f" + hologram.getName())
                 .lore(Arrays.asList(
                         "",
                         "&7状态: " + (hologram.isEnabled() ? "&a启用" : "&c禁用"),
-                        "&7页面: &f" + hologram.getPageCount(),
+                        "&7总页面: &f" + hologram.getPageCount(),
+                        "&7当前页: &f" + (currentPageIndex + 1),
                         "&7显示范围: &f" + hologram.getDisplayRange() + " 格",
-                        "&7更新间隔: &f" + hologram.getUpdateInterval() + " tick",
                         "&7权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
                         ""
                 ))
@@ -92,9 +93,6 @@ public class HologramDetailGui extends GuiScreen {
         HologramPage page = hologram.getPage(currentPageIndex);
         if (page != null) {
             int lineCount = page.size();
-            int totalPages = (int) Math.ceil((double) lineCount / LINES_PER_PAGE);
-            if (totalPages == 0) totalPages = 1;
-            
             int startLine = 0;
             int endLine = Math.min(LINES_PER_PAGE, lineCount);
             
@@ -109,6 +107,141 @@ public class HologramDetailGui extends GuiScreen {
             }
         }
         
+        renderBottomButtons(hologram);
+    }
+    
+    private void renderPageButtons(Hologram hologram) {
+        int pageCount = hologram.getPageCount();
+        
+        for (int i = 0; i < MAX_PAGES; i++) {
+            int slot = 1 + i;
+            final int pageIndex = i;
+            
+            if (i < pageCount) {
+                HologramPage page = hologram.getPage(i);
+                int lineCount = page != null ? page.size() : 0;
+                int actionCount = 0;
+                if (page != null) {
+                    for (ClickType clickType : ClickType.values()) {
+                        actionCount += page.getActions(clickType).size();
+                    }
+                }
+                
+                boolean isCurrentPage = (i == currentPageIndex);
+                Material material = isCurrentPage ? Material.ENCHANTED_BOOK : Material.WRITABLE_BOOK;
+                
+                List<String> lore = new ArrayList<>();
+                lore.add("");
+                lore.add("&7行数: &f" + lineCount);
+                lore.add("&7动作数: &f" + actionCount);
+                lore.add("");
+                if (isCurrentPage) {
+                    lore.add("&a当前编辑中");
+                } else {
+                    lore.add("&e点击切换到此页");
+                }
+                
+                GuiButton.Builder builder = GuiButton.builder(material)
+                        .name((isCurrentPage ? "&a" : "&f") + "页面 " + (i + 1))
+                        .lore(lore);
+                
+                if (isCurrentPage) {
+                    builder.glow();
+                }
+                
+                if (!isCurrentPage) {
+                    builder.onClick(context -> {
+                        guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
+                    });
+                }
+                
+                setButton(slot, builder.build());
+            } else {
+                setButton(slot, GuiButton.builder(Material.BOOK)
+                        .name("&7空页面 " + (i + 1))
+                        .lore(Arrays.asList(
+                                "",
+                                "&7尚未创建",
+                                "",
+                                "&7点击添加页面按钮创建"
+                        ))
+                        .build());
+            }
+        }
+        
+        if (pageCount < MAX_PAGES) {
+            setButton(6, GuiButton.builder(Material.LIME_DYE)
+                    .name("&a添加页面")
+                    .lore(Arrays.asList(
+                            "&7在末尾添加新页面",
+                            "&7当前: &f" + pageCount + "/" + MAX_PAGES + " 页",
+                            "",
+                            "&e点击添加"
+                    ))
+                    .onClick(context -> {
+                        Player player = context.getPlayer();
+                        if (hologram.getPageCount() >= MAX_PAGES) {
+                            player.sendMessage(ColorUtil.colorize("&c已达到最大页面数量限制 (" + MAX_PAGES + " 页)！"));
+                            return;
+                        }
+                        
+                        HologramPage newPage = hologram.addPage();
+                        if (newPage != null) {
+                            hologram.save();
+                            player.sendMessage(ColorUtil.colorize("&a已添加新页面！当前共 " + hologram.getPageCount() + " 页。"));
+                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, hologram.getPageCount() - 1));
+                        } else {
+                            player.sendMessage(ColorUtil.colorize("&c添加页面失败！"));
+                        }
+                    })
+                    .build());
+        } else {
+            setButton(6, GuiButton.builder(Material.GRAY_DYE)
+                    .name("&7页面已满")
+                    .lore(Arrays.asList(
+                            "&7已达到最大页面数量",
+                            "&7最多支持 " + MAX_PAGES + " 个页面"
+                    ))
+                    .build());
+        }
+        
+        if (pageCount > 1) {
+            setButton(7, GuiButton.builder(Material.RED_DYE)
+                    .name("&c删除当前页")
+                    .lore(Arrays.asList(
+                            "&7删除当前页面 (第 " + (currentPageIndex + 1) + " 页)",
+                            "",
+                            "&c此操作不可撤销！",
+                            "",
+                            "&e点击删除"
+                    ))
+                    .onClick(context -> {
+                        Player player = context.getPlayer();
+                        guiManager.openGui(player, ConfirmGui.create("&c确认删除页面?", confirmed -> {
+                            if (confirmed) {
+                                hologram.removePage(currentPageIndex);
+                                hologram.save();
+                                int newPageIndex = Math.min(currentPageIndex, hologram.getPageCount() - 1);
+                                newPageIndex = Math.max(0, newPageIndex);
+                                player.sendMessage(ColorUtil.colorize("&a已删除页面！当前共 " + hologram.getPageCount() + " 页。"));
+                                guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, newPageIndex));
+                            } else {
+                                guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                            }
+                        }));
+                    })
+                    .build());
+        } else {
+            setButton(7, GuiButton.builder(Material.GRAY_DYE)
+                    .name("&7无法删除")
+                    .lore(Arrays.asList(
+                            "&7至少需要保留一个页面"
+                    ))
+                    .build());
+        }
+    }
+    
+    private void renderBottomButtons(Hologram hologram) {
         setButton(36, GuiButton.builder(Material.PAPER)
                 .name("&f添加行")
                 .lore(Arrays.asList(
@@ -208,12 +341,6 @@ public class HologramDetailGui extends GuiScreen {
                 .lore(Arrays.asList(
                         "&7设置全息图的朝向模式",
                         "&7当前: &f" + facingDisplay,
-                        "",
-                        "&7模式说明:",
-                        "&7- 固定角度: 固定朝向",
-                        "&7- 水平跟随: 水平跟随玩家",
-                        "&7- 垂直跟随: 垂直跟随玩家",
-                        "&7- 完全跟随: 完全跟随玩家",
                         "",
                         "&e点击设置"
                 ))
@@ -410,7 +537,7 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
         
         setButton(46, GuiButton.builder(Material.REDSTONE_BLOCK)
-                .name("&f删除")
+                .name("&f删除全息图")
                 .lore(Arrays.asList(
                         "&7删除此全息图",
                         "",
@@ -427,35 +554,6 @@ public class HologramDetailGui extends GuiScreen {
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                         }
                     }));
-                })
-                .build());
-        
-        setButton(48, GuiButton.builder(Material.TRIPWIRE_HOOK)
-                .name("&f设置权限")
-                .lore(Arrays.asList(
-                        "&7当前权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
-                        "",
-                        "&e点击设置"
-                ))
-                .onClick(context -> {
-                    Player player = context.getPlayer();
-                    player.closeInventory();
-                    
-                    chatInputManager.requestInput(player, "&a请输入权限节点 (输入 clear 清除):", 
-                            ChatInputManager.InputType.PERMISSION, hologramName, input -> {
-                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
-                        if (h != null) {
-                            if (input.equalsIgnoreCase("clear")) {
-                                h.setPermission(null);
-                                player.sendMessage(ColorUtil.colorize("&a已清除权限！"));
-                            } else {
-                                h.setPermission(input);
-                                player.sendMessage(ColorUtil.colorize("&a已设置权限为 " + input + "！"));
-                            }
-                            h.save();
-                        }
-                        guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
-                    });
                 })
                 .build());
         
@@ -482,6 +580,35 @@ public class HologramDetailGui extends GuiScreen {
                             }
                         } catch (NumberFormatException e) {
                             player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                        }
+                        guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                    });
+                })
+                .build());
+        
+        setButton(48, GuiButton.builder(Material.TRIPWIRE_HOOK)
+                .name("&f设置权限")
+                .lore(Arrays.asList(
+                        "&7当前权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
+                        "",
+                        "&e点击设置"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    player.closeInventory();
+                    
+                    chatInputManager.requestInput(player, "&a请输入权限节点 (输入 clear 清除):", 
+                            ChatInputManager.InputType.PERMISSION, hologramName, input -> {
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h != null) {
+                            if (input.equalsIgnoreCase("clear")) {
+                                h.setPermission(null);
+                                player.sendMessage(ColorUtil.colorize("&a已清除权限！"));
+                            } else {
+                                h.setPermission(input);
+                                player.sendMessage(ColorUtil.colorize("&a已设置权限为 " + input + "！"));
+                            }
+                            h.save();
                         }
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     });
@@ -517,46 +644,6 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        if (hologram.getPageCount() > 1) {
-            if (currentPageIndex > 0) {
-                setButton(45, GuiButton.builder(Material.ARROW)
-                        .name("&f上一页")
-                        .lore(Arrays.asList(
-                                "&7当前: 第 " + (currentPageIndex + 1) + " 页",
-                                "&7点击查看上一页"
-                        ))
-                        .onClick(context -> {
-                            guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex - 1));
-                        })
-                        .build());
-            }
-            
-            setButton(49, GuiButton.builder(Material.BOOK)
-                    .name("&f页面管理")
-                    .lore(Arrays.asList(
-                            "&7当前: 第 " + (currentPageIndex + 1) + " / " + hologram.getPageCount() + " 页",
-                            "",
-                            "&e点击管理页面"
-                    ))
-                    .onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
-                    })
-                    .build());
-            
-            if (currentPageIndex < hologram.getPageCount() - 1) {
-                setButton(53, GuiButton.builder(Material.ARROW)
-                        .name("&f下一页")
-                        .lore(Arrays.asList(
-                                "&7当前: 第 " + (currentPageIndex + 1) + " 页",
-                                "&7点击查看下一页"
-                        ))
-                        .onClick(context -> {
-                            guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex + 1));
-                        })
-                        .build());
-            }
-        }
-        
         setButton(51, GuiButton.builder(Material.COMMAND_BLOCK)
                 .name("&f动作管理")
                 .lore(Arrays.asList(
@@ -569,20 +656,7 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
         
-        fillFirstRow();
         fillLastTwoRows();
-    }
-    
-    private void fillFirstRow() {
-        GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
-                .name(" ")
-                .build();
-        
-        for (int i = 1; i < 9; i++) {
-            if (getButton(i) == null) {
-                setButton(i, background);
-            }
-        }
     }
     
     private void fillLastTwoRows() {
@@ -600,7 +674,7 @@ public class HologramDetailGui extends GuiScreen {
     private GuiButton createLineButton(Hologram hologram, int lineIndex, HologramLine line) {
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add("&7内容: " + line.getContent());
+        lore.add("&7内容: &r" + line.getContent());
         lore.add("&7偏移: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()));
         lore.add("&7高度: &f" + line.getHeight());
         lore.add("");

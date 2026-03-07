@@ -113,4 +113,15 @@ public class ConfirmGui extends GuiScreen {
                 callback
         );
     }
+    
+    /**
+     * 创建通用确认对话框
+     */
+    public static ConfirmGui create(String message, Consumer<Boolean> callback) {
+        return new ConfirmGui(
+                "&8确认操作",
+                message,
+                callback
+        );
+    }
 }
