@@ -63,7 +63,7 @@ public class HologramDetailGui extends GuiScreen {
             currentPageIndex = Math.max(0, hologram.getPageCount() - 1);
         }
         
-        setButton(0, GuiButton.builder(Material.BOOK)
+        setButton(0, GuiButton.builder(Material.SPECTRAL_ARROW)
                 .name("&f返回列表")
                 .lore(Arrays.asList(
                         "&7返回全息图列表",
@@ -128,7 +128,7 @@ public class HologramDetailGui extends GuiScreen {
                 }
                 
                 boolean isCurrentPage = (i == currentPageIndex);
-                Material material = isCurrentPage ? Material.ENCHANTED_BOOK : Material.WRITABLE_BOOK;
+                Material material = isCurrentPage ? Material.FILLED_MAP : Material.MAP;
                 
                 List<String> lore = new ArrayList<>();
                 lore.add("");
@@ -157,7 +157,7 @@ public class HologramDetailGui extends GuiScreen {
                 
                 setButton(slot, builder.build());
             } else {
-                setButton(slot, GuiButton.builder(Material.BOOK)
+                setButton(slot, GuiButton.builder(Material.EMPTY_MAP)
                         .name("&7空页面 " + (i + 1))
                         .lore(Arrays.asList(
                                 "",
