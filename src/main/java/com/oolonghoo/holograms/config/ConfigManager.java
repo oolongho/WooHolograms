@@ -5,6 +5,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 配置管理器
@@ -54,6 +56,10 @@ public class ConfigManager {
     // 渲染器缓存池设置
     private boolean rendererPoolEnabled;
     private int rendererPoolMaxSize;
+    
+    // 安全设置
+    private List<String> commandBlacklist;
+    private int maxInputLength;
 
     public ConfigManager(WooHolograms plugin) {
         this.plugin = plugin;
@@ -108,6 +114,17 @@ public class ConfigManager {
         // 渲染器缓存池设置
         rendererPoolEnabled = config.getBoolean("renderer-pool.enabled", true);
         rendererPoolMaxSize = config.getInt("renderer-pool.max-size", 100);
+        
+        // 安全设置
+        commandBlacklist = config.getStringList("security.command-blacklist");
+        if (commandBlacklist.isEmpty()) {
+            commandBlacklist = new ArrayList<>(java.util.Arrays.asList(
+                    "op", "deop", "stop", "reload", "save-all", "save-off", "save-on",
+                    "whitelist", "ban", "ban-ip", "pardon", "pardon-ip", "kick",
+                    "execute", "function", "debug", "perf"
+            ));
+        }
+        maxInputLength = config.getInt("security.max-input-length", 256);
     }
 
     /**
@@ -224,6 +241,22 @@ public class ConfigManager {
 
     public int getRendererPoolMaxSize() {
         return rendererPoolMaxSize;
+    }
+    
+    public List<String> getCommandBlacklist() {
+        return commandBlacklist;
+    }
+    
+    public int getMaxInputLength() {
+        return maxInputLength;
+    }
+    
+    public boolean isCommandBlacklisted(String command) {
+        if (command == null || command.isEmpty()) {
+            return false;
+        }
+        String cmd = command.toLowerCase().split(" ")[0].replace("/", "");
+        return commandBlacklist.contains(cmd);
     }
 
     /**

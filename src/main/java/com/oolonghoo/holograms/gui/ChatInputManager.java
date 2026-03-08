@@ -149,6 +149,14 @@ public class ChatInputManager implements Listener {
                 return;
             }
             
+            // 输入验证
+            String validationError = validateInput(input, context.getType());
+            if (validationError != null) {
+                player.sendMessage(ColorUtil.colorize(validationError));
+                pendingInputs.put(playerId, context);
+                return;
+            }
+            
             final String finalInput = input;
             new BukkitRunnable() {
                 @Override
@@ -157,6 +165,59 @@ public class ChatInputManager implements Listener {
                 }
             }.runTask(plugin);
         }
+    }
+    
+    /**
+     * 验证输入
+     * @param input 输入内容
+     * @param type 输入类型
+     * @return 错误消息，null表示验证通过
+     */
+    private String validateInput(String input, InputType type) {
+        int maxLength = plugin.getConfigManager().getMaxInputLength();
+        
+        if (input == null || input.isEmpty()) {
+            return "&c输入不能为空！";
+        }
+        
+        if (input.length() > maxLength) {
+            return "&c输入长度超过限制（最大 " + maxLength + " 字符）！";
+        }
+        
+        // 根据类型进行特定验证
+        switch (type) {
+            case HOLOGRAM_NAME:
+                if (!input.matches("^[a-zA-Z0-9_\\-]+$")) {
+                    return "&c名称只能包含字母、数字、下划线和连字符！";
+                }
+                break;
+            case DISPLAY_RANGE:
+            case UPDATE_INTERVAL:
+            case LINE_HEIGHT:
+                try {
+                    int value = Integer.parseInt(input);
+                    if (value <= 0) {
+                        return "&c数值必须大于0！";
+                    }
+                } catch (NumberFormatException e) {
+                    return "&c请输入有效的数字！";
+                }
+                break;
+            case LINE_OFFSET:
+                if (!input.matches("^[\\d.\\- ]+$")) {
+                    return "&c偏移值只能包含数字、小数点和负号！";
+                }
+                break;
+            case COORDINATES:
+                if (!input.matches("^[\\d.\\- ]+$")) {
+                    return "&c坐标只能包含数字、小数点和负号！";
+                }
+                break;
+            default:
+                break;
+        }
+        
+        return null;
     }
 
     /**

@@ -93,6 +93,16 @@ public abstract class ActionType {
             String command = String.join(" ", args);
             command = command.replace("{player}", player.getName());
 
+            // 检查命令是否在黑名单中
+            if (WooHolograms.getInstance().getConfigManager().isCommandBlacklisted(command)) {
+                if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                    WooHolograms.getInstance().getLogger().warning(
+                            "Blocked blacklisted command for player " + player.getName() + ": " + command);
+                }
+                player.sendMessage(ColorUtil.colorize("&c该命令被禁止执行！"));
+                return false;
+            }
+
             // 在主线程执行命令
             final String finalCommand = command;
             Bukkit.getScheduler().runTask(WooHolograms.getInstance(), () -> {
@@ -114,6 +124,16 @@ public abstract class ActionType {
 
             String command = String.join(" ", args);
             command = command.replace("{player}", player.getName());
+
+            // 检查命令是否在黑名单中
+            if (WooHolograms.getInstance().getConfigManager().isCommandBlacklisted(command)) {
+                if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                    WooHolograms.getInstance().getLogger().warning(
+                            "Blocked blacklisted console command for player " + player.getName() + ": " + command);
+                }
+                player.sendMessage(ColorUtil.colorize("&c该命令被禁止执行！"));
+                return false;
+            }
 
             // 在主线程执行命令
             final String finalCommand = command;

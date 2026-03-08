@@ -320,7 +320,10 @@ public class YamlHologramStorage implements HologramStorage {
                 try {
                     EnumFlag flag = EnumFlag.valueOf(flagStr.toUpperCase());
                     hologram.addFlags(flag);
-                } catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException e) {
+                    if (plugin.getConfigManager().isDebug()) {
+                        plugin.getLogger().warning("Unknown flag '" + flagStr + "' for hologram " + hologram.getName());
+                    }
                 }
             }
         }
@@ -395,13 +398,18 @@ public class YamlHologramStorage implements HologramStorage {
         page.realignLines();
         
         if (section.contains("brightness")) {
-            String[] brightnessParts = section.getString("brightness", "15,15").split(",");
+            String brightnessValue = section.getString("brightness", "15,15");
+            String[] brightnessParts = brightnessValue.split(",");
             if (brightnessParts.length == 2) {
                 try {
                     int skyLight = Integer.parseInt(brightnessParts[0]);
                     int blockLight = Integer.parseInt(brightnessParts[1]);
                     line.setBrightness(Brightness.of(skyLight, blockLight));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    if (plugin.getConfigManager().isDebug()) {
+                        plugin.getLogger().warning("Invalid brightness format for line in hologram " + 
+                                (line.getHologram() != null ? line.getHologram().getName() : "unknown") + ": " + brightnessValue);
+                    }
                 }
             }
         }
@@ -425,7 +433,11 @@ public class YamlHologramStorage implements HologramStorage {
                 try {
                     EnumFlag flag = EnumFlag.valueOf(flagStr.toUpperCase());
                     line.addFlags(flag);
-                } catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException e) {
+                    if (plugin.getConfigManager().isDebug()) {
+                        plugin.getLogger().warning("Unknown flag '" + flagStr + "' for line in hologram " + 
+                                (line.getHologram() != null ? line.getHologram().getName() : "unknown"));
+                    }
                 }
             }
         }

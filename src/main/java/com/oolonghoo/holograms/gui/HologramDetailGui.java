@@ -25,16 +25,23 @@ public class HologramDetailGui extends GuiScreen {
     private final ChatInputManager chatInputManager;
     private final String hologramName;
     private int currentPageIndex;
+    private int pageGroupIndex;
     private static final int LINES_PER_PAGE = 27;
-    private static final int MAX_PAGES = 5;
+    private static final int PAGES_PER_GROUP = 4;
+    private static final int MAX_PAGE_GROUPS = 100;
 
     public HologramDetailGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName, int pageIndex) {
+        this(plugin, guiManager, chatInputManager, hologramName, pageIndex, 0);
+    }
+
+    public HologramDetailGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName, int pageIndex, int pageGroupIndex) {
         super("hologram_detail", ColorUtil.colorize("&8全息图: " + hologramName), 54);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
         this.hologramName = hologramName;
         this.currentPageIndex = pageIndex;
+        this.pageGroupIndex = pageGroupIndex;
         
         render();
     }
@@ -113,12 +120,45 @@ public class HologramDetailGui extends GuiScreen {
     private void renderPageButtons(Hologram hologram) {
         int pageCount = hologram.getPageCount();
         
-        for (int i = 0; i < MAX_PAGES; i++) {
-            int slot = 1 + i;
-            final int pageIndex = i;
+        // 计算当前页面所在的组
+        int currentGroup = currentPageIndex / PAGES_PER_GROUP;
+        if (pageGroupIndex != currentGroup) {
+            pageGroupIndex = currentGroup;
+        }
+        
+        // 计算当前组的起始页面索引
+        int groupStartPage = pageGroupIndex * PAGES_PER_GROUP;
+        
+        // 渲染上一组按钮（槽位1）
+        if (pageGroupIndex > 0) {
+            setButton(1, GuiButton.builder(Material.SPECTRAL_ARROW)
+                    .name("&f上一组页面")
+                    .lore(Arrays.asList(
+                            "",
+                            "&7切换到第 " + ((pageGroupIndex) * PAGES_PER_GROUP + 1) + " - " + 
+                                    Math.min((pageGroupIndex) * PAGES_PER_GROUP + PAGES_PER_GROUP, pageCount) + " 页",
+                            "",
+                            "&e点击切换"
+                    ))
+                    .onClick(context -> {
+                        guiManager.openGui(context.getPlayer(), 
+                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 
+                                        Math.max(0, groupStartPage - PAGES_PER_GROUP), pageGroupIndex - 1));
+                    })
+                    .build());
+        } else {
+            setButton(1, GuiButton.builder(Material.GRAY_STAINED_GLASS_PANE)
+                    .name("&7没有更多页面")
+                    .build());
+        }
+        
+        // 渲染页面按钮（槽位2-5，共4个）
+        for (int i = 0; i < PAGES_PER_GROUP; i++) {
+            int slot = 2 + i;
+            int pageIndex = groupStartPage + i;
             
-            if (i < pageCount) {
-                HologramPage page = hologram.getPage(i);
+            if (pageIndex < pageCount) {
+                HologramPage page = hologram.getPage(pageIndex);
                 int lineCount = page != null ? page.size() : 0;
                 int actionCount = 0;
                 if (page != null) {
@@ -127,7 +167,7 @@ public class HologramDetailGui extends GuiScreen {
                     }
                 }
                 
-                boolean isCurrentPage = (i == currentPageIndex);
+                boolean isCurrentPage = (pageIndex == currentPageIndex);
                 Material material = isCurrentPage ? Material.FILLED_MAP : Material.MAP;
                 
                 List<String> lore = new ArrayList<>();
@@ -142,23 +182,26 @@ public class HologramDetailGui extends GuiScreen {
                 }
                 
                 GuiButton.Builder builder = GuiButton.builder(material)
-                        .name((isCurrentPage ? "&a" : "&f") + "页面 " + (i + 1))
+                        .name((isCurrentPage ? "&a" : "&f") + "页面 " + (pageIndex + 1))
                         .lore(lore);
                 
                 if (isCurrentPage) {
                     builder.glow();
                 }
                 
+                final int targetPageIndex = pageIndex;
                 if (!isCurrentPage) {
                     builder.onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
+                        guiManager.openGui(context.getPlayer(), 
+                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, targetPageIndex, pageGroupIndex));
                     });
                 }
                 
                 setButton(slot, builder.build());
             } else {
-                setButton(slot, GuiButton.builder(Material.EMPTY_MAP)
-                        .name("&7空页面 " + (i + 1))
+                // 空页面槽位
+                setButton(slot, GuiButton.builder(Material.MAP)
+                        .name("&7空页面 " + (pageIndex + 1))
                         .lore(Arrays.asList(
                                 "",
                                 "&7尚未创建",
@@ -169,42 +212,53 @@ public class HologramDetailGui extends GuiScreen {
             }
         }
         
-        if (pageCount < MAX_PAGES) {
+        // 渲染下一组按钮（槽位6）
+        int totalPages = hologram.getPageCount();
+        boolean hasNextGroup = (pageGroupIndex + 1) * PAGES_PER_GROUP < totalPages;
+        
+        if (hasNextGroup) {
+            int nextGroupStart = (pageGroupIndex + 1) * PAGES_PER_GROUP + 1;
+            int nextGroupEnd = Math.min((pageGroupIndex + 2) * PAGES_PER_GROUP, totalPages);
+            setButton(6, GuiButton.builder(Material.SPECTRAL_ARROW)
+                    .name("&f下一组页面")
+                    .lore(Arrays.asList(
+                            "",
+                            "&7切换到第 " + nextGroupStart + " - " + nextGroupEnd + " 页",
+                            "",
+                            "&e点击切换"
+                    ))
+                    .onClick(context -> {
+                        guiManager.openGui(context.getPlayer(), 
+                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 
+                                        (pageGroupIndex + 1) * PAGES_PER_GROUP, pageGroupIndex + 1));
+                    })
+                    .build());
+        } else {
             setButton(6, GuiButton.builder(Material.LIME_DYE)
                     .name("&a添加页面")
                     .lore(Arrays.asList(
                             "&7在末尾添加新页面",
-                            "&7当前: &f" + pageCount + "/" + MAX_PAGES + " 页",
+                            "&7当前: &f" + pageCount + " 页",
                             "",
                             "&e点击添加"
                     ))
                     .onClick(context -> {
                         Player player = context.getPlayer();
-                        if (hologram.getPageCount() >= MAX_PAGES) {
-                            player.sendMessage(ColorUtil.colorize("&c已达到最大页面数量限制 (" + MAX_PAGES + " 页)！"));
-                            return;
-                        }
-                        
                         HologramPage newPage = hologram.addPage();
                         if (newPage != null) {
                             hologram.save();
                             player.sendMessage(ColorUtil.colorize("&a已添加新页面！当前共 " + hologram.getPageCount() + " 页。"));
-                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, hologram.getPageCount() - 1));
+                            int newPageIndex = hologram.getPageCount() - 1;
+                            int newGroup = newPageIndex / PAGES_PER_GROUP;
+                            guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, newPageIndex, newGroup));
                         } else {
                             player.sendMessage(ColorUtil.colorize("&c添加页面失败！"));
                         }
                     })
                     .build());
-        } else {
-            setButton(6, GuiButton.builder(Material.GRAY_DYE)
-                    .name("&7页面已满")
-                    .lore(Arrays.asList(
-                            "&7已达到最大页面数量",
-                            "&7最多支持 " + MAX_PAGES + " 个页面"
-                    ))
-                    .build());
         }
         
+        // 删除页面按钮（槽位7）
         if (pageCount > 1) {
             setButton(7, GuiButton.builder(Material.RED_DYE)
                     .name("&c删除当前页")
@@ -226,7 +280,7 @@ public class HologramDetailGui extends GuiScreen {
                                 player.sendMessage(ColorUtil.colorize("&a已删除页面！当前共 " + hologram.getPageCount() + " 页。"));
                                 guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, newPageIndex));
                             } else {
-                                guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                                guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex, pageGroupIndex));
                             }
                         }));
                     })

@@ -237,7 +237,9 @@ public class PacketListener {
             try {
                 channel.pipeline().remove("wooholograms_packet");
             } catch (Exception e) {
-                // 忽略
+                if (plugin.getConfigManager().isDebug()) {
+                    plugin.getLogger().warning("Failed to remove packet handler for player " + player.getName() + ": " + e.getMessage());
+                }
             }
         }
     }
@@ -341,7 +343,9 @@ public class PacketListener {
             }
             
         } catch (Exception e) {
-            // 忽略
+            if (plugin.getConfigManager().isDebug()) {
+                plugin.getLogger().warning("Failed to get entity ID from packet: " + e.getMessage());
+            }
         }
         return -1;
     }
@@ -372,11 +376,15 @@ public class PacketListener {
                             return ClickType.RIGHT;
                         }
                     }
-                } catch (NoSuchFieldException ignored) {}
+                } catch (NoSuchFieldException e) {
+                    // 继续尝试下一个字段名
+                }
             }
             
         } catch (Exception e) {
-            // 忽略
+            if (plugin.getConfigManager().isDebug()) {
+                plugin.getLogger().warning("Failed to get click type from packet: " + e.getMessage());
+            }
         }
         
         return ClickType.RIGHT;

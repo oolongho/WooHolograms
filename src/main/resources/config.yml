@@ -67,3 +67,28 @@ renderer-pool:
   enabled: true
   # 最大缓存数量
   max-size: 100
+
+# 安全设置
+security:
+  # 命令黑名单（禁止通过全息图执行的命令）
+  # 这些命令不能通过 COMMAND 或 CONSOLE 动作执行
+  command-blacklist:
+    - op
+    - deop
+    - stop
+    - reload
+    - save-all
+    - save-off
+    - save-on
+    - whitelist
+    - ban
+    - ban-ip
+    - pardon
+    - pardon-ip
+    - kick
+    - execute
+    - function
+    - debug
+    - perf
+  # 最大输入长度（用于GUI输入验证）
+  max-input-length: 256
