@@ -550,12 +550,22 @@ public class HologramManager {
      * 负责更新动画和占位符，以及视距检测
      */
     private class UpdateTask extends BukkitRunnable {
+        private Hologram[] cachedHolograms = new Hologram[0];
+        private long lastCacheUpdate = 0;
+        private static final long CACHE_UPDATE_INTERVAL = 100; // 每100tick更新一次缓存
+        
         @Override
         public void run() {
             plugin.getAnimationManager().tick();
             
-            List<Hologram> hologramList = new ArrayList<>(holograms.values());
-            for (Hologram hologram : hologramList) {
+            // 使用缓存的全息图数组，避免每次创建新列表
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastCacheUpdate > CACHE_UPDATE_INTERVAL * 50) {
+                cachedHolograms = holograms.values().toArray(new Hologram[0]);
+                lastCacheUpdate = currentTime;
+            }
+            
+            for (Hologram hologram : cachedHolograms) {
                 if (!hologram.isEnabled()) {
                     continue;
                 }
@@ -570,8 +580,7 @@ public class HologramManager {
     }
     
     private void updateVisibilityForAllPlayers() {
-        List<Hologram> hologramList = new ArrayList<>(holograms.values());
-        for (Hologram hologram : hologramList) {
+        for (Hologram hologram : holograms.values()) {
             if (!hologram.isEnabled()) {
                 continue;
             }

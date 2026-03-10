@@ -172,48 +172,10 @@ public class ActionManageGui extends GuiScreen {
                 .lore(Arrays.asList(
                         "&7添加新的点击动作",
                         "",
-                        "&7格式: <类型>:<值>",
-                        "&7例如: message:&a你好!",
-                        "&7      command:spawn",
-                        "&7      sound:ENTITY_PLAYER_LEVELUP",
-                        "",
-                        "&e点击添加"
+                        "&e点击选择动作类型"
                 ))
                 .onClick(context -> {
-                    Player player = context.getPlayer();
-                    player.closeInventory();
-                    
-                    chatInputManager.requestInput(player, "&a请输入动作值 (格式: <类型>:<值>):", 
-                            ChatInputManager.InputType.ACTION_VALUE, hologramName, input -> {
-                        String[] parts = input.split(":", 2);
-                        if (parts.length < 2) {
-                            player.sendMessage(ColorUtil.colorize("&c格式错误！正确格式: <类型>:<值>"));
-                        } else {
-                            String typeStr = parts[0].toUpperCase();
-                            String value = parts[1];
-                            
-                            ActionType actionType = ActionType.getByName(typeStr);
-                            if (actionType == null) {
-                                List<String> typeNames = new ArrayList<>();
-                                for (ActionType t : ActionType.getActionTypes()) {
-                                    typeNames.add(t.getName());
-                                }
-                                player.sendMessage(ColorUtil.colorize("&c未知的动作类型！可用类型: " + String.join(", ", typeNames)));
-                            } else {
-                                Hologram h = plugin.getHologramManager().getHologram(hologramName);
-                                if (h != null) {
-                                    HologramPage p = h.getPage(pageIndex);
-                                    if (p != null) {
-                                        Action action = new Action(actionType, value);
-                                        p.addAction(currentClickType, action);
-                                        h.save();
-                                        player.sendMessage(ColorUtil.colorize("&a已添加动作！"));
-                                    }
-                                }
-                            }
-                        }
-                        guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
-                    });
+                    guiManager.openGui(context.getPlayer(), new ActionTypeSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
                 })
                 .build());
         
@@ -224,59 +186,16 @@ public class ActionManageGui extends GuiScreen {
                         "&7可用动作类型:",
                         "&fMESSAGE &7- 发送消息",
                         "&fCOMMAND &7- 执行命令",
+                        "&fCONSOLE &7- 控制台命令",
                         "&fSOUND &7- 播放声音",
                         "&fTELEPORT &7- 传送玩家",
+                        "&fSERVER &7- 跨服传送",
+                        "&fNEXT_PAGE &7- 下一页",
+                        "&fPREV_PAGE &7- 上一页",
+                        "&fPAGE &7- 页面跳转",
                         ""
                 ))
                 .build());
-        
-        if (hologram.getPageCount() > 1) {
-            setButton(47, GuiButton.builder(Material.SPECTRAL_ARROW)
-                    .name("&f添加下一页动作")
-                    .lore(Arrays.asList(
-                            "&7快速添加下一页翻页动作",
-                            "",
-                            "&e点击添加"
-                    ))
-                    .onClick(context -> {
-                        Player player = context.getPlayer();
-                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
-                        if (h != null) {
-                            HologramPage p = h.getPage(pageIndex);
-                            if (p != null) {
-                                Action action = new Action(ActionType.NEXT_PAGE, hologramName);
-                                p.addAction(currentClickType, action);
-                                h.save();
-                                player.sendMessage(ColorUtil.colorize("&a已添加下一页动作！"));
-                                guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
-                            }
-                        }
-                    })
-                    .build());
-            
-            setButton(51, GuiButton.builder(Material.TIPPED_ARROW)
-                    .name("&f添加上一页动作")
-                    .lore(Arrays.asList(
-                            "&7快速添加上一页翻页动作",
-                            "",
-                            "&e点击添加"
-                    ))
-                    .onClick(context -> {
-                        Player player = context.getPlayer();
-                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
-                        if (h != null) {
-                            HologramPage p = h.getPage(pageIndex);
-                            if (p != null) {
-                                Action action = new Action(ActionType.PREV_PAGE, hologramName);
-                                p.addAction(currentClickType, action);
-                                h.save();
-                                player.sendMessage(ColorUtil.colorize("&a已添加上一页动作！"));
-                                guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
-                            }
-                        }
-                    })
-                    .build());
-        }
         
         fillBackground();
     }
