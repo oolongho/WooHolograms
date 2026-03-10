@@ -7,6 +7,7 @@ import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.HologramPage;
+import com.oolonghoo.holograms.hologram.HologramType;
 import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -726,15 +727,52 @@ public class HologramDetailGui extends GuiScreen {
     }
 
     private GuiButton createLineButton(Hologram hologram, int lineIndex, HologramLine line) {
+        HologramType type = line.getType();
+        Material material;
+        String typeDisplay;
+        
+        switch (type) {
+            case ICON:
+                material = Material.ITEM_FRAME;
+                typeDisplay = "&b物品图标";
+                break;
+            case HEAD:
+                material = Material.PLAYER_HEAD;
+                typeDisplay = "&d玩家头颅";
+                break;
+            case SMALLHEAD:
+                material = Material.PLAYER_HEAD;
+                typeDisplay = "&d小型头颅";
+                break;
+            case ENTITY:
+                material = Material.ZOMBIE_HEAD;
+                typeDisplay = "&c实体显示";
+                break;
+            case NEXT:
+                material = Material.ARROW;
+                typeDisplay = "&a下一页按钮";
+                break;
+            case PREV:
+                material = Material.ARROW;
+                typeDisplay = "&e上一页按钮";
+                break;
+            case TEXT:
+            default:
+                material = Material.PAPER;
+                typeDisplay = "&f文本";
+                break;
+        }
+        
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add("&7内容: &r" + line.getContent());
+        lore.add("&7类型: " + typeDisplay);
+        lore.add("&7内容: &r" + (line.getContent().length() > 30 ? line.getContent().substring(0, 30) + "..." : line.getContent()));
         lore.add("&7偏移: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()));
         lore.add("&7高度: &f" + line.getHeight());
         lore.add("");
         lore.add("&e点击编辑");
         
-        return GuiButton.builder(Material.PAPER)
+        return GuiButton.builder(material)
                 .name("&f第 " + (lineIndex + 1) + " 行")
                 .lore(lore)
                 .onClick(context -> {

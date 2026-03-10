@@ -24,15 +24,15 @@ public class ConfirmGui extends GuiScreen {
         
         fillBackground();
         
-        setButton(11, GuiButton.builder(Material.RED_WOOL)
-                .name("&f确认删除")
+        setButton(11, GuiButton.builder(Material.GREEN_WOOL)
+                .name("&f取消")
                 .lore(Arrays.asList(
-                        "&7" + warningMessage,
+                        "&7取消此操作",
                         "",
-                        "&e点击确认"
+                        "&e点击取消"
                 ))
                 .onClick(context -> {
-                    callback.accept(true);
+                    callback.accept(false);
                 })
                 .build());
         
@@ -45,15 +45,15 @@ public class ConfirmGui extends GuiScreen {
                 ))
                 .build());
         
-        setButton(15, GuiButton.builder(Material.GREEN_WOOL)
-                .name("&f取消")
+        setButton(15, GuiButton.builder(Material.RED_WOOL)
+                .name("&f确认删除")
                 .lore(Arrays.asList(
-                        "&7取消此操作",
+                        "&7" + warningMessage,
                         "",
-                        "&e点击取消"
+                        "&e点击确认"
                 ))
                 .onClick(context -> {
-                    callback.accept(false);
+                    callback.accept(true);
                 })
                 .build());
     }

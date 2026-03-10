@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
 import java.util.UUID;
@@ -25,11 +26,13 @@ public class ChatInputManager implements Listener {
 
     private final WooHolograms plugin;
     private final Map<UUID, InputContext> pendingInputs;
+    private final Map<UUID, BukkitTask> timeoutTasks;
     private static final long INPUT_TIMEOUT = 30 * 20; // 30秒超时
 
     public ChatInputManager(WooHolograms plugin) {
         this.plugin = plugin;
         this.pendingInputs = new ConcurrentHashMap<>();
+        this.timeoutTasks = new ConcurrentHashMap<>();
         
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -54,22 +57,25 @@ public class ChatInputManager implements Listener {
     public void requestInput(Player player, String prompt, InputType type, Consumer<String> callback) {
         UUID playerId = player.getUniqueId();
         
+        cancelTimeoutTask(playerId);
+        
         InputContext context = new InputContext(type, callback);
         pendingInputs.put(playerId, context);
         
         player.sendMessage(ColorUtil.colorize(prompt));
         player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
         
-        // 设置超时
-        new BukkitRunnable() {
+        BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
                     pendingInputs.remove(playerId);
+                    timeoutTasks.remove(playerId);
                     player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
                 }
             }
         }.runTaskLater(plugin, INPUT_TIMEOUT);
+        timeoutTasks.put(playerId, task);
     }
 
     /**
@@ -83,21 +89,25 @@ public class ChatInputManager implements Listener {
     public void requestInput(Player player, String prompt, InputType type, String hologramName, Consumer<String> callback) {
         UUID playerId = player.getUniqueId();
         
+        cancelTimeoutTask(playerId);
+        
         InputContext context = new InputContext(type, hologramName, callback);
         pendingInputs.put(playerId, context);
         
         player.sendMessage(ColorUtil.colorize(prompt));
         player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
         
-        new BukkitRunnable() {
+        BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
                     pendingInputs.remove(playerId);
+                    timeoutTasks.remove(playerId);
                     player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
                 }
             }
         }.runTaskLater(plugin, INPUT_TIMEOUT);
+        timeoutTasks.put(playerId, task);
     }
 
     /**
@@ -113,21 +123,36 @@ public class ChatInputManager implements Listener {
     public void requestInput(Player player, String prompt, InputType type, String hologramName, int lineNumber, int pageIndex, Consumer<String> callback) {
         UUID playerId = player.getUniqueId();
         
+        cancelTimeoutTask(playerId);
+        
         InputContext context = new InputContext(type, hologramName, lineNumber, pageIndex, callback);
         pendingInputs.put(playerId, context);
         
         player.sendMessage(ColorUtil.colorize(prompt));
         player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
         
-        new BukkitRunnable() {
+        BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
                     pendingInputs.remove(playerId);
+                    timeoutTasks.remove(playerId);
                     player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
                 }
             }
         }.runTaskLater(plugin, INPUT_TIMEOUT);
+        timeoutTasks.put(playerId, task);
+    }
+    
+    /**
+     * 取消超时任务
+     * @param playerId 玩家ID
+     */
+    private void cancelTimeoutTask(UUID playerId) {
+        BukkitTask task = timeoutTasks.remove(playerId);
+        if (task != null) {
+            task.cancel();
+        }
     }
 
     /**
@@ -141,6 +166,7 @@ public class ChatInputManager implements Listener {
         InputContext context = pendingInputs.remove(playerId);
         if (context != null) {
             event.setCancelled(true);
+            cancelTimeoutTask(playerId);
             
             String input = event.getMessage();
             
@@ -225,7 +251,9 @@ public class ChatInputManager implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        pendingInputs.remove(event.getPlayer().getUniqueId());
+        UUID playerId = event.getPlayer().getUniqueId();
+        pendingInputs.remove(playerId);
+        cancelTimeoutTask(playerId);
     }
 
     /**
@@ -242,7 +270,9 @@ public class ChatInputManager implements Listener {
      * @param player 玩家
      */
     public void cancelInput(Player player) {
-        pendingInputs.remove(player.getUniqueId());
+        UUID playerId = player.getUniqueId();
+        pendingInputs.remove(playerId);
+        cancelTimeoutTask(playerId);
     }
 
     /**

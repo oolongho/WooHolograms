@@ -375,7 +375,10 @@ public class HologramLine {
         String text = content;
         
         if (containsPlaceholders) {
-            text = WooHolograms.getInstance().getPlaceholderHook().setPlaceholders(player, text);
+            WooHolograms plugin = WooHolograms.getInstance();
+            if (plugin != null && plugin.getPlaceholderHook() != null) {
+                text = plugin.getPlaceholderHook().setPlaceholders(player, text);
+            }
         }
         
         text = ColorUtil.colorize(text);
