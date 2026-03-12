@@ -323,7 +323,6 @@ public class YamlHologramStorage implements HologramStorage {
                     hologram.addFlags(flag);
                 } catch (IllegalArgumentException e) {
                     if (plugin.getConfigManager().isDebug()) {
-                        String flagStrUp = flagStr.toUpperCase();
                         plugin.getLogger().warning(() -> "Unknown flag '" + flagStr + "' for hologram " + hologram.getName());
                     }
                 }
