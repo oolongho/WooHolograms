@@ -341,7 +341,8 @@ public class HologramManager {
             }
         }
 
-        plugin.getLogger().info("已保存 " + count + " 个全息图");
+        int finalCount = count;
+        plugin.getLogger().info(() -> "已保存 " + finalCount + " 个全息图");
     }
 
     /**

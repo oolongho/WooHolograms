@@ -1659,7 +1659,8 @@ public class Hologram {
             }
         } catch (Exception e) {
             if (WooHolograms.getInstance().getConfigManager().isDebug()) {
-                WooHolograms.getInstance().getLogger().warning("isInRange check failed: " + e.getMessage());
+                String errorMsg = e.getMessage();
+                WooHolograms.getInstance().getLogger().warning(() -> "isInRange check failed: " + errorMsg);
             }
         }
         return false;
@@ -2021,7 +2022,7 @@ public class Hologram {
         hologram.setDisplayRange(this.displayRange);
         hologram.setUpdateRange(this.updateRange);
         hologram.setUpdateInterval(this.updateInterval);
-        hologram.addFlags(this.flags.toArray(new EnumFlag[0]));
+        hologram.addFlags(this.flags.toArray(new EnumFlag[this.flags.size()]));
         hologram.setDefaultVisibleState(this.defaultVisibleState);
         hologram.showPlayers.addAll(this.showPlayers);
         hologram.hidePlayers.addAll(this.hidePlayers);

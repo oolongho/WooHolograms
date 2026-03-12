@@ -333,11 +333,9 @@ public class HologramLine {
         WooHolograms plugin = WooHolograms.getInstance();
         
         HologramRendererPool pool = plugin.getRendererPool();
-        if (pool != null) {
-            renderer = pool.obtain(type);
-            if (renderer != null) {
-                return;
-            }
+        renderer = pool.obtain(type);
+        if (renderer != null) {
+            return;
         }
         
         NmsHologramRendererFactory factory = plugin.getRendererFactory();
@@ -566,12 +564,7 @@ public class HologramLine {
             return "";
         }
 
-        // 动画解析由 AnimationManager 处理
-        if (WooHolograms.getInstance().getAnimationManager() != null) {
-            return WooHolograms.getInstance().getAnimationManager().parseTextAnimations(text);
-        }
-
-        return text;
+        return WooHolograms.getInstance().getAnimationManager().parseTextAnimations(text);
     }
     
     /**
@@ -934,9 +927,7 @@ public class HologramLine {
             renderer.destroy(getViewerPlayers());
             WooHolograms plugin = WooHolograms.getInstance();
             HologramRendererPool pool = plugin.getRendererPool();
-            if (pool != null) {
-                pool.release(renderer);
-            }
+            pool.release(renderer);
             renderer = null;
         }
         if (previousRenderer != null) {

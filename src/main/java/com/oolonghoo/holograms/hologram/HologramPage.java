@@ -465,7 +465,7 @@ public class HologramPage {
         }
 
         for (HologramLine line : lines) {
-            line.update(players.toArray(new Player[0]));
+            line.update(players.toArray(new Player[players.size()]));
         }
     }
 
@@ -484,7 +484,7 @@ public class HologramPage {
         }
 
         for (HologramLine line : lines) {
-            line.updateAnimations(players.toArray(new Player[0]));
+            line.updateAnimations(players.toArray(new Player[players.size()]));
         }
     }
 
@@ -813,7 +813,7 @@ public class HologramPage {
         }
 
         // 克隆标志
-        page.addFlags(this.flags.toArray(new EnumFlag[0]));
+        page.addFlags(this.flags.toArray(new EnumFlag[this.flags.size()]));
 
         return page;
     }
