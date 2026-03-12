@@ -1,6 +1,4 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
-
- 
 import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;

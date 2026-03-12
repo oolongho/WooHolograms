@@ -1,5 +1,4 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
-
 import com.oolonghoo.holograms.nms.renderer.NmsClickableHologramRenderer;
 import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;

@@ -1,5 +1,4 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
-
 import com.oolonghoo.holograms.nms.renderer.NmsSmallHeadHologramRenderer;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 
