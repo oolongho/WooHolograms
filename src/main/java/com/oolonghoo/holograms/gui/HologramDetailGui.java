@@ -29,7 +29,6 @@ public class HologramDetailGui extends GuiScreen {
     private int pageGroupIndex;
     private static final int LINES_PER_PAGE = 27;
     private static final int PAGES_PER_GROUP = 4;
-    private static final int MAX_PAGE_GROUPS = 100;
 
     public HologramDetailGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName, int pageIndex) {
         this(plugin, guiManager, chatInputManager, hologramName, pageIndex, 0);
@@ -110,7 +109,7 @@ public class HologramDetailGui extends GuiScreen {
                 
                 HologramLine line = page.getLine(i);
                 if (line != null) {
-                    setButton(slot, createLineButton(hologram, i, line));
+                    setButton(slot, createLineButton(i, line));
                 }
             }
         }
@@ -726,7 +725,7 @@ public class HologramDetailGui extends GuiScreen {
         }
     }
 
-    private GuiButton createLineButton(Hologram hologram, int lineIndex, HologramLine line) {
+    private GuiButton createLineButton(int lineIndex, HologramLine line) {
         HologramType type = line.getType();
         Material material;
         String typeDisplay;

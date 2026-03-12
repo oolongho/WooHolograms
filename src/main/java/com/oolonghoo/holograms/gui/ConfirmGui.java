@@ -14,13 +14,8 @@ import java.util.function.Consumer;
  */
 public class ConfirmGui extends GuiScreen {
 
-    private final String warningMessage;
-    private final Consumer<Boolean> callback;
-
     public ConfirmGui(String title, String warningMessage, Consumer<Boolean> callback) {
         super("confirm", ColorUtil.colorize(title), 27);
-        this.warningMessage = warningMessage;
-        this.callback = callback;
         
         fillBackground();
         

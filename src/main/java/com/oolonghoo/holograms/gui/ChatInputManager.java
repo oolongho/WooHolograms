@@ -33,7 +33,12 @@ public class ChatInputManager implements Listener {
         this.plugin = plugin;
         this.pendingInputs = new ConcurrentHashMap<>();
         this.timeoutTasks = new ConcurrentHashMap<>();
-        
+    }
+    
+    /**
+     * 注册事件监听器
+     */
+    public void register() {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -212,14 +217,12 @@ public class ChatInputManager implements Listener {
         
         // 根据类型进行特定验证
         switch (type) {
-            case HOLOGRAM_NAME:
+            case HOLOGRAM_NAME -> {
                 if (!input.matches("^[a-zA-Z0-9_\\-]+$")) {
                     return "&c名称只能包含字母、数字、下划线和连字符！";
                 }
-                break;
-            case DISPLAY_RANGE:
-            case UPDATE_INTERVAL:
-            case LINE_HEIGHT:
+            }
+            case DISPLAY_RANGE, UPDATE_INTERVAL, LINE_HEIGHT -> {
                 try {
                     int value = Integer.parseInt(input);
                     if (value <= 0) {
@@ -228,19 +231,19 @@ public class ChatInputManager implements Listener {
                 } catch (NumberFormatException e) {
                     return "&c请输入有效的数字！";
                 }
-                break;
-            case LINE_OFFSET:
+            }
+            case LINE_OFFSET -> {
                 if (!input.matches("^[\\d.\\- ]+$")) {
                     return "&c偏移值只能包含数字、小数点和负号！";
                 }
-                break;
-            case COORDINATES:
+            }
+            case COORDINATES -> {
                 if (!input.matches("^[\\d.\\- ]+$")) {
                     return "&c坐标只能包含数字、小数点和负号！";
                 }
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         
         return null;
