@@ -36,9 +36,6 @@ public class PacketListener {
     private Class<?> packetClass;
     private Method getHandleMethod;
     private Method getConnectionMethod;
-    private Method getChannelMethod;
-    private Field entityIdField;
-    private Field actionField;
 
     public PacketListener(WooHolograms plugin) {
         this.plugin = plugin;
@@ -93,7 +90,6 @@ public class PacketListener {
                 for (Field f : connectionClass.getDeclaredFields()) {
                     if (f.getType() == Channel.class) {
                         f.setAccessible(true);
-                        getChannelMethod = null;
                         break;
                     }
                 }
@@ -109,14 +105,23 @@ public class PacketListener {
                         packetClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayInUseEntity");
                     } catch (ClassNotFoundException e3) {
                         plugin.getLogger().warning("无法找到交互数据包类，点击功能可能无法正常工作");
+                        if (plugin.getConfigManager().isDebug()) {
+                            String errorMsg = e3.getMessage();
+                            plugin.getLogger().warning(() -> "详细错误: " + errorMsg);
+                        }
                     }
                 }
             }
             
-        } catch (Exception e) {
-            plugin.getLogger().warning("初始化反射失败: " + e.getMessage());
-            if (plugin.getConfigManager() != null && plugin.getConfigManager().isDebug()) {
-                e.printStackTrace();
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            String errorMsg = e.getMessage();
+            plugin.getLogger().warning(() -> "初始化反射失败: " + errorMsg);
+            if (plugin.getConfigManager().isDebug()) {
+                plugin.getLogger().warning("初始化反射详细错误信息:");
+                for (StackTraceElement ste : e.getStackTrace()) {
+                    String steStr = ste.toString();
+                    plugin.getLogger().warning(() -> "  at " + steStr);
+                }
             }
         }
     }
@@ -167,8 +172,10 @@ public class PacketListener {
                 playerChannels.put(player, channel);
             }
         } catch (Exception e) {
-            if (plugin.getConfigManager() != null && plugin.getConfigManager().isDebug()) {
-                plugin.getLogger().warning("无法为玩家 " + player.getName() + " 注入数据包监听器: " + e.getMessage());
+            if (plugin.getConfigManager().isDebug()) {
+                String playerName = player.getName();
+                String errorMsg = e.getMessage();
+                plugin.getLogger().warning(() -> "无法为玩家 " + playerName + " 注入数据包监听器: " + errorMsg);
             }
         }
     }
@@ -218,9 +225,9 @@ public class PacketListener {
                 }
             }
             
-        } catch (Exception e) {
-            if (plugin.getConfigManager() != null && plugin.getConfigManager().isDebug()) {
-                plugin.getLogger().warning("获取 Channel 失败: " + e.getMessage());
+        } catch (ReflectiveOperationException e) {
+            if (plugin.getConfigManager().isDebug()) {
+                plugin.getLogger().warning(() -> "获取 Channel 失败: " + e.getMessage());
             }
         }
         return null;
@@ -236,9 +243,10 @@ public class PacketListener {
         if (channel != null && channel.pipeline().get("wooholograms_packet") != null) {
             try {
                 channel.pipeline().remove("wooholograms_packet");
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 if (plugin.getConfigManager().isDebug()) {
-                    plugin.getLogger().warning("Failed to remove packet handler for player " + player.getName() + ": " + e.getMessage());
+                    String playerName = player.getName();
+                    plugin.getLogger().warning(() -> "Failed to remove packet handler for player " + playerName + ": " + e.getMessage());
                 }
             }
         }
@@ -293,8 +301,9 @@ public class PacketListener {
             
             return false;
         } catch (Exception e) {
-            if (plugin.getConfigManager() != null && plugin.getConfigManager().isDebug()) {
-                e.printStackTrace();
+            if (plugin.getConfigManager().isDebug()) {
+                String errorMsg = e.getMessage();
+                plugin.getLogger().warning(() -> "处理实体交互数据包时出错: " + errorMsg);
             }
             return false;
         }
@@ -317,8 +326,8 @@ public class PacketListener {
                     field.setAccessible(true);
                     Object value = field.get(packet);
                     
-                    if (value instanceof Integer) {
-                        return (Integer) value;
+                    if (value instanceof Integer intValue) {
+                        return intValue;
                     } else if (value != null) {
                         // 可能是一个包含 entityId 的对象
                         try {
@@ -335,16 +344,16 @@ public class PacketListener {
                     m.setAccessible(true);
                     try {
                         Object result = m.invoke(packet);
-                        if (result instanceof Integer) {
-                            return (Integer) result;
+                        if (result instanceof Integer intValue) {
+                            return intValue;
                         }
-                    } catch (Exception ignored) {}
+                    } catch (ReflectiveOperationException ignored) {}
                 }
             }
             
-        } catch (Exception e) {
+        } catch (ReflectiveOperationException e) {
             if (plugin.getConfigManager().isDebug()) {
-                plugin.getLogger().warning("Failed to get entity ID from packet: " + e.getMessage());
+                plugin.getLogger().warning(() -> "Failed to get entity ID from packet: " + e.getMessage());
             }
         }
         return -1;
@@ -381,9 +390,9 @@ public class PacketListener {
                 }
             }
             
-        } catch (Exception e) {
+        } catch (ReflectiveOperationException e) {
             if (plugin.getConfigManager().isDebug()) {
-                plugin.getLogger().warning("Failed to get click type from packet: " + e.getMessage());
+                plugin.getLogger().warning(() -> "Failed to get click type from packet: " + e.getMessage());
             }
         }
         
