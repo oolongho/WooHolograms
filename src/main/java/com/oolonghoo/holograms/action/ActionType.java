@@ -18,7 +18,6 @@ import java.util.Map;
  * 参考 DecentHolograms 的 ActionType 实现
  * 定义全息图支持的所有动作类型
  * 
- * @author oolongho
  */
 public abstract class ActionType {
 

@@ -28,7 +28,6 @@ import java.util.Arrays;
 /**
  * WooHolograms 全息图插件主类
  * 
- * @author oolongho
  */
 public class WooHolograms extends JavaPlugin {
 

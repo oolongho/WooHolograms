@@ -4,7 +4,6 @@ package com.oolonghoo.holograms.action;
  * 点击类型枚举
  * 定义全息图支持的点击类型
  * 
- * @author oolongho
  */
 public enum ClickType {
 

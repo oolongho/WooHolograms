@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
  * 参考 DecentHolograms 的 Action 实现
  * 表示一个可执行的动作
  * 
- * @author oolongho
  */
 public class Action {
 
