@@ -54,7 +54,8 @@ public class YamlHologramStorage implements HologramStorage {
             try {
                 hologramsFile.createNewFile();
             } catch (IOException e) {
-                plugin.getLogger().severe("无法创建全息图存储文件: " + e.getMessage());
+                String errorMsg = e.getMessage();
+                plugin.getLogger().severe(() -> "无法创建全息图存储文件: " + errorMsg);
             }
         }
         
@@ -322,7 +323,8 @@ public class YamlHologramStorage implements HologramStorage {
                     hologram.addFlags(flag);
                 } catch (IllegalArgumentException e) {
                     if (plugin.getConfigManager().isDebug()) {
-                        plugin.getLogger().warning("Unknown flag '" + flagStr + "' for hologram " + hologram.getName());
+                        String flagStrUp = flagStr.toUpperCase();
+                        plugin.getLogger().warning(() -> "Unknown flag '" + flagStr + "' for hologram " + hologram.getName());
                     }
                 }
             }
@@ -408,8 +410,8 @@ public class YamlHologramStorage implements HologramStorage {
                         line.setBrightness(Brightness.of(skyLight, blockLight));
                     } catch (NumberFormatException e) {
                         if (plugin.getConfigManager().isDebug()) {
-                            plugin.getLogger().warning("Invalid brightness format for line in hologram " + 
-                                    (line.getHologram() != null ? line.getHologram().getName() : "unknown") + ": " + brightnessValue);
+                            String hologramName = line.getHologram() != null ? line.getHologram().getName() : "unknown";
+                            plugin.getLogger().warning(() -> "Invalid brightness format for line in hologram " + hologramName + ": " + brightnessValue);
                         }
                     }
                 }
@@ -437,8 +439,8 @@ public class YamlHologramStorage implements HologramStorage {
                     line.addFlags(flag);
                 } catch (IllegalArgumentException e) {
                     if (plugin.getConfigManager().isDebug()) {
-                        plugin.getLogger().warning("Unknown flag '" + flagStr + "' for line in hologram " + 
-                                (line.getHologram() != null ? line.getHologram().getName() : "unknown"));
+                        String hologramName = line.getHologram() != null ? line.getHologram().getName() : "unknown";
+                        plugin.getLogger().warning(() -> "Unknown flag '" + flagStr + "' for line in hologram " + hologramName);
                     }
                 }
             }
@@ -467,7 +469,8 @@ public class YamlHologramStorage implements HologramStorage {
             storage.save(hologramsFile);
             return true;
         } catch (IOException e) {
-            plugin.getLogger().severe("无法保存全息图存储文件: " + e.getMessage());
+            String errorMsg = e.getMessage();
+            plugin.getLogger().severe(() -> "无法保存全息图存储文件: " + errorMsg);
             return false;
         }
     }
