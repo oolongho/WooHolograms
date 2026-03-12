@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 实体 ID 生成器
  * 用于生成唯一的实体 ID
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class EntityIdGenerator {
 

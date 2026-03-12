@@ -7,7 +7,7 @@ import org.bukkit.entity.EntityType;
  * 实体全息图渲染器接口
  * 用于显示自定义实体类型的全息图
  *
- * @author oolongho
+ * 
  */
 public interface NmsEntityHologramRenderer extends NmsHologramRenderer {
 

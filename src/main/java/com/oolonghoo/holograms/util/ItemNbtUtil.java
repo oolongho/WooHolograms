@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * 物品 NBT 数据工具类
  * 支持解析 NBT 格式和键值对格式
  *
- * @author oolongho
+ * 
  */
 public class ItemNbtUtil {
 

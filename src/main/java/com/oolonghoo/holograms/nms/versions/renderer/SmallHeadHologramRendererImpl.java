@@ -6,8 +6,8 @@ import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 /**
  * 小型头颅全息图渲染器实现
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class SmallHeadHologramRendererImpl extends HeadHologramRendererImpl implements NmsSmallHeadHologramRenderer {
 

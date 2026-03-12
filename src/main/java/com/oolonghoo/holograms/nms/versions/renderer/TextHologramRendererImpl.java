@@ -21,8 +21,8 @@ import java.util.*;
  * 使用 TextDisplay 实体显示文本
  * 支持双面渲染（创建两个背对背的 TextDisplay）
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class TextHologramRendererImpl implements NmsTextHologramRenderer {
  

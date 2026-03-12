@@ -7,7 +7,7 @@ import java.util.Objects;
  * 存储全息图的高级视觉效果设置
  * 参考 Minecraft 1.19.4+ Display Entity 的属性
  * 
- * @since 1.0.0
+ * 
  */
 public class DisplayHologramData {
 

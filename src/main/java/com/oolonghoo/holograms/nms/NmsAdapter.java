@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
  *
  * <p>此类提供对全息图渲染器工厂和包监听器的访问。</p>
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public interface NmsAdapter {
 

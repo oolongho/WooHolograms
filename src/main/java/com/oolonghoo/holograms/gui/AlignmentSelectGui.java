@@ -15,7 +15,7 @@ import java.util.Arrays;
  * 对齐设置 GUI
  * 用于设置全息图行的文本对齐方式
  *
- * @author oolongho
+ * 
  */
 public class AlignmentSelectGui extends GuiScreen {
 

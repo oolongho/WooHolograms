@@ -10,8 +10,8 @@ import java.util.Optional;
  * 实体类型注册表
  * 用于将 Bukkit EntityType 转换为 NMS EntityTypes
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public final class EntityTypeRegistry {
 

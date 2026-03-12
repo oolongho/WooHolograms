@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
  *
  * <p>这不是一个 Bukkit 事件，无法通过 Bukkit 监听器捕获！</p>
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class NmsEntityInteractEvent {
 

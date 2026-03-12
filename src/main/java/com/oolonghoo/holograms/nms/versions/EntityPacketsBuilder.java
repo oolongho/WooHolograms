@@ -25,8 +25,8 @@ import java.util.UUID;
  * 实体数据包构建器
  * 用于构建和发送实体相关的数据包
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class EntityPacketsBuilder {
 

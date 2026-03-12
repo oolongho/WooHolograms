@@ -13,8 +13,8 @@ import org.bukkit.entity.Player;
  * 入站数据包处理器
  * 用于处理玩家发送的数据包
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 class InboundPacketHandler extends ChannelInboundHandlerAdapter {
 

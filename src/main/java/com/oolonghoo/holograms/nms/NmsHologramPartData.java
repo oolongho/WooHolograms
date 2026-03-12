@@ -1,16 +1,16 @@
 package com.oolonghoo.holograms.nms;
 
-import com.oolonghoo.holograms.nms.util.DecentPosition;
-
 import java.util.function.Supplier;
+
+import com.oolonghoo.holograms.nms.util.DecentPosition;
 
 /**
  * 全息图部件数据类
  * 用于存储单个全息图部件的渲染数据
  *
  * @param <T> 全息图部件内容的类型
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class NmsHologramPartData<T> {
 

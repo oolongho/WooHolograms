@@ -23,8 +23,8 @@ import java.util.function.Consumer;
  *
  * <p>此实现使用 Paper 1.21+ NMS API。</p>
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 @SuppressWarnings("unused") // 通过反射实例化
 public class Nms_1_21 implements NmsAdapter {

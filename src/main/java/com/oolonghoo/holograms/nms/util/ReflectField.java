@@ -7,8 +7,8 @@ import java.lang.reflect.Field;
  * 用于访问和修改类的字段
  *
  * @param <T> 字段类型
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class ReflectField<T> {
 

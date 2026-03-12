@@ -1,14 +1,14 @@
 package com.oolonghoo.holograms.storage;
 
-import com.oolonghoo.holograms.hologram.Hologram;
-
 import java.util.Map;
+
+import com.oolonghoo.holograms.hologram.Hologram;
 
 /**
  * 全息图存储接口
  * 定义全息图持久化存储的基本操作
  * 
- * @since 1.0.0
+ * 
  */
 public interface HologramStorage {
 

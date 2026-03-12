@@ -13,7 +13,7 @@ import java.util.Arrays;
  * 朝向设置 GUI
  * 用于设置全息图的 Billboard 模式
  *
- * @author oolongho
+ * 
  */
 public class BillboardSelectGui extends GuiScreen {
 

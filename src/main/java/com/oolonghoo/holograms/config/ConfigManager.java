@@ -1,18 +1,19 @@
 package com.oolonghoo.holograms.config;
 
-import com.oolonghoo.holograms.WooHolograms;
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.configuration.file.FileConfiguration;
+
+import com.oolonghoo.holograms.WooHolograms;
+
 /**
  * 配置管理器
  * 负责加载和管理插件配置
  * 
- * @since 1.0.0
+ * 
  */
 public class ConfigManager {
 

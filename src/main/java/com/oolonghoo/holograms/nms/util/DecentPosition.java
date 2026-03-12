@@ -8,8 +8,8 @@ import org.bukkit.Location;
  *
  * <p>此实现是不可变的。</p>
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class DecentPosition {
 

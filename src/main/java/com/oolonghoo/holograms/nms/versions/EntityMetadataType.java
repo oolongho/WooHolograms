@@ -17,8 +17,8 @@ import java.util.Optional;
  * 用于构建实体的元数据项
  *
  * @param <T> 元数据值的类型
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 class EntityMetadataType<T> {
 

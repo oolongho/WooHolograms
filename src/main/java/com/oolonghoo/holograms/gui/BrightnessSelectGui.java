@@ -15,7 +15,7 @@ import java.util.Arrays;
  * 亮度设置 GUI
  * 用于设置全息图行的亮度等级
  *
- * @author oolongho
+ * 
  */
 public class BrightnessSelectGui extends GuiScreen {
 

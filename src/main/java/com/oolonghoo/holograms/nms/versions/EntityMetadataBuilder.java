@@ -20,8 +20,8 @@ import java.util.Optional;
  * 实体元数据构建器
  * 用于构建实体的元数据
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class EntityMetadataBuilder {
 

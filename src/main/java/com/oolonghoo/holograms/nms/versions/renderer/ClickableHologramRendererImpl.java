@@ -11,8 +11,8 @@ import org.bukkit.entity.Player;
 /**
  * 可点击全息图渲染器实现
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class ClickableHologramRendererImpl implements NmsClickableHologramRenderer {
 

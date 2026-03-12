@@ -12,8 +12,8 @@ import java.util.List;
  * 可点击全息图渲染器
  * 用于全息图中的点击检测
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public interface NmsClickableHologramRenderer extends NmsHologramRenderer {
 

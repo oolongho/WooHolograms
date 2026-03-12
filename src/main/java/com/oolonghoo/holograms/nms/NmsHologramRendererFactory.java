@@ -7,8 +7,8 @@ import com.oolonghoo.holograms.nms.renderer.*;
  *
  * <p>此工厂的实现提供适合渲染不同类型全息图元素的渲染器实例。</p>
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public interface NmsHologramRendererFactory {
 

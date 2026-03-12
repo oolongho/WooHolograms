@@ -6,8 +6,8 @@ import com.oolonghoo.holograms.nms.event.NmsEntityInteractEvent;
  * NMS 数据包监听器接口
  * 用于处理 NMS 相关事件
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public interface NmsPacketListener {
 

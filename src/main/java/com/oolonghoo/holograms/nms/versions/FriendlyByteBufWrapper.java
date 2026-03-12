@@ -7,8 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
  * 字节缓冲区包装类
  * 用于数据包序列化
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 class FriendlyByteBufWrapper {
 

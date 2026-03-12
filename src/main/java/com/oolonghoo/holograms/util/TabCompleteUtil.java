@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * TAB 补全工具类
  * 提供各种类型的补全提示
  *
- * @author oolongho
+ * 
  */
 public class TabCompleteUtil {
 

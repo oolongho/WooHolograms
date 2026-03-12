@@ -7,8 +7,8 @@ import com.oolonghoo.holograms.nms.versions.renderer.*;
 /**
  * 全息图渲染器工厂实现
  *
- * @author oolongho
- * @since 1.0.0
+ * 
+ * 
  */
 public class HologramRendererFactoryImpl implements NmsHologramRendererFactory {
 

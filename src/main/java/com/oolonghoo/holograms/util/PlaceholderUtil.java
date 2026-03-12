@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * 变量替换工具类
  * 支持在行内容中使用变量
  *
- * @author oolongho
+ * 
  */
 public class PlaceholderUtil {
 
