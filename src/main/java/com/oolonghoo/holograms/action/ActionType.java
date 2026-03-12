@@ -61,6 +61,10 @@ public abstract class ActionType {
         public boolean execute(Player player, String... args) {
             return true;
         }
+        
+        {
+            register();
+        }
     };
 
     /**
@@ -77,6 +81,10 @@ public abstract class ActionType {
             message = message.replace("{player}", player.getName());
             player.sendMessage(ColorUtil.colorize(message));
             return true;
+        }
+        
+        {
+            register();
         }
     };
 
@@ -97,7 +105,7 @@ public abstract class ActionType {
             if (WooHolograms.getInstance().getConfigManager().isCommandBlacklisted(command)) {
                 if (WooHolograms.getInstance().getConfigManager().isDebug()) {
                     WooHolograms.getInstance().getLogger().warning(
-                            "Blocked blacklisted command for player " + player.getName() + ": " + command);
+                            String.format("Blocked blacklisted command for player %s: %s", player.getName(), command));
                 }
                 player.sendMessage(ColorUtil.colorize("&c该命令被禁止执行！"));
                 return false;
@@ -109,6 +117,10 @@ public abstract class ActionType {
                 player.chat("/" + finalCommand);
             });
             return true;
+        }
+        
+        {
+            register();
         }
     };
 
@@ -129,7 +141,7 @@ public abstract class ActionType {
             if (WooHolograms.getInstance().getConfigManager().isCommandBlacklisted(command)) {
                 if (WooHolograms.getInstance().getConfigManager().isDebug()) {
                     WooHolograms.getInstance().getLogger().warning(
-                            "Blocked blacklisted console command for player " + player.getName() + ": " + command);
+                            String.format("Blocked blacklisted console command for player %s: %s", player.getName(), command));
                 }
                 player.sendMessage(ColorUtil.colorize("&c该命令被禁止执行！"));
                 return false;
@@ -141,6 +153,10 @@ public abstract class ActionType {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
             });
             return true;
+        }
+        
+        {
+            register();
         }
     };
 
@@ -186,6 +202,10 @@ public abstract class ActionType {
             player.playSound(player.getLocation(), sound, volume, pitch);
             return true;
         }
+        
+        {
+            register();
+        }
     };
 
     /**
@@ -212,6 +232,10 @@ public abstract class ActionType {
             });
             return true;
         }
+        
+        {
+            register();
+        }
     };
 
     /**
@@ -231,12 +255,22 @@ public abstract class ActionType {
                 out.writeUTF("Connect");
                 out.writeUTF(server);
                 player.sendPluginMessage(WooHolograms.getInstance(), "BungeeCord", byteArray.toByteArray());
-            } catch (Exception e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 if (WooHolograms.getInstance().getConfigManager().isDebug()) {
-                    WooHolograms.getInstance().getLogger().warning("BungeeCord connect failed: " + e.getMessage());
+                    WooHolograms.getInstance().getLogger().warning(
+                            String.format("BungeeCord connect failed: %s", e.getMessage()));
+                }
+            } catch (java.io.IOException e) {
+                if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                    WooHolograms.getInstance().getLogger().warning(
+                            String.format("BungeeCord connect failed due to IO error: %s", e.getMessage()));
                 }
             }
             return true;
+        }
+        
+        {
+            register();
         }
     };
 
@@ -263,6 +297,10 @@ public abstract class ActionType {
             hologram.show(player, nextPage);
             return true;
         }
+        
+        {
+            register();
+        }
     };
 
     /**
@@ -287,6 +325,10 @@ public abstract class ActionType {
 
             hologram.show(player, prevPage);
             return true;
+        }
+        
+        {
+            register();
         }
     };
 
@@ -324,6 +366,10 @@ public abstract class ActionType {
             hologram.show(player, page);
             return true;
         }
+        
+        {
+            register();
+        }
     };
 
     /*
@@ -342,6 +388,14 @@ public abstract class ActionType {
      */
     protected ActionType(String name) {
         this.name = name.toUpperCase();
+        // 注册操作延迟到构造完成后执行，避免在构造函数中泄漏 this
+    }
+
+    /**
+     * 注册动作类型到缓存
+     * 在子类构造完成后调用
+     */
+    protected void register() {
         if (VALUES.containsKey(this.name)) {
             throw new IllegalArgumentException("ActionType " + this.name + " 已存在！");
         }

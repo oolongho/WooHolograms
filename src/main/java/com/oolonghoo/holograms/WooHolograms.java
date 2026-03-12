@@ -20,14 +20,10 @@ import com.oolonghoo.holograms.storage.HologramStorage;
 import com.oolonghoo.holograms.storage.YamlHologramStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.PluginDescriptionFile;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.logging.Level;
-
-import java.util.logging.Logger;
 
 /**
  * WooHolograms 全息图插件主类
@@ -107,6 +103,7 @@ public class WooHolograms extends JavaPlugin {
         
         // 初始化聊天输入管理器
         chatInputManager = new ChatInputManager(this);
+        chatInputManager.register();
         
         // 初始化数据包监听器
         packetListener = new PacketListener(this);
@@ -327,15 +324,5 @@ public class WooHolograms extends JavaPlugin {
         } catch (NumberFormatException e) {
             return false;
         }
-    }
-    
-    private void debug(String message) {
-        if (configManager != null && configManager.isDebug()) {
-            getLogger().info("[DEBUG] " + message);
-        }
-    }
-    
-    private void warn(String message) {
-        getLogger().warning(message);
     }
 }

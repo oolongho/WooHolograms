@@ -143,7 +143,7 @@ public class ConfigManager {
         try {
             config.save(new File(plugin.getDataFolder(), "config.yml"));
         } catch (IOException e) {
-            plugin.getLogger().severe("无法保存配置文件: " + e.getMessage());
+            plugin.getLogger().severe(() -> "无法保存配置文件: " + e.getMessage());
         }
     }
 
