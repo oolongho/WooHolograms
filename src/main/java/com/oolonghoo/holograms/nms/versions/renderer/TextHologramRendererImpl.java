@@ -10,7 +10,6 @@ import com.oolonghoo.holograms.nms.util.DecentPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
-import com.oolonghoo.holograms.util.ColorUtil;
 import net.minecraft.network.syncher.SynchedEntityData;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -29,7 +28,7 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
  
     private final int frontEntityId;
     private final int backEntityId;
-    private boolean destroyed = false;
+    private final boolean destroyed = false;
     private float currentYaw = 0.0f;
     private float currentPitch = 0.0f;
     private boolean currentDoubleSided = false;
@@ -74,11 +73,15 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         float yaw;
 
         if (billboard == Billboard.FIXED_ANGLE) {
-            yaw = line.getCustomYaw() != null ? line.getCustomYaw() : hologramFacing;
-            pitch = line.getCustomPitch() != null ? line.getCustomPitch() : 0;
+            Float customYaw = line.getCustomYaw();
+            Float customPitch = line.getCustomPitch();
+            yaw = customYaw != null ? customYaw : hologramFacing;
+            pitch = customPitch != null ? customPitch : 0;
         } else {
-            yaw = line.getCustomYaw() != null ? line.getCustomYaw() : location.getYaw();
-            pitch = line.getCustomPitch() != null ? line.getCustomPitch() : location.getPitch();
+            Float customYaw = line.getCustomYaw();
+            Float customPitch = line.getCustomPitch();
+            yaw = customYaw != null ? customYaw : location.getYaw();
+            pitch = customPitch != null ? customPitch : location.getPitch();
         }
         
         this.currentYaw = yaw;

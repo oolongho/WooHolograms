@@ -19,7 +19,7 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
     private final int entityId;
     private EntityType entityType = EntityType.ZOMBIE;
-    private boolean destroyed = false;
+    private final boolean destroyed = false;
 
     public EntityHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.entityId = entityIdGenerator.getFreeEntityId();
@@ -51,11 +51,12 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
         }
 
         Hologram hologram = line != null ? line.getHologram() : null;
-        Billboard billboard = hologram != null ? hologram.getBillboard() : Billboard.CENTER;
         float hologramFacing = hologram != null ? hologram.getFacing() : 0f;
 
-        float yaw = line != null && line.getCustomYaw() != null ? line.getCustomYaw() : hologramFacing;
-        float pitch = line != null && line.getCustomPitch() != null ? line.getCustomPitch() : 0;
+        Float customYaw = line != null ? line.getCustomYaw() : null;
+        Float customPitch = line != null ? line.getCustomPitch() : null;
+        float yaw = customYaw != null ? customYaw : hologramFacing;
+        float pitch = customPitch != null ? customPitch : 0;
 
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withNoGravity()

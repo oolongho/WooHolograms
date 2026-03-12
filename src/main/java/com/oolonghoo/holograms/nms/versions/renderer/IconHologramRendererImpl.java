@@ -11,7 +11,6 @@ import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
 import com.oolonghoo.holograms.util.PlaceholderUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -31,7 +30,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
 
     private final int itemEntityId;
     private final int armorStandEntityId;
-    private boolean destroyed = false;
+    private final boolean destroyed = false;
 
     public IconHologramRendererImpl(EntityIdGenerator entityIdGenerator) {
         this.itemEntityId = entityIdGenerator.getFreeEntityId();
@@ -288,12 +287,12 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
                 Field profileField = meta.getClass().getDeclaredField("profile");
                 profileField.setAccessible(true);
                 profileField.set(meta, profile);
-            } catch (Exception e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 try {
                     Method setProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
                     setProfileMethod.setAccessible(true);
                     setProfileMethod.invoke(meta, profile);
-                } catch (Exception ignored) {
+                } catch (NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException ignored) {
                 }
             }
             

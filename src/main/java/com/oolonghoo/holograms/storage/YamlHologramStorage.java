@@ -72,13 +72,13 @@ public class YamlHologramStorage implements HologramStorage {
             
             Location loc = hologram.getLocation();
             if (loc == null) {
-                plugin.getLogger().warning("无法保存全息图 " + id + ": 位置为空");
+                plugin.getLogger().warning(() -> "无法保存全息图 " + id + ": 位置为空");
                 return false;
             }
             
             World world = loc.getWorld();
             if (world == null) {
-                plugin.getLogger().warning("无法保存全息图 " + id + ": 世界为空");
+                plugin.getLogger().warning(() -> "无法保存全息图 " + id + ": 世界为空");
                 return false;
             }
             
@@ -276,13 +276,13 @@ public class YamlHologramStorage implements HologramStorage {
         
         String worldName = section.getString("world");
         if (worldName == null || worldName.isEmpty()) {
-            plugin.getLogger().warning("无法加载全息图 " + id + ": 世界名称为空");
+            plugin.getLogger().warning(() -> "无法加载全息图 " + id + ": 世界名称为空");
             return null;
         }
         
         World world = plugin.getServer().getWorld(worldName);
         if (world == null) {
-            plugin.getLogger().warning("无法加载全息图 " + id + ": 世界 " + worldName + " 未加载，将在世界加载后自动加载");
+            plugin.getLogger().warning(() -> "无法加载全息图 " + id + ": 世界 " + worldName + " 未加载，将在世界加载后自动加载");
             return null;
         }
         
@@ -399,16 +399,18 @@ public class YamlHologramStorage implements HologramStorage {
         
         if (section.contains("brightness")) {
             String brightnessValue = section.getString("brightness", "15,15");
-            String[] brightnessParts = brightnessValue.split(",");
-            if (brightnessParts.length == 2) {
-                try {
-                    int skyLight = Integer.parseInt(brightnessParts[0]);
-                    int blockLight = Integer.parseInt(brightnessParts[1]);
-                    line.setBrightness(Brightness.of(skyLight, blockLight));
-                } catch (NumberFormatException e) {
-                    if (plugin.getConfigManager().isDebug()) {
-                        plugin.getLogger().warning("Invalid brightness format for line in hologram " + 
-                                (line.getHologram() != null ? line.getHologram().getName() : "unknown") + ": " + brightnessValue);
+            if (brightnessValue != null) {
+                String[] brightnessParts = brightnessValue.split(",");
+                if (brightnessParts.length == 2) {
+                    try {
+                        int skyLight = Integer.parseInt(brightnessParts[0]);
+                        int blockLight = Integer.parseInt(brightnessParts[1]);
+                        line.setBrightness(Brightness.of(skyLight, blockLight));
+                    } catch (NumberFormatException e) {
+                        if (plugin.getConfigManager().isDebug()) {
+                            plugin.getLogger().warning("Invalid brightness format for line in hologram " + 
+                                    (line.getHologram() != null ? line.getHologram().getName() : "unknown") + ": " + brightnessValue);
+                        }
                     }
                 }
             }
@@ -470,6 +472,7 @@ public class YamlHologramStorage implements HologramStorage {
         }
     }
 
+    @Override
     public void reload() {
         storage = YamlConfiguration.loadConfiguration(hologramsFile);
     }

@@ -218,16 +218,12 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
             return new ItemStack(Material.PLAYER_HEAD);
         }
 
-        switch (headTexture.getType()) {
-            case BASE64:
-                return createHeadFromBase64(headTexture.getValue());
-            case PLAYER:
-                return createHeadFromPlayerName(headTexture.getValue());
-            case HDB:
-                return createHeadFromHDB(headTexture.getValue());
-            default:
-                return new ItemStack(Material.PLAYER_HEAD);
-        }
+        return switch (headTexture.getType()) {
+            case BASE64 -> createHeadFromBase64(headTexture.getValue());
+            case PLAYER -> createHeadFromPlayerName(headTexture.getValue());
+            case HDB -> createHeadFromHDB(headTexture.getValue());
+            default -> new ItemStack(Material.PLAYER_HEAD);
+        };
     }
     
     protected ItemStack createHeadItem(HologramLine line, Player player) {
@@ -248,16 +244,12 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
             value = com.oolonghoo.holograms.util.PlaceholderUtil.replace(value, player);
         }
 
-        switch (headTexture.getType()) {
-            case BASE64:
-                return createHeadFromBase64(value);
-            case PLAYER:
-                return createHeadFromPlayerName(value);
-            case HDB:
-                return createHeadFromHDB(value);
-            default:
-                return new ItemStack(Material.PLAYER_HEAD);
-        }
+        return switch (headTexture.getType()) {
+            case BASE64 -> createHeadFromBase64(value);
+            case PLAYER -> createHeadFromPlayerName(value);
+            case HDB -> createHeadFromHDB(value);
+            default -> new ItemStack(Material.PLAYER_HEAD);
+        };
     }
 
     protected ItemStack createHeadFromBase64(String base64) {
@@ -272,12 +264,12 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
                 Field profileField = meta.getClass().getDeclaredField("profile");
                 profileField.setAccessible(true);
                 profileField.set(meta, profile);
-            } catch (Exception e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 try {
                     Method setProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
                     setProfileMethod.setAccessible(true);
                     setProfileMethod.invoke(meta, profile);
-                } catch (Exception ignored) {
+                } catch (NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException ignored) {
                 }
             }
             
@@ -308,7 +300,7 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
                 if (head != null) {
                     return head;
                 }
-            } catch (Exception ignored) {
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | java.lang.reflect.InvocationTargetException ignored) {
             }
         }
         return new ItemStack(Material.PLAYER_HEAD);
