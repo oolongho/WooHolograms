@@ -73,11 +73,12 @@ public class MoveToCommand extends Subcommand {
             return true;
         }
 
-        Location newLocation = new Location(world, x, y, z);
+        final World finalWorld = world;
+        Location newLocation = new Location(finalWorld, x, y, z);
         hologram.teleport(newLocation);
         hologram.save();
 
-        sender.sendMessage(ColorUtil.colorize("&a已将全息图 " + name + " 移动到 " + world.getName() + " (" + x + ", " + y + ", " + z + ")"));
+        sender.sendMessage(ColorUtil.colorize("&a已将全息图 " + name + " 移动到 " + finalWorld.getName() + " (" + x + ", " + y + ", " + z + ")"));
         return true;
     }
 
