@@ -1,19 +1,20 @@
 package com.oolonghoo.holograms.command.subcommand;
 
-import com.oolonghoo.holograms.WooHolograms;
-import com.oolonghoo.holograms.command.Subcommand;
-import com.oolonghoo.holograms.hologram.Hologram;
-import com.oolonghoo.holograms.util.ColorUtil;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.oolonghoo.holograms.WooHolograms;
+import com.oolonghoo.holograms.command.Subcommand;
+import com.oolonghoo.holograms.hologram.Hologram;
+import com.oolonghoo.holograms.util.ColorUtil;
 
 /**
  * 移动全息图到指定位置命令
@@ -61,12 +62,15 @@ public class MoveToCommand extends Subcommand {
                 sender.sendMessage(ColorUtil.colorize("&c世界 " + args[4] + " 不存在！"));
                 return true;
             }
+        } else if (sender instanceof Player player) {
+            world = player.getWorld();
         } else {
-            if (sender instanceof Player) {
-                world = ((Player) sender).getWorld();
-            } else {
-                world = hologram.getLocation().getWorld();
-            }
+            world = hologram.getLocation().getWorld();
+        }
+        
+        if (world == null) {
+            sender.sendMessage(ColorUtil.colorize("&c无法确定目标世界！"));
+            return true;
         }
 
         Location newLocation = new Location(world, x, y, z);
