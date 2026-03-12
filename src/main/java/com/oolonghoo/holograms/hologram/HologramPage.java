@@ -686,7 +686,7 @@ public class HologramPage {
         location.setY((int) (location.getY() - (parent.isDownOrigin() ? 0 : getHeight())) + 0.5);
 
         for (int i = 0; i < amount; i++) {
-            NmsHologramRenderer renderer = getClickableRenderer(i);
+            getClickableRenderer(i);
             // 渲染可点击实体
             // renderer.display(player, location);
             location.add(0, 1.8, 0);

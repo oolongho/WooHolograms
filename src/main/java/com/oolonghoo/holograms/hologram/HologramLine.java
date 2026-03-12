@@ -45,10 +45,10 @@ public class HologramLine {
 
     // 内容相关
     private String content;
-    private HologramType type;
+    private HologramType type = HologramType.UNKNOWN;
     private double height;
     private HeadTexture headTexture;
-    private org.bukkit.entity.EntityType entityType;
+    private org.bukkit.entity.EntityType entityType = org.bukkit.entity.EntityType.ZOMBIE;
 
     // 偏移
     private double offsetX;
@@ -114,7 +114,6 @@ public class HologramLine {
         this.parent = parent;
         this.location = location != null ? location.clone() : null;
         this.content = content != null ? content : "";
-        this.type = HologramType.UNKNOWN;
         this.height = DEFAULT_HEIGHT_TEXT;
         this.offsetX = 0.0;
         this.offsetY = 0.0;
@@ -139,7 +138,7 @@ public class HologramLine {
     /**
      * 解析内容，确定类型和高度
      */
-    public void parseContent() {
+    public final void parseContent() {
         synchronized (renderMutex) {
             HologramType prevType = this.type;
             String upperContent = content.toUpperCase(Locale.ROOT);
@@ -281,7 +280,7 @@ public class HologramLine {
 
             hidePreviousIfNecessary();
 
-            List<Player> playerList = players != null && players.length > 0 
+            List<Player> playerList = (players != null && players.length > 0) 
                     ? Arrays.asList(players) 
                     : new ArrayList<>(Bukkit.getOnlinePlayers());
 
@@ -332,9 +331,6 @@ public class HologramLine {
         }
         
         WooHolograms plugin = WooHolograms.getInstance();
-        if (plugin == null) {
-            return;
-        }
         
         HologramRendererPool pool = plugin.getRendererPool();
         if (pool != null) {
@@ -345,45 +341,15 @@ public class HologramLine {
         }
         
         NmsHologramRendererFactory factory = plugin.getRendererFactory();
-        if (factory == null) {
-            return;
-        }
         
-        switch (type) {
-            case TEXT:
-                renderer = factory.createTextRenderer();
-                break;
-            case ICON:
-                renderer = factory.createIconRenderer();
-                break;
-            case HEAD:
-                renderer = factory.createHeadRenderer();
-                break;
-            case SMALLHEAD:
-                renderer = factory.createSmallHeadRenderer();
-                break;
-            case ENTITY:
-                renderer = factory.createEntityRenderer();
-                break;
-            default:
-                renderer = factory.createTextRenderer();
-                break;
-        }
-    }
-
-    private String getText(Player player) {
-        String text = content;
-        
-        if (containsPlaceholders) {
-            WooHolograms plugin = WooHolograms.getInstance();
-            if (plugin != null && plugin.getPlaceholderHook() != null) {
-                text = plugin.getPlaceholderHook().setPlaceholders(player, text);
-            }
-        }
-        
-        text = ColorUtil.colorize(text);
-        
-        return text;
+        renderer = switch (type) {
+            case TEXT -> factory.createTextRenderer();
+            case ICON -> factory.createIconRenderer();
+            case HEAD -> factory.createHeadRenderer();
+            case SMALLHEAD -> factory.createSmallHeadRenderer();
+            case ENTITY -> factory.createEntityRenderer();
+            default -> factory.createTextRenderer();
+        };
     }
 
     /**
@@ -395,7 +361,7 @@ public class HologramLine {
         synchronized (renderMutex) {
             hidePreviousIfNecessary();
 
-            List<Player> playerList = players != null && players.length > 0 
+            List<Player> playerList = (players != null && players.length > 0) 
                     ? Arrays.asList(players) 
                     : new ArrayList<>(getViewerPlayers());
 
@@ -433,7 +399,7 @@ public class HologramLine {
 
             hidePreviousIfNecessary();
 
-            List<Player> playerList = players != null && players.length > 0 
+            List<Player> playerList = (players != null && players.length > 0) 
                     ? Arrays.asList(players) 
                     : new ArrayList<>(getViewerPlayers());
 
@@ -459,7 +425,7 @@ public class HologramLine {
 
             hidePreviousIfNecessary();
 
-            List<Player> playerList = players != null && players.length > 0 
+            List<Player> playerList = (players != null && players.length > 0) 
                     ? Arrays.asList(players) 
                     : new ArrayList<>(getViewerPlayers());
 
@@ -483,7 +449,7 @@ public class HologramLine {
 
             hidePreviousIfNecessary();
 
-            List<Player> playerList = players != null && players.length > 0 
+            List<Player> playerList = (players != null && players.length > 0) 
                     ? Arrays.asList(players) 
                     : new ArrayList<>(getViewerPlayers());
 
@@ -582,7 +548,7 @@ public class HologramLine {
         text = text.replace("{pages}", String.valueOf(parent != null ? parent.getParent().size() : 1));
 
         // PlaceholderAPI 占位符由 hook 处理
-        if (WooHolograms.getInstance() != null && WooHolograms.getInstance().getPlaceholderHook() != null) {
+        if (WooHolograms.getInstance().getPlaceholderHook() != null) {
             text = WooHolograms.getInstance().getPlaceholderHook().setPlaceholders(player, text);
         }
 
@@ -601,7 +567,7 @@ public class HologramLine {
         }
 
         // 动画解析由 AnimationManager 处理
-        if (WooHolograms.getInstance() != null && WooHolograms.getInstance().getAnimationManager() != null) {
+        if (WooHolograms.getInstance().getAnimationManager() != null) {
             return WooHolograms.getInstance().getAnimationManager().parseTextAnimations(text);
         }
 
@@ -854,27 +820,23 @@ public class HologramLine {
         String content = (String) map.getOrDefault("content", "");
         HologramLine line = new HologramLine(parent, location, content);
 
-        if (map.containsKey("height")) {
-            Object height = map.get("height");
-            if (height instanceof Number) {
-                line.setHeight(((Number) height).doubleValue());
-            }
+        if (map.containsKey("height") && map.get("height") instanceof Number height) {
+            line.setHeight(height.doubleValue());
         }
 
-        if (map.containsKey("flags")) {
-            Object flagsObj = map.get("flags");
-            if (flagsObj instanceof List) {
-                try {
-                    for (String flagStr : (List<String>) flagsObj) {
+        if (map.containsKey("flags") && map.get("flags") instanceof List<?> flagsList) {
+            try {
+                for (Object flagObj : flagsList) {
+                    if (flagObj instanceof String flagStr) {
                         EnumFlag flag = EnumFlag.fromId(flagStr);
                         if (flag != null) {
                             line.addFlags(flag);
                         }
                     }
-                } catch (Exception e) {
-                    if (WooHolograms.getInstance().getConfigManager().isDebug()) {
-                        WooHolograms.getInstance().getLogger().warning("Failed to parse flags: " + e.getMessage());
-                    }
+                }
+            } catch (Exception e) {
+                if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                    WooHolograms.getInstance().getLogger().warning(() -> "Failed to parse flags: " + e.getMessage());
                 }
             }
         }
@@ -883,57 +845,39 @@ public class HologramLine {
             line.setPermission((String) map.get("permission"));
         }
 
-        if (map.containsKey("offsetX")) {
-            Object offsetX = map.get("offsetX");
-            if (offsetX instanceof Number) {
-                line.setOffsetX(((Number) offsetX).doubleValue());
-            }
+        if (map.containsKey("offsetX") && map.get("offsetX") instanceof Number offsetX) {
+            line.setOffsetX(offsetX.doubleValue());
         }
 
-        if (map.containsKey("offsetZ")) {
-            Object offsetZ = map.get("offsetZ");
-            if (offsetZ instanceof Number) {
-                line.setOffsetZ(((Number) offsetZ).doubleValue());
-            }
+        if (map.containsKey("offsetZ") && map.get("offsetZ") instanceof Number offsetZ) {
+            line.setOffsetZ(offsetZ.doubleValue());
         }
 
-        if (map.containsKey("facing")) {
-            Object facing = map.get("facing");
-            if (facing instanceof Number) {
-                line.setFacing(((Number) facing).floatValue());
-            }
+        if (map.containsKey("facing") && map.get("facing") instanceof Number facing) {
+            line.setFacing(facing.floatValue());
         }
 
-        if (map.containsKey("brightness")) {
-            Object brightnessObj = map.get("brightness");
-            if (brightnessObj instanceof String) {
-                String[] parts = ((String) brightnessObj).split(",");
-                if (parts.length == 2) {
-                    try {
-                        int sky = Integer.parseInt(parts[0].trim());
-                        int block = Integer.parseInt(parts[1].trim());
-                        line.setBrightness(Brightness.of(sky, block));
-                    } catch (NumberFormatException e) {
-                        if (WooHolograms.getInstance().getConfigManager().isDebug()) {
-                            WooHolograms.getInstance().getLogger().warning("Failed to parse brightness: " + brightnessObj);
-                        }
+        if (map.containsKey("brightness") && map.get("brightness") instanceof String brightnessObj) {
+            String[] parts = brightnessObj.split(",");
+            if (parts.length == 2) {
+                try {
+                    int sky = Integer.parseInt(parts[0].trim());
+                    int block = Integer.parseInt(parts[1].trim());
+                    line.setBrightness(Brightness.of(sky, block));
+                } catch (NumberFormatException e) {
+                    if (WooHolograms.getInstance().getConfigManager().isDebug()) {
+                        WooHolograms.getInstance().getLogger().warning(() -> "Failed to parse brightness: " + brightnessObj);
                     }
                 }
             }
         }
 
-        if (map.containsKey("alignment")) {
-            Object alignmentObj = map.get("alignment");
-            if (alignmentObj instanceof String) {
-                line.setAlignment(TextAlignment.fromId((String) alignmentObj));
-            }
+        if (map.containsKey("alignment") && map.get("alignment") instanceof String alignmentObj) {
+            line.setAlignment(TextAlignment.fromId(alignmentObj));
         }
 
-        if (map.containsKey("billboard")) {
-            Object billboardObj = map.get("billboard");
-            if (billboardObj instanceof String) {
-                line.setBillboard(Billboard.fromId((String) billboardObj));
-            }
+        if (map.containsKey("billboard") && map.get("billboard") instanceof String billboardObj) {
+            line.setBillboard(Billboard.fromId(billboardObj));
         }
 
         return line;
@@ -957,7 +901,7 @@ public class HologramLine {
         line.setBrightness(this.brightness);
         line.setAlignment(this.alignment);
         line.setBillboard(this.billboard);
-        line.addFlags(this.flags.toArray(new EnumFlag[0]));
+        line.addFlags(this.flags.toArray(EnumFlag[]::new));
         return line;
     }
 
@@ -989,11 +933,9 @@ public class HologramLine {
         if (renderer != null) {
             renderer.destroy(getViewerPlayers());
             WooHolograms plugin = WooHolograms.getInstance();
-            if (plugin != null) {
-                HologramRendererPool pool = plugin.getRendererPool();
-                if (pool != null) {
-                    pool.release(renderer);
-                }
+            HologramRendererPool pool = plugin.getRendererPool();
+            if (pool != null) {
+                pool.release(renderer);
             }
             renderer = null;
         }
@@ -1055,7 +997,7 @@ public class HologramLine {
 
     public HologramType getType() {
         synchronized (renderMutex) {
-            return type != null ? type : HologramType.UNKNOWN;
+            return type;
         }
     }
 
@@ -1064,7 +1006,7 @@ public class HologramLine {
     }
     
     public org.bukkit.entity.EntityType getEntityType() {
-        return entityType != null ? entityType : org.bukkit.entity.EntityType.ZOMBIE;
+        return entityType;
     }
 
     public double getHeight() {
@@ -1256,7 +1198,10 @@ public class HologramLine {
     }
 
     public int[] getEntityIds() {
-        return renderer != null ? renderer.getEntityIds().stream().mapToInt(Integer::intValue).toArray() : new int[0];
+        if (renderer == null) {
+            return new int[0];
+        }
+        return renderer.getEntityIds().stream().mapToInt(Integer::intValue).toArray();
     }
 
     @Override

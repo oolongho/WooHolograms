@@ -326,7 +326,7 @@ public class HologramManager {
         // 启动更新任务
         startUpdateTask();
 
-        plugin.getLogger().info("已加载 " + loaded.size() + " 个全息图");
+        plugin.getLogger().info(() -> "已加载 " + loaded.size() + " 个全息图");
     }
 
     /**
@@ -523,9 +523,7 @@ public class HologramManager {
             updateTask = null;
         }
 
-        long interval = plugin.getConfigManager() != null 
-                ? plugin.getConfigManager().getUpdateInterval() 
-                : 3L;
+        long interval = plugin.getConfigManager().getUpdateInterval();
 
         if (interval <= 0) {
             return;
@@ -561,7 +559,7 @@ public class HologramManager {
             // 使用缓存的全息图数组，避免每次创建新列表
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastCacheUpdate > CACHE_UPDATE_INTERVAL * 50) {
-                cachedHolograms = holograms.values().toArray(new Hologram[0]);
+                cachedHolograms = holograms.values().toArray(new Hologram[holograms.size()]);
                 lastCacheUpdate = currentTime;
             }
             
