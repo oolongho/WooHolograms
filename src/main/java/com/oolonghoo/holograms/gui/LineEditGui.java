@@ -348,17 +348,11 @@ public class LineEditGui extends GuiScreen {
             HeadTexture headTexture = line.getHeadTexture();
             String textureDisplay = "未设置";
             if (headTexture != null) {
-                switch (headTexture.getType()) {
-                    case BASE64:
-                        textureDisplay = "URL材质";
-                        break;
-                    case PLAYER:
-                        textureDisplay = "玩家: " + headTexture.getValue();
-                        break;
-                    case HDB:
-                        textureDisplay = "HDB: " + headTexture.getValue();
-                        break;
-                }
+                textureDisplay = switch (headTexture.getType()) {
+                    case BASE64 -> "URL材质";
+                    case PLAYER -> "玩家: " + headTexture.getValue();
+                    case HDB -> "HDB: " + headTexture.getValue();
+                };
             }
             
             setButton(21, GuiButton.builder(Material.PLAYER_HEAD)
@@ -485,7 +479,7 @@ public class LineEditGui extends GuiScreen {
         }
         
         // 下移按钮
-        if (page != null && lineIndex < page.size() - 1) {
+        if (lineIndex < page.size() - 1) {
             setButton(35, GuiButton.builder(Material.ARROW)
                     .name("&f下移")
                     .lore(Arrays.asList(

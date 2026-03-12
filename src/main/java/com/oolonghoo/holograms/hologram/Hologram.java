@@ -105,19 +105,11 @@ public class Hologram {
         this.enabled = true;
         
         WooHolograms plugin = WooHolograms.getInstance();
-        if (plugin != null && plugin.getConfigManager() != null) {
-            this.displayRange = plugin.getConfigManager().getDefaultDisplayRange();
-            this.updateRange = plugin.getConfigManager().getDefaultUpdateRange();
-            this.updateInterval = plugin.getConfigManager().getDefaultUpdateInterval();
-            this.downOrigin = plugin.getConfigManager().isDefaultDownOrigin();
-            this.lineHeight = plugin.getConfigManager().getDefaultLineHeight();
-        } else {
-            this.displayRange = 48.0;
-            this.updateRange = 48.0;
-            this.updateInterval = 3;
-            this.downOrigin = true;
-            this.lineHeight = 0.25;
-        }
+        this.displayRange = plugin.getConfigManager().getDefaultDisplayRange();
+        this.updateRange = plugin.getConfigManager().getDefaultUpdateRange();
+        this.updateInterval = plugin.getConfigManager().getDefaultUpdateInterval();
+        this.downOrigin = plugin.getConfigManager().isDefaultDownOrigin();
+        this.lineHeight = plugin.getConfigManager().getDefaultLineHeight();
         
         this.facing = 0.0f;
         this.type = HologramType.TEXT;
@@ -133,8 +125,8 @@ public class Hologram {
         this.defaultVisibleState = true;
         this.clickableRenderers = new ArrayList<>();
 
-        // 添加默认页
-        addPage();
+        // 添加默认页（直接创建，避免在构造函数中调用可覆盖的方法）
+        pages.add(new HologramPage(this, 0));
     }
 
     /*
@@ -1693,8 +1685,7 @@ public class Hologram {
         loc.setY((int) (loc.getY() - (downOrigin ? 0 : page.getHeight())) + 0.5);
 
         for (int i = 0; i < amount; i++) {
-            NmsHologramRenderer renderer = getClickableRenderer(i);
-            // renderer.display(player, loc);
+            getClickableRenderer(i);
             loc.add(0, 1.8, 0);
         }
     }
@@ -1749,8 +1740,7 @@ public class Hologram {
         loc.setY((int) (loc.getY() - (downOrigin ? 0 : page.getHeight())) + 0.5);
 
         for (int i = 0; i < amount; i++) {
-            NmsHologramRenderer renderer = getClickableRenderer(i);
-            // renderer.move(player, loc);
+            getClickableRenderer(i);
             loc.add(0, 1.8, 0);
         }
     }
@@ -2111,9 +2101,9 @@ public class Hologram {
             return;
         }
 
-        double displayRange = getDisplayRange();
+        double range = getDisplayRange();
         for (Player player : loc.getWorld().getPlayers()) {
-            if (player.getLocation().distanceSquared(loc) <= displayRange * displayRange) {
+            if (player.getLocation().distanceSquared(loc) <= range * range) {
                 show(player, 0);
             }
         }

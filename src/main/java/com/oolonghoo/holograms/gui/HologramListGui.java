@@ -201,10 +201,8 @@ public class HologramListGui extends GuiScreen {
     
     private void sortHolograms(List<Hologram> holograms) {
         switch (sortType) {
-            case NAME:
-                holograms.sort(Comparator.comparing(Hologram::getName, String.CASE_INSENSITIVE_ORDER));
-                break;
-            case DISTANCE:
+            case NAME -> holograms.sort(Comparator.comparing(Hologram::getName, String.CASE_INSENSITIVE_ORDER));
+            case DISTANCE -> {
                 Player nearestPlayer = plugin.getServer().getOnlinePlayers().stream().findFirst().orElse(null);
                 if (nearestPlayer != null) {
                     Location playerLoc = nearestPlayer.getLocation();
@@ -219,23 +217,19 @@ public class HologramListGui extends GuiScreen {
                         return Double.compare(playerLoc.distanceSquared(loc1), playerLoc.distanceSquared(loc2));
                     });
                 }
-                break;
-            case ENABLED:
-                holograms.sort((h1, h2) -> {
-                    int cmp = Boolean.compare(h2.isEnabled(), h1.isEnabled());
-                    if (cmp != 0) return cmp;
-                    return h1.getName().compareToIgnoreCase(h2.getName());
-                });
-                break;
-            case LINES:
-                holograms.sort((h1, h2) -> {
-                    int lines1 = getTotalLines(h1);
-                    int lines2 = getTotalLines(h2);
-                    int cmp = Integer.compare(lines2, lines1);
-                    if (cmp != 0) return cmp;
-                    return h1.getName().compareToIgnoreCase(h2.getName());
-                });
-                break;
+            }
+            case ENABLED -> holograms.sort((h1, h2) -> {
+                int cmp = Boolean.compare(h2.isEnabled(), h1.isEnabled());
+                if (cmp != 0) return cmp;
+                return h1.getName().compareToIgnoreCase(h2.getName());
+            });
+            case LINES -> holograms.sort((h1, h2) -> {
+                int lines1 = getTotalLines(h1);
+                int lines2 = getTotalLines(h2);
+                int cmp = Integer.compare(lines2, lines1);
+                if (cmp != 0) return cmp;
+                return h1.getName().compareToIgnoreCase(h2.getName());
+            });
         }
     }
     
