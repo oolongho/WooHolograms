@@ -5,7 +5,6 @@ package com.oolonghoo.holograms.hologram;
  * 定义不同类型的全息图行内容
  * 参考 DecentHolograms 的 HologramLineType 实现
  * 
- * @author oolongho
  */
 public enum HologramType {
 

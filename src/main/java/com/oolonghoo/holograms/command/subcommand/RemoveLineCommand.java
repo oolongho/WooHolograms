@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  * 删除行命令
  * /wh removeline <名称> <行号>
  * 
- * @author oolongho
  */
 public class RemoveLineCommand extends Subcommand {
 

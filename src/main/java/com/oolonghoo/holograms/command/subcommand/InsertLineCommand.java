@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  * 插入行命令
  * /wh insertline <名称> <行号> <内容>
  * 
- * @author oolongho
  */
 public class InsertLineCommand extends Subcommand {
 

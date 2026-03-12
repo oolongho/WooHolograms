@@ -13,7 +13,6 @@ import java.util.Arrays;
  * 页面管理 GUI
  * 用于管理全息图的页面
  * 
- * @author oolongho
  */
 public class PageManageGui extends GuiScreen {
 

@@ -8,7 +8,6 @@ import java.util.Map;
  * 全息图存储接口
  * 定义全息图持久化存储的基本操作
  * 
- * @author oolongho
  * @since 1.0.0
  */
 public interface HologramStorage {

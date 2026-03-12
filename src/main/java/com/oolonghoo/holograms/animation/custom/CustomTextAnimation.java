@@ -11,7 +11,6 @@ import java.util.List;
  * 自定义文本动画
  * 从配置文件加载的自定义动画
  * 
- * @author oolongho
  */
 public class CustomTextAnimation extends TextAnimation {
 

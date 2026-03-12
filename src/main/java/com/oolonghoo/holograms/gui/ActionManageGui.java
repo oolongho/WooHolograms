@@ -18,7 +18,6 @@ import java.util.List;
  * 动作管理 GUI
  * 用于管理全息图的点击动作
  * 
- * @author oolongho
  */
 public class ActionManageGui extends GuiScreen {
 

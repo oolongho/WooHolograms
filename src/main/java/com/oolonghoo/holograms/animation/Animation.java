@@ -8,7 +8,6 @@ import java.util.List;
  * 参考 DecentHolograms 的 Animation 实现
  * 定义全息图动画的基本属性和行为
  * 
- * @author oolongho
  */
 public abstract class Animation {
 

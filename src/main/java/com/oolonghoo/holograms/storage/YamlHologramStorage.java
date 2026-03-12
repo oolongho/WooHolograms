@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
  * YAML 格式的全息图存储实现
  * 使用 YAML 文件存储全息图数据
  * 
- * @author oolongho
  */
 public class YamlHologramStorage implements HologramStorage {
 

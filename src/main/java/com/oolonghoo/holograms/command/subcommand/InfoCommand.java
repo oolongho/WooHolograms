@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
  * 查看全息图信息命令
  * /wh info <名称>
  * 
- * @author oolongho
  */
 public class InfoCommand extends Subcommand {
 

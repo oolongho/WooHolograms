@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
  * 添加行命令
  * /wh addline <名称> <内容>
  * 
- * @author oolongho
  */
 public class AddLineCommand extends Subcommand {
 

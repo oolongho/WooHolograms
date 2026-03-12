@@ -22,7 +22,6 @@ import java.util.Map;
  * 监听玩家交互数据包以检测全息图点击
  * 使用反射实现版本兼容
  * 
- * @author oolongho
  */
 public class PacketListener {
 

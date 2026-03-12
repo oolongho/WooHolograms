@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.animation.TextAnimation;
  * 参考 DecentHolograms 的 ScrollAnimation 实现
  * 创建文本滚动效果
  * 
- * @author oolongho
  */
 public class ScrollAnimation extends TextAnimation {
 

@@ -8,7 +8,6 @@ import com.oolonghoo.holograms.util.TextUtil;
  * 参考 DecentHolograms 的 TextAnimation 实现
  * 用于处理文本相关的动画效果
  * 
- * @author oolongho
  */
 public abstract class TextAnimation extends Animation {
 

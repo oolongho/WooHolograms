@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
  * PlaceholderAPI 扩展
  * 提供全息图相关占位符
  * 
- * @author oolongho
  */
 public class PlaceholderHook extends PlaceholderExpansion {
 

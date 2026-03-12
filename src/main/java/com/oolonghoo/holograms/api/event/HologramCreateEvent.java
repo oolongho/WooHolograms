@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
  * 全息图创建事件
  * 当全息图被创建时触发
  * 
- * @author oolongho
  */
 public class HologramCreateEvent extends Event implements Cancellable {
 

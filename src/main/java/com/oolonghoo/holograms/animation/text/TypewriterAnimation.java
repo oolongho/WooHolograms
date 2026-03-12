@@ -9,7 +9,6 @@ import java.util.Arrays;
  * 参考 DecentHolograms 的 TypewriterAnimation 实现
  * 创建逐字显示的打字机效果
  * 
- * @author oolongho
  */
 public class TypewriterAnimation extends TextAnimation {
 

@@ -12,7 +12,6 @@ import java.util.Optional;
  * WooHolograms API
  * 提供对外接口供其他插件使用
  * 
- * @author oolongho
  */
 public class WooHologramsAPI {
 

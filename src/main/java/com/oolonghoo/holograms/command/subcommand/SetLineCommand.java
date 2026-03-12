@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
  * 设置行命令
  * /wh setline <名称> <行号> <内容>
  * 
- * @author oolongho
  */
 public class SetLineCommand extends Subcommand {
 

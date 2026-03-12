@@ -11,7 +11,6 @@ import org.bukkit.event.world.WorldUnloadEvent;
  * 世界事件监听器
  * 处理世界加载、卸载等事件
  * 
- * @author oolongho
  */
 public class WorldListener implements Listener {
 

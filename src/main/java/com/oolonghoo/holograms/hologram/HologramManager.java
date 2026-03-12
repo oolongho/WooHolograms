@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * 负责全息图的创建、删除、存储和更新
  * 参考 DecentHolograms 的 HologramManager 实现
  * 
- * @author oolongho
  */
 public class HologramManager {
 

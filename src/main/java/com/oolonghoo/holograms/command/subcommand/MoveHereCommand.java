@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  * 移动全息图到玩家位置命令
  * /wh movehere <名称>
  * 
- * @author oolongho
  */
 public class MoveHereCommand extends Subcommand {
 

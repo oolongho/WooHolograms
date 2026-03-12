@@ -14,7 +14,6 @@ import java.util.List;
  * 列出全息图命令
  * /wh list [页码]
  * 
- * @author oolongho
  */
 public class ListCommand extends Subcommand {
 

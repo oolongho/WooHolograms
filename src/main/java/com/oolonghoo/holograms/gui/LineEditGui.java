@@ -19,7 +19,6 @@ import java.util.Arrays;
  * 行编辑 GUI
  * 用于编辑单行的属性
  * 
- * @author oolongho
  */
 public class LineEditGui extends GuiScreen {
 

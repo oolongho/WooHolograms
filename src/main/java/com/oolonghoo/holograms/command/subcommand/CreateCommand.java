@@ -17,7 +17,6 @@ import java.util.List;
  * 创建全息图命令
  * /wh create <名称>
  * 
- * @author oolongho
  */
 public class CreateCommand extends Subcommand {
 

@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
  * 颜色工具类
  * 处理颜色代码转换，支持传统颜色代码、十六进制颜色和 MiniMessage 格式
  * 
- * @author oolongho
  * @since 1.0.0
  */
 public class ColorUtil {

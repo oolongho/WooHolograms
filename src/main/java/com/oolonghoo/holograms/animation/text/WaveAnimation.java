@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.animation.TextAnimation;
  * 参考 DecentHolograms 的 WaveAnimation 实现
  * 创建波浪效果的文本动画
  * 
- * @author oolongho
  */
 public class WaveAnimation extends TextAnimation {
 

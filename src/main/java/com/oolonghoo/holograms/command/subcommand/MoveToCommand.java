@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
  * 移动全息图到指定位置命令
  * /wh moveto <名称> <x> <y> <z> [世界]
  * 
- * @author oolongho
  */
 public class MoveToCommand extends Subcommand {
 

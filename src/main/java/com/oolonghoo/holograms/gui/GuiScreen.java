@@ -12,7 +12,6 @@ import java.util.Map;
  * GUI 界面基类
  * 提供基本的 GUI 功能
  * 
- * @author oolongho
  */
 public class GuiScreen implements InventoryHolder {
 

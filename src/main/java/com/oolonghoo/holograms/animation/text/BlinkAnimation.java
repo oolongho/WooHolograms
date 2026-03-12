@@ -6,7 +6,6 @@ import com.oolonghoo.holograms.animation.TextAnimation;
  * 闪烁动画
  * 创建闪烁效果的文本动画
  * 
- * @author oolongho
  */
 public class BlinkAnimation extends TextAnimation {
 

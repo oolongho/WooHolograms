@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
  * 删除页命令
  * /wh removepage <名称> <页码>
  * 
- * @author oolongho
  */
 public class RemovePageCommand extends Subcommand {
 

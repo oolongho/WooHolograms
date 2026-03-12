@@ -18,7 +18,6 @@ import java.util.UUID;
  * GUI 管理器
  * 管理所有 GUI 实例和事件监听
  * 
- * @author oolongho
  */
 public class GuiManager implements Listener {
 

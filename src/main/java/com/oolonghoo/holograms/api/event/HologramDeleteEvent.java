@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
  * 全息图删除事件
  * 当全息图被删除时触发
  * 
- * @author oolongho
  */
 public class HologramDeleteEvent extends Event {
 

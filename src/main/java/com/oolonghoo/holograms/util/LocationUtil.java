@@ -8,7 +8,6 @@ import org.bukkit.World;
  * 位置工具类
  * 处理位置的序列化和反序列化
  * 
- * @author oolongho
  */
 public class LocationUtil {
 

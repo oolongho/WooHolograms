@@ -11,7 +11,6 @@ import java.util.List;
  * NMS 全息图渲染器接口
  * 负责将全息图渲染给玩家
  * 
- * @author oolongho
  */
 public interface NmsHologramRenderer {
 

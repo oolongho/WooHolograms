@@ -9,7 +9,6 @@ import java.util.List;
  * 子命令抽象类
  * 定义子命令的基本结构
  * 
- * @author oolongho
  */
 public abstract class Subcommand {
 

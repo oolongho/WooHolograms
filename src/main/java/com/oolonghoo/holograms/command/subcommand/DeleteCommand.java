@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
  * 删除全息图命令
  * /wh delete <名称>
  * 
- * @author oolongho
  */
 public class DeleteCommand extends Subcommand {
 

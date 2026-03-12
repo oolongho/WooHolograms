@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
  * 表示一个完整的全息图对象，包含多页、多行数据
  * 参考 DecentHolograms 的 Hologram 实现
  * 
- * @author oolongho
  */
 public class Hologram {
 

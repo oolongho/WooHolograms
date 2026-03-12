@@ -11,7 +11,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
  * 玩家事件监听器
  * 处理玩家加入、退出等事件
  * 
- * @author oolongho
  */
 public class PlayerListener implements Listener {
 

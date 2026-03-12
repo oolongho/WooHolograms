@@ -11,7 +11,6 @@ import java.util.List;
  * 全息图加载完成事件
  * 当所有全息图加载完成时触发
  * 
- * @author oolongho
  */
 public class HologramsLoadedEvent extends Event {
 

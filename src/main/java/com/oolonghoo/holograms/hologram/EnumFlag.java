@@ -5,7 +5,6 @@ package com.oolonghoo.holograms.hologram;
  * 定义全息图和行的各种行为标志
  * 参考 DecentHolograms 的 EnumFlag 实现
  * 
- * @author oolongho
  */
 public enum EnumFlag {
 

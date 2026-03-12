@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
  * 文本工具类
  * 处理文本相关的操作
  * 
- * @author oolongho
  */
 public class TextUtil {
 

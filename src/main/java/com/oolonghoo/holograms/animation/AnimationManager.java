@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
  * 参考 DecentHolograms 的 AnimationManager 实现
  * 负责动画的注册、管理和文本解析
  * 
- * @author oolongho
  */
 public class AnimationManager {
 

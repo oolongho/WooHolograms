@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
  * 表示全息图的单行内容
  * 参考 DecentHolograms 的 HologramLine 实现
  * 
- * @author oolongho
  */
 public class HologramLine {
 

@@ -20,7 +20,6 @@ import java.util.function.Consumer;
  * 聊天框输入管理器
  * 用于处理玩家在聊天框中的输入
  * 
- * @author oolongho
  */
 public class ChatInputManager implements Listener {
 

@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
  * 全息图点击事件
  * 当玩家点击全息图时触发
  * 
- * @author oolongho
  */
 public class HologramClickEvent extends Event implements Cancellable {
 

@@ -10,7 +10,6 @@ import java.util.function.Consumer;
  * 确认对话框 GUI
  * 用于确认删除等危险操作
  * 
- * @author oolongho
  */
 public class ConfirmGui extends GuiScreen {
 

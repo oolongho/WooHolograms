@@ -12,7 +12,6 @@ import java.util.List;
  * 配置管理器
  * 负责加载和管理插件配置
  * 
- * @author oolongho
  * @since 1.0.0
  */
 public class ConfigManager {

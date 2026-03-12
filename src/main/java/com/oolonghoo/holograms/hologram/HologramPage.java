@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
  * 表示全息图的一页，包含多行内容
  * 参考 DecentHolograms 的 HologramPage 实现
  * 
- * @author oolongho
  */
 public class HologramPage {
 

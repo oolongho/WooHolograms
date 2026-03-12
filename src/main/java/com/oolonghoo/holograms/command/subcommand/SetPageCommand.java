@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  * 设置玩家当前页命令
  * /wh setpage <名称> <页码>
  * 
- * @author oolongho
  */
 public class SetPageCommand extends Subcommand {
 
