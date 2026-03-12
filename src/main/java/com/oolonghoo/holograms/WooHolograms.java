@@ -123,7 +123,8 @@ public class WooHolograms extends JavaPlugin {
         
         // 加载全息图
         hologramManager.loadAll();
-        getLogger().info("已加载 " + hologramManager.getHologramCount() + " 个全息图");
+        int hologramCount = hologramManager.getHologramCount();
+        getLogger().info(() -> "已加载 " + hologramCount + " 个全息图");
         
         // 注册数据包监听器
         packetListener.register();
@@ -136,7 +137,8 @@ public class WooHolograms extends JavaPlugin {
         }
         
         pluginEnabled = true;
-        getLogger().info("WooHolograms v" + getPluginMeta().getVersion() + " 已启用!");
+        String version = getPluginMeta().getVersion();
+        getLogger().info(() -> "WooHolograms v" + version + " 已启用!");
     }
     
     @Override
