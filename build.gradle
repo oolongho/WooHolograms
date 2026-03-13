@@ -21,9 +21,7 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle('1.21.4-R0.1-SNAPSHOT')
-    
     compileOnly 'me.clip:placeholderapi:2.11.6'
-    
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
@@ -40,6 +38,14 @@ processResources {
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveBaseName = 'WooHolograms'
+    
+    manifest {
+        attributes(
+            'Built-By': 'Gradle',
+            'Build-Jdk': System.getProperty('java.version'),
+            'Created-By': 'WooHolograms Build System'
+        )
+    }
 }
 
 tasks.register('buildInfo') {
@@ -49,7 +55,7 @@ tasks.register('buildInfo') {
         println "=========================================="
         println "Version: ${version}"
         println "Java: ${java.sourceCompatibility}"
-        println "Paper: 1.21.4"
+        println "Paper: 1.21+"
         println "=========================================="
     }
 }
