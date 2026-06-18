@@ -124,6 +124,21 @@ public final class DHAPI {
 
 	// ===== 行操作 =====
 
+	public static void setHologramLines(Hologram hologram, List<String> lines) {
+		if (!com.oolonghoo.holograms.api.WooHologramsAPI.isLoaded()) return;
+		if (hologram == null) return;
+		HologramPage page = hologram.getPage(0);
+		if (page == null) return;
+		page.clearLines();
+		if (lines != null) {
+			for (String line : lines) {
+				if (line != null) {
+					page.addLine(line);
+				}
+			}
+		}
+	}
+
 	public static HologramLine addHologramLine(Hologram hologram, String line) {
 		return addHologramLine(hologram, 0, line);
 	}
