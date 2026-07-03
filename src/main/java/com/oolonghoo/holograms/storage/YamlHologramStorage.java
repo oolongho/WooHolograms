@@ -966,27 +966,23 @@ public class YamlHologramStorage implements HologramStorage {
         }
 
         // Display Entity 行级别属性
-        if (section.contains("scale-x") || section.contains("scaleX") ||
-                section.contains("scale-y") || section.contains("scaleY") ||
-                section.contains("scale-z") || section.contains("scaleZ")) {
-            Float sx = section.contains("scale-x") ? (float) section.getDouble("scale-x", 1.0) :
-                    section.contains("scaleX") ? (float) section.getDouble("scaleX", 1.0) : null;
-            Float sy = section.contains("scale-y") ? (float) section.getDouble("scale-y", 1.0) :
-                    section.contains("scaleY") ? (float) section.getDouble("scaleY", 1.0) : null;
-            Float sz = section.contains("scale-z") ? (float) section.getDouble("scale-z", 1.0) :
-                    section.contains("scaleZ") ? (float) section.getDouble("scaleZ", 1.0) : null;
+        float sx = (float) getCompatDouble(section, "scale-x", "scaleX", 1.0);
+        float sy = (float) getCompatDouble(section, "scale-y", "scaleY", 1.0);
+        float sz = (float) getCompatDouble(section, "scale-z", "scaleZ", 1.0);
+
+        boolean hasCustomScale = section.contains("scale-x") || section.contains("scaleX")
+                || section.contains("scale-y") || section.contains("scaleY")
+                || section.contains("scale-z") || section.contains("scaleZ");
+        if (hasCustomScale) {
             line.setScale(sx, sy, sz);
         }
 
         if (section.contains("translation-x") || section.contains("translationX") ||
                 section.contains("translation-y") || section.contains("translationY") ||
                 section.contains("translation-z") || section.contains("translationZ")) {
-            Double tx = section.contains("translation-x") ? section.getDouble("translation-x", 0) :
-                    section.contains("translationX") ? section.getDouble("translationX", 0) : null;
-            Double ty = section.contains("translation-y") ? section.getDouble("translation-y", 0) :
-                    section.contains("translationY") ? section.getDouble("translationY", 0) : null;
-            Double tz = section.contains("translation-z") ? section.getDouble("translation-z", 0) :
-                    section.contains("translationZ") ? section.getDouble("translationZ", 0) : null;
+            double tx = getCompatDouble(section, "translation-x", "translationX", 0);
+            double ty = getCompatDouble(section, "translation-y", "translationY", 0);
+            double tz = getCompatDouble(section, "translation-z", "translationZ", 0);
             line.setTranslation(tx, ty, tz);
         }
 
