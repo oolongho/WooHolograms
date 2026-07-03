@@ -372,7 +372,7 @@ public class EntityMetadataBuilder {
      * @return this
      */
     public EntityMetadataBuilder withTranslation(double x, double y, double z) {
-        watchableObjects.add(EntityMetadataType.DISPLAY_TRANSLATION.construct(new net.minecraft.world.phys.Vec3(x, y, z)));
+        watchableObjects.add(EntityMetadataType.DISPLAY_TRANSLATION.construct(new org.joml.Vector3f((float) x, (float) y, (float) z)));
         return this;
     }
 

@@ -10,7 +10,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 
 import java.lang.reflect.Field;
 
@@ -58,8 +57,8 @@ class EntityMetadataType<T> {
     // Display Entity - 亮度覆盖
     private static final EntityDataAccessor<Integer> DISPLAY_BRIGHTNESS_OBJECT = getAccessor(Display.class, "DATA_BRIGHTNESS_OVERRIDE_ID");
 
-    // Display Entity - 平移
-    private static final EntityDataAccessor<Vec3> DISPLAY_TRANSLATION_OBJECT = getAccessor(Display.class, "DATA_TRANSLATION_ID");
+    // Display Entity - 平移（26.1+ 字段类型为 Vector3fc，Vector3f 实现该接口，兼容 1.21.x 与 26.1+）
+    private static final EntityDataAccessor<org.joml.Vector3f> DISPLAY_TRANSLATION_OBJECT = getAccessor(Display.class, "DATA_TRANSLATION_ID");
 
     // Display Entity - 缩放
     private static final EntityDataAccessor<org.joml.Vector3f> DISPLAY_SCALE_OBJECT = getAccessor(Display.class, "DATA_SCALE_ID");
@@ -129,7 +128,7 @@ class EntityMetadataType<T> {
     // Display Entity 静态实例
     static final EntityMetadataType<Byte> DISPLAY_BILLBOARD = new EntityMetadataType<>(DISPLAY_BILLBOARD_OBJECT);
     static final EntityMetadataType<Integer> DISPLAY_BRIGHTNESS = new EntityMetadataType<>(DISPLAY_BRIGHTNESS_OBJECT);
-    static final EntityMetadataType<Vec3> DISPLAY_TRANSLATION = new EntityMetadataType<>(DISPLAY_TRANSLATION_OBJECT);
+    static final EntityMetadataType<org.joml.Vector3f> DISPLAY_TRANSLATION = new EntityMetadataType<>(DISPLAY_TRANSLATION_OBJECT);
     static final EntityMetadataType<org.joml.Vector3f> DISPLAY_SCALE = new EntityMetadataType<>(DISPLAY_SCALE_OBJECT);
     static final EntityMetadataType<org.joml.Quaternionf> DISPLAY_LEFT_ROTATION = new EntityMetadataType<>(DISPLAY_LEFT_ROTATION_OBJECT);
     static final EntityMetadataType<org.joml.Quaternionf> DISPLAY_RIGHT_ROTATION = new EntityMetadataType<>(DISPLAY_RIGHT_ROTATION_OBJECT);

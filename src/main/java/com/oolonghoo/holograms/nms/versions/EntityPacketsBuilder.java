@@ -5,7 +5,6 @@ import com.oolonghoo.holograms.nms.util.DecentPosition;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.CraftEquipmentSlot;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -31,6 +30,7 @@ import java.util.UUID;
 public class EntityPacketsBuilder {
 
     private static final Set<net.minecraft.world.entity.Relative> EMPTY_RELATIVES = Set.of();
+    private static final EntityPacketHelper PACKET_HELPER = EntityPacketHelperFactory.getInstance();
 
     private final List<Packet<?>> packets;
 
@@ -58,7 +58,7 @@ public class EntityPacketsBuilder {
      * @return this
      */
     public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, DecentPosition position) {
-        ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(
+        Packet<?> packet = PACKET_HELPER.createSpawnPacket(
                 entityId,
                 UUID.randomUUID(),
                 position.getX(),
@@ -87,7 +87,7 @@ public class EntityPacketsBuilder {
      * @return this
      */
     public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, DecentPosition position, float yaw, float pitch) {
-        ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(
+        Packet<?> packet = PACKET_HELPER.createSpawnPacket(
                 entityId,
                 UUID.randomUUID(),
                 position.getX(),
@@ -151,10 +151,13 @@ public class EntityPacketsBuilder {
      * @return this
      */
     public EntityPacketsBuilder withTeleportEntity(int entityId, DecentPosition position) {
-        Vec3 locationVec3 = new Vec3(position.getX(), position.getY(), position.getZ());
-        ClientboundTeleportEntityPacket packet = new ClientboundTeleportEntityPacket(
+        Packet<?> packet = PACKET_HELPER.createTeleportPacket(
                 entityId,
-                new PositionMoveRotation(locationVec3, Vec3.ZERO, position.getYaw(), position.getPitch()),
+                position.getX(),
+                position.getY(),
+                position.getZ(),
+                position.getYaw(),
+                position.getPitch(),
                 EMPTY_RELATIVES,
                 false
         );
