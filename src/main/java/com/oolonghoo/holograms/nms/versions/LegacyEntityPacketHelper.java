@@ -19,7 +19,8 @@ final class LegacyEntityPacketHelper implements EntityPacketHelper {
         try {
             SPAWN_CONSTRUCTOR = ClientboundAddEntityPacket.class.getConstructor(
                     int.class, UUID.class, double.class, double.class, double.class,
-                    float.class, float.class, EntityType.class, int.class, Vec3.class
+                    float.class, float.class, EntityType.class, int.class, Vec3.class,
+                    float.class
             );
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Failed to find legacy spawn packet constructor", e);
@@ -40,7 +41,7 @@ final class LegacyEntityPacketHelper implements EntityPacketHelper {
                                        Vec3 delta, float headYaw) {
         try {
             return (Packet<?>) SPAWN_CONSTRUCTOR.newInstance(
-                    entityId, uuid, x, y, z, pitch, yaw, type, data, delta
+                    entityId, uuid, x, y, z, pitch, yaw, type, data, delta, headYaw
             );
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to create legacy spawn packet", e);
