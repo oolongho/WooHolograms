@@ -10,8 +10,10 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3fc;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 /**
  * 实体元数据类型
@@ -27,8 +29,8 @@ class EntityMetadataType<T> {
     // 实体属性（不可见、着火等）
     static final EntityDataAccessor<Byte> ENTITY_PROPERTIES_OBJECT = getAccessor(Entity.class, "DATA_SHARED_FLAGS_ID");
 
-    // 实体自定义名称
-    private static final EntityDataAccessor<Component> ENTITY_CUSTOM_NAME_OBJECT = getAccessor(Entity.class, "DATA_CUSTOM_NAME");
+    // 实体自定义名称（26.1+ 中类型为 Optional<Component>）
+    private static final EntityDataAccessor<Optional<Component>> ENTITY_CUSTOM_NAME_OBJECT = getAccessor(Entity.class, "DATA_CUSTOM_NAME");
 
     // 实体自定义名称是否可见
     private static final EntityDataAccessor<Boolean> ENTITY_CUSTOM_NAME_VISIBLE_OBJECT = getAccessor(Entity.class, "DATA_CUSTOM_NAME_VISIBLE");
@@ -58,10 +60,10 @@ class EntityMetadataType<T> {
     private static final EntityDataAccessor<Integer> DISPLAY_BRIGHTNESS_OBJECT = getAccessor(Display.class, "DATA_BRIGHTNESS_OVERRIDE_ID");
 
     // Display Entity - 平移（26.1+ 字段类型为 Vector3fc，Vector3f 实现该接口，兼容 1.21.x 与 26.1+）
-    private static final EntityDataAccessor<org.joml.Vector3f> DISPLAY_TRANSLATION_OBJECT = getAccessor(Display.class, "DATA_TRANSLATION_ID");
+    private static final EntityDataAccessor<Vector3fc> DISPLAY_TRANSLATION_OBJECT = getAccessor(Display.class, "DATA_TRANSLATION_ID");
 
     // Display Entity - 缩放
-    private static final EntityDataAccessor<org.joml.Vector3f> DISPLAY_SCALE_OBJECT = getAccessor(Display.class, "DATA_SCALE_ID");
+    private static final EntityDataAccessor<Vector3fc> DISPLAY_SCALE_OBJECT = getAccessor(Display.class, "DATA_SCALE_ID");
 
     // Display Entity - 左旋转
     private static final EntityDataAccessor<org.joml.Quaternionf> DISPLAY_LEFT_ROTATION_OBJECT = getAccessor(Display.class, "DATA_LEFT_ROTATION_ID");
@@ -116,7 +118,7 @@ class EntityMetadataType<T> {
 
     // 静态实例
     static final EntityMetadataType<Byte> ENTITY_PROPERTIES = new EntityMetadataType<>(ENTITY_PROPERTIES_OBJECT);
-    static final EntityMetadataType<Component> ENTITY_CUSTOM_NAME = new EntityMetadataType<>(ENTITY_CUSTOM_NAME_OBJECT);
+    static final EntityMetadataType<Optional<Component>> ENTITY_CUSTOM_NAME = new EntityMetadataType<>(ENTITY_CUSTOM_NAME_OBJECT);
     static final EntityMetadataType<Boolean> ENTITY_CUSTOM_NAME_VISIBLE = new EntityMetadataType<>(ENTITY_CUSTOM_NAME_VISIBLE_OBJECT);
     static final EntityMetadataType<Boolean> ENTITY_SILENT = new EntityMetadataType<>(ENTITY_SILENT_OBJECT);
     static final EntityMetadataType<Boolean> ENTITY_HAS_NO_GRAVITY = new EntityMetadataType<>(ENTITY_HAS_NO_GRAVITY_OBJECT);
@@ -128,8 +130,8 @@ class EntityMetadataType<T> {
     // Display Entity 静态实例
     static final EntityMetadataType<Byte> DISPLAY_BILLBOARD = new EntityMetadataType<>(DISPLAY_BILLBOARD_OBJECT);
     static final EntityMetadataType<Integer> DISPLAY_BRIGHTNESS = new EntityMetadataType<>(DISPLAY_BRIGHTNESS_OBJECT);
-    static final EntityMetadataType<org.joml.Vector3f> DISPLAY_TRANSLATION = new EntityMetadataType<>(DISPLAY_TRANSLATION_OBJECT);
-    static final EntityMetadataType<org.joml.Vector3f> DISPLAY_SCALE = new EntityMetadataType<>(DISPLAY_SCALE_OBJECT);
+    static final EntityMetadataType<Vector3fc> DISPLAY_TRANSLATION = new EntityMetadataType<>(DISPLAY_TRANSLATION_OBJECT);
+    static final EntityMetadataType<Vector3fc> DISPLAY_SCALE = new EntityMetadataType<>(DISPLAY_SCALE_OBJECT);
     static final EntityMetadataType<org.joml.Quaternionf> DISPLAY_LEFT_ROTATION = new EntityMetadataType<>(DISPLAY_LEFT_ROTATION_OBJECT);
     static final EntityMetadataType<org.joml.Quaternionf> DISPLAY_RIGHT_ROTATION = new EntityMetadataType<>(DISPLAY_RIGHT_ROTATION_OBJECT);
     static final EntityMetadataType<Float> DISPLAY_SHADOW_RADIUS = new EntityMetadataType<>(DISPLAY_SHADOW_RADIUS_OBJECT);

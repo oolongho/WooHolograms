@@ -23,10 +23,14 @@ final class EntityPacketHelperFactory {
             if (parts.length >= 3) patch = Integer.parseInt(parts[2]);
         } catch (NumberFormatException ignored) {}
 
+        // Legacy: MC 1.21.0/1（旧版 ClientboundAddEntityPacket 构造函数签名）
+        // Modern: MC 1.21.2+ 及 Spigot 26.1+（新版构造函数含 headYaw 参数）
         boolean legacy = (major == 1 && minor == 21 && patch <= 1);
 
+        String adapterType = legacy ? "legacy" : "modern";
+        Bukkit.getLogger().info("[WooHolograms] NMS adapter: " + adapterType + " (server version: " + version + ")");
+
         if (legacy) {
-            Bukkit.getLogger().info("[WooHolograms] Using legacy NMS adapter for MC " + version);
             return new LegacyEntityPacketHelper();
         }
         return new ModernEntityPacketHelper();
