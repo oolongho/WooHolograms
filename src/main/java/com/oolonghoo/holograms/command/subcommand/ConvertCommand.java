@@ -146,17 +146,19 @@ public class ConvertCommand extends Subcommand {
     }
 
     /**
-     * 解析 HD 的位置格式: world,x,y,z
+     * 通用位置解析方法
+     * 支持自定义分隔符，统一处理位置字符串解析
      *
-     * @param locationStr 位置字符串
+     * @param locationStr 位置字符串，格式为 world<delim>x<delim>y<delim>z
+     * @param delimiter 分隔符正则（如 "," 或 ":"）
      * @return Location 对象，解析失败返回 null
      */
-    private Location parseHdLocation(String locationStr) {
+    private Location parseLocation(String locationStr, String delimiter) {
         if (locationStr == null || locationStr.isEmpty()) {
             return null;
         }
 
-        String[] parts = locationStr.split(",");
+        String[] parts = locationStr.split(delimiter);
         if (parts.length < 4) {
             return null;
         }
@@ -176,6 +178,16 @@ public class ConvertCommand extends Subcommand {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /**
+     * 解析 HD 的位置格式: world,x,y,z
+     *
+     * @param locationStr 位置字符串
+     * @return Location 对象，解析失败返回 null
+     */
+    private Location parseHdLocation(String locationStr) {
+        return parseLocation(locationStr, ",");
     }
 
     /**
@@ -323,32 +335,9 @@ public class ConvertCommand extends Subcommand {
      * @return Location 对象，解析失败返回 null
      */
     private Location parseCmiLocation(String locationStr) {
-        if (locationStr == null || locationStr.isEmpty()) {
-            return null;
-        }
-
         // CMI 使用分号分隔，替换为冒号后统一解析
         String normalized = locationStr.replace(";", ":");
-        String[] parts = normalized.split(":");
-        if (parts.length < 4) {
-            return null;
-        }
-
-        try {
-            String worldName = parts[0].trim();
-            double x = Double.parseDouble(parts[1].trim());
-            double y = Double.parseDouble(parts[2].trim());
-            double z = Double.parseDouble(parts[3].trim());
-
-            World world = Bukkit.getWorld(worldName);
-            if (world == null) {
-                return null;
-            }
-
-            return new Location(world, x, y, z);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return parseLocation(normalized, ":");
     }
 
     @Override
