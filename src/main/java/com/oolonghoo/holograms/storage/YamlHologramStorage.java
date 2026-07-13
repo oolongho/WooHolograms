@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class YamlHologramStorage implements HologramStorage {
@@ -497,42 +498,31 @@ public class YamlHologramStorage implements HologramStorage {
     public void saveAllAsync() {
     }
 
-    private String getCompatString(ConfigurationSection section, String kebabKey, String camelKey) {
-        String value = section.getString(kebabKey);
-        if (value == null) {
-            value = section.getString(camelKey);
+    private <T> T getCompatValue(ConfigurationSection section, String kebabKey, String camelKey,
+                                  T defaultValue, BiFunction<ConfigurationSection, String, T> reader) {
+        if (section.contains(kebabKey)) {
+            return reader.apply(section, kebabKey);
         }
-        return value;
+        if (section.contains(camelKey)) {
+            return reader.apply(section, camelKey);
+        }
+        return defaultValue;
+    }
+
+    private String getCompatString(ConfigurationSection section, String kebabKey, String camelKey, String defaultValue) {
+        return getCompatValue(section, kebabKey, camelKey, defaultValue, ConfigurationSection::getString);
     }
 
     private boolean getCompatBoolean(ConfigurationSection section, String kebabKey, String camelKey, boolean defaultValue) {
-        if (section.contains(kebabKey)) {
-            return section.getBoolean(kebabKey);
-        }
-        if (section.contains(camelKey)) {
-            return section.getBoolean(camelKey);
-        }
-        return defaultValue;
+        return getCompatValue(section, kebabKey, camelKey, defaultValue, ConfigurationSection::getBoolean);
     }
 
     private double getCompatDouble(ConfigurationSection section, String kebabKey, String camelKey, double defaultValue) {
-        if (section.contains(kebabKey)) {
-            return section.getDouble(kebabKey);
-        }
-        if (section.contains(camelKey)) {
-            return section.getDouble(camelKey);
-        }
-        return defaultValue;
+        return getCompatValue(section, kebabKey, camelKey, defaultValue, ConfigurationSection::getDouble);
     }
 
     private int getCompatInt(ConfigurationSection section, String kebabKey, String camelKey, int defaultValue) {
-        if (section.contains(kebabKey)) {
-            return section.getInt(kebabKey);
-        }
-        if (section.contains(camelKey)) {
-            return section.getInt(camelKey);
-        }
-        return defaultValue;
+        return getCompatValue(section, kebabKey, camelKey, defaultValue, ConfigurationSection::getInt);
     }
 
     private Location loadLocation(ConfigurationSection section) {
