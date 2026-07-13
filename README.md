@@ -43,7 +43,7 @@
 - **动作类型**：命令、消息、音效、传送、翻页等
 - **点击冷却**：防止快速点击刷动作，可配置冷却时间
 
-### 🔧 技术特性
+### 🔧 更多特性
 
 - **Display Entity**：基于 1.21+ 的 TextDisplay/ItemDisplay/BlockDisplay 实体，性能优异
 - **Folia 支持**：完整兼容 Folia 区域化多线程调度
