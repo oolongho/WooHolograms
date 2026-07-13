@@ -199,7 +199,7 @@
 
 ### 渐变动画颜色支持
 
-渐变动画支持以下颜色格式：
+渐变动画支持以下颜色格式： 
 
 - **颜色名称**：`red`、`blue`、`green`、`yellow`、`cyan`、`magenta`、`white`、`black`、`orange`、`purple`、`pink`、`gold`、`gray`、`aqua`、`lime` 等
 - **HEX 格式**：`#FF0000`、`#00FF00`、`#0000FF` 等
