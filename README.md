@@ -492,52 +492,6 @@ WooHolograms 内置了 DecentHolograms API 兼容层，通过 `provides: DecentH
 
 报告按总耗时降序显示各模块的平均耗时和调用次数，帮助定位性能瓶颈。
 
-### 配置文件格式
-
-每个全息图一个 `.yml` 文件，存储在 `plugins/WooHolograms/holograms/` 目录下：
-
-```yaml
-location: world,100.0,64.0,200.0,0.0,0.0
-enabled: true
-display-range: 48
-update-range: 48
-update-interval: 20
-facing: 0.0
-down-origin: false
-billboard: CENTER
-double-sided: false
-line-height: 0.3
-permission: null
-scale-x: 1.0
-scale-y: 1.0
-scale-z: 1.0
-shadow-radius: 0
-shadow-strength: 1.0
-glow-color: -1
-chroma-background: false
-chroma-glow: false
-pages:
-  '1':
-    lines:
-      '1':
-        content: '&a欢迎来到服务器！'
-        height: 0.3
-        offsetX: 0.0
-        offsetY: 0.0
-        offsetZ: 0.0
-      '2':
-        content: '#ICON:DIAMOND'
-        height: 0.6
-      '3':
-        content: '#BLOCK:GOLD_BLOCK'
-        height: 0.5
-      '4':
-        content: '#NEXT 下一页'
-        height: 0.3
-    actions:
-      ANY:
-        - 'MESSAGE:&a你点击了全息图！'
-```
 
 ***
 
