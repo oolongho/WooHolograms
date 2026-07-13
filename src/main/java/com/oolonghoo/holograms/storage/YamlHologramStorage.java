@@ -509,10 +509,6 @@ public class YamlHologramStorage implements HologramStorage {
         return defaultValue;
     }
 
-    private String getCompatString(ConfigurationSection section, String kebabKey, String camelKey, String defaultValue) {
-        return getCompatValue(section, kebabKey, camelKey, defaultValue, ConfigurationSection::getString);
-    }
-
     private boolean getCompatBoolean(ConfigurationSection section, String kebabKey, String camelKey, boolean defaultValue) {
         return getCompatValue(section, kebabKey, camelKey, defaultValue, ConfigurationSection::getBoolean);
     }
