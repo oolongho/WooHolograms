@@ -59,24 +59,7 @@ public class ChatInputManager implements Listener {
      * @param callback 输入完成回调
      */
     public void requestInput(Player player, String prompt, InputType type, Consumer<String> callback) {
-        UUID playerId = player.getUniqueId();
-        
-        cancelTimeoutTask(playerId);
-        
-        InputContext context = new InputContext(type, callback);
-        pendingInputs.put(playerId, context);
-        
-        player.sendMessage(ColorUtil.colorize(prompt));
-        player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
-        
-        TaskHandle task = SchedulerUtil.runTaskLater(player, () -> {
-            if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
-                pendingInputs.remove(playerId);
-                timeoutTasks.remove(playerId);
-                player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
-            }
-        }, INPUT_TIMEOUT);
-        timeoutTasks.put(playerId, task);
+        requestInputInternal(player, prompt, new InputContext(type, callback));
     }
 
     /**
@@ -88,24 +71,7 @@ public class ChatInputManager implements Listener {
      * @param callback 输入完成回调
      */
     public void requestInput(Player player, String prompt, InputType type, String hologramName, Consumer<String> callback) {
-        UUID playerId = player.getUniqueId();
-        
-        cancelTimeoutTask(playerId);
-        
-        InputContext context = new InputContext(type, hologramName, callback);
-        pendingInputs.put(playerId, context);
-        
-        player.sendMessage(ColorUtil.colorize(prompt));
-        player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
-        
-        TaskHandle task = SchedulerUtil.runTaskLater(player, () -> {
-            if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
-                pendingInputs.remove(playerId);
-                timeoutTasks.remove(playerId);
-                player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
-            }
-        }, INPUT_TIMEOUT);
-        timeoutTasks.put(playerId, task);
+        requestInputInternal(player, prompt, new InputContext(type, hologramName, callback));
     }
 
     /**
@@ -119,24 +85,30 @@ public class ChatInputManager implements Listener {
      * @param callback 输入完成回调
      */
     public void requestInput(Player player, String prompt, InputType type, String hologramName, int lineNumber, int pageIndex, Consumer<String> callback) {
+        requestInputInternal(player, prompt, new InputContext(type, hologramName, lineNumber, pageIndex, callback));
+    }
+
+    private void requestInputInternal(Player player, String prompt, InputContext context) {
         UUID playerId = player.getUniqueId();
-        
+
         cancelTimeoutTask(playerId);
-        
-        InputContext context = new InputContext(type, hologramName, lineNumber, pageIndex, callback);
+
         pendingInputs.put(playerId, context);
-        
+
         player.sendMessage(ColorUtil.colorize(prompt));
         player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
-        
-        TaskHandle task = SchedulerUtil.runTaskLater(player, () -> {
+
+        timeoutTasks.put(playerId, createTimeoutTask(player, playerId, context));
+    }
+
+    private TaskHandle createTimeoutTask(Player player, UUID playerId, InputContext context) {
+        return SchedulerUtil.runTaskLater(player, () -> {
             if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
                 pendingInputs.remove(playerId);
                 timeoutTasks.remove(playerId);
                 player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
             }
         }, INPUT_TIMEOUT);
-        timeoutTasks.put(playerId, task);
     }
     
     /**
@@ -182,14 +154,7 @@ public class ChatInputManager implements Listener {
             if (validationError != null) {
                 player.sendMessage(ColorUtil.colorize(validationError));
                 pendingInputs.put(playerId, context);
-                TaskHandle retryTask = SchedulerUtil.runTaskLater(player, () -> {
-                    if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
-                        pendingInputs.remove(playerId);
-                        timeoutTasks.remove(playerId);
-                        player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
-                    }
-                }, INPUT_TIMEOUT);
-                timeoutTasks.put(playerId, retryTask);
+                timeoutTasks.put(playerId, createTimeoutTask(player, playerId, context));
                 return;
             }
             
