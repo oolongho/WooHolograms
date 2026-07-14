@@ -1,5 +1,7 @@
 package com.oolonghoo.holograms.nms.versions;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
@@ -13,25 +15,17 @@ import java.util.UUID;
 final class LegacyEntityPacketHelper implements EntityPacketHelper {
 
     private static final Constructor<?> SPAWN_CONSTRUCTOR;
-    private static final Constructor<?> TELEPORT_CONSTRUCTOR;
 
     static {
         try {
-            SPAWN_CONSTRUCTOR = ClientboundAddEntityPacket.class.getConstructor(
+            SPAWN_CONSTRUCTOR = ClientboundAddEntityPacket.class.getDeclaredConstructor(
                     int.class, UUID.class, double.class, double.class, double.class,
                     float.class, float.class, EntityType.class, int.class, Vec3.class,
                     float.class
             );
+            SPAWN_CONSTRUCTOR.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Failed to find legacy spawn packet constructor", e);
-        }
-        try {
-            TELEPORT_CONSTRUCTOR = ClientboundTeleportEntityPacket.class.getConstructor(
-                    int.class, double.class, double.class, double.class,
-                    float.class, float.class, Set.class, boolean.class
-            );
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to find legacy teleport packet constructor", e);
         }
     }
 
@@ -53,12 +47,14 @@ final class LegacyEntityPacketHelper implements EntityPacketHelper {
                                           float yaw, float pitch,
                                           Set<net.minecraft.world.entity.Relative> relatives,
                                           boolean onGround) {
-        try {
-            return (Packet<?>) TELEPORT_CONSTRUCTOR.newInstance(
-                    entityId, x, y, z, yaw, pitch, relatives, onGround
-            );
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Failed to create legacy teleport packet", e);
-        }
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeVarInt(entityId);
+        buf.writeDouble(x);
+        buf.writeDouble(y);
+        buf.writeDouble(z);
+        buf.writeByte((byte) (yaw * 256.0F / 360.0F));
+        buf.writeByte((byte) (pitch * 256.0F / 360.0F));
+        buf.writeBoolean(onGround);
+        return ClientboundTeleportEntityPacket.STREAM_CODEC.decode(buf);
     }
 }
