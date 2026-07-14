@@ -125,7 +125,7 @@ public class HologramPage {
         }
 
         Location center = parent.getLocation().clone();
-        center.add(0, getHeight() / 2, 0);
+        center.subtract(0, getHeight() / 2, 0);
         return center;
     }
 
@@ -391,7 +391,6 @@ public class HologramPage {
         }
 
         Location currentLocation = parent.getLocation().clone();
-        currentLocation.add(0, getHeight(), 0);
 
         // 遍历行，连续的TEXT行分为一组，共享位置
         int i = 0;

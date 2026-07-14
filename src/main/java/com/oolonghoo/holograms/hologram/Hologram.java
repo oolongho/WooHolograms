@@ -2073,7 +2073,7 @@ public class Hologram {
     }
 
     private DecentPosition getClickableBasePosition(HologramPage page) {
-        double baseY = Math.floor(location.getY()) + 0.5;
+        double baseY = Math.floor(location.getY() - page.getHeight()) + 0.5;
         return new DecentPosition(location.getX(), baseY, location.getZ());
     }
 
