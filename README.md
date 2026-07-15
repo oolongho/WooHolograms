@@ -45,7 +45,7 @@
 
 ### 🔧 更多特性
 
-- **Display Entity**：基于 1.21+ 的 TextDisplay/ItemDisplay/BlockDisplay 实体，性能优异
+- **Display Entity**：基于 TextDisplay/ItemDisplay/BlockDisplay 实体，性能优异
 - **Folia 支持**：完整兼容 Folia 区域化多线程调度
 - **增量渲染**：仅更新变更的数据，减少网络包发送
 - **对象池**：渲染器对象复用，减少 GC 压力
