@@ -157,7 +157,7 @@ public class PageTextRendererImpl {
                     .withTextAlignment(alignment)
                     .withTextBackgroundColor(backgroundColor)
                     .withTextLineWidth(lineWidth)
-                    .withDisplayProperties(group.lines.get(0), hologram);
+                    .withDisplayProperties(group.lines, hologram);
 
             List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
 
@@ -246,7 +246,7 @@ public class PageTextRendererImpl {
                     .withTextAlignment(alignment)
                     .withTextBackgroundColor(effectiveBgColor)
                     .withTextLineWidth(lineWidth)
-                    .withDisplayProperties(group.lines.get(0), hologram, groupChromaGlow);
+                    .withDisplayProperties(group.lines, hologram, groupChromaGlow);
 
             // Chroma 发光色：覆盖 glowColor（withGlowColor 内部自动启用发光标志）
             if (groupChromaGlow) {
@@ -298,7 +298,7 @@ public class PageTextRendererImpl {
                     .withTextAlignment(alignment)
                     .withTextBackgroundColor(backgroundColor)
                     .withTextLineWidth(lineWidth)
-                    .withDisplayProperties(group.lines.get(0), hologram);
+                    .withDisplayProperties(group.lines, hologram);
 
             List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
 

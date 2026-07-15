@@ -153,7 +153,7 @@ public class BrightnessSelectGui extends GuiScreen {
                             if (l != null) {
                                 l.setBrightness(null);
                                 h.save();
-                                h.showToNearby();
+                                h.updateDisplayPropertiesAllViewers();
                                 player.sendMessage(ColorUtil.colorize("&a已重置亮度为默认值！"));
                             }
                         }
@@ -194,7 +194,7 @@ public class BrightnessSelectGui extends GuiScreen {
                                                     int blockLight = selectingSkyLight ? (current != null ? current.getBlockLight() : value) : value;
                                                     l.setBrightness(Brightness.of(skyLight, blockLight));
                                                     h.save();
-                                                    h.showToNearby();
+                                                    h.updateDisplayPropertiesAllViewers();
                                                     player.sendMessage(ColorUtil.colorize("&a已设置" + (selectingSkyLight ? "天空光" : "方块光") + "为 " + value + "！"));
                                                 }
                                             }

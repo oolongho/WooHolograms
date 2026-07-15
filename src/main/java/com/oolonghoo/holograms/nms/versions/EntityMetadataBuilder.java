@@ -207,10 +207,14 @@ public class EntityMetadataBuilder {
      * @return this
      */
     public EntityMetadataBuilder withDisplayBrightness(Brightness brightness) {
+        // 始终发送亮度字段：-1 表示使用世界光照（Minecraft 默认值），
+        // 确保 metadata update 时客户端能正确重置亮度，而非保留旧值
+        int brightnessInt;
         if (brightness == null || brightness.isDefault()) {
-            return this;
+            brightnessInt = -1;
+        } else {
+            brightnessInt = brightness.getBlockLight() << 4 | brightness.getSkyLight() << 20;
         }
-        int brightnessInt = brightness.getBlockLight() << 4 | brightness.getSkyLight() << 20;
         watchableObjects.add(EntityMetadataType.DISPLAY_BRIGHTNESS.construct(brightnessInt));
         return this;
     }
@@ -497,9 +501,126 @@ public class EntityMetadataBuilder {
         if (line != null && line.getBrightness() != null) effectiveBrightness = line.getBrightness();
         if (effectiveBrightness != null && !effectiveBrightness.isDefault()) {
             withDisplayBrightness(effectiveBrightness);
+        } else {
+            withDisplayBrightness(null);
         }
 
         return this;
+    }
+
+    /**
+     * 设置 Display Entity 的属性（缩放、平移、阴影、发光颜色、亮度）
+     * 从行列表中聚合属性：每个属性使用第一个非 null 的行值，否则继承全息图值。
+     * 用于 TEXT 行组（多行合并为单个 TextDisplay 实体）。
+     *
+     * @param lines 行列表（文本组中的所有行）
+     * @param hologram 全息图（可为 null）
+     * @param skipGlowColor 是否跳过发光颜色设置（当后续会由 Chroma 覆盖时使用）
+     * @return this
+     */
+    public EntityMetadataBuilder withDisplayProperties(List<HologramLine> lines, Hologram hologram, boolean skipGlowColor) {
+        // 缩放：每个分量使用第一个非 null 行值
+        float sx = 1.0f, sy = 1.0f, sz = 1.0f;
+        if (hologram != null) {
+            sx = hologram.getScaleX();
+            sy = hologram.getScaleY();
+            sz = hologram.getScaleZ();
+        }
+        if (lines != null) {
+            Float lx = null, ly = null, lz = null;
+            for (HologramLine line : lines) {
+                if (lx == null) lx = line.getScaleX();
+                if (ly == null) ly = line.getScaleY();
+                if (lz == null) lz = line.getScaleZ();
+                if (lx != null && ly != null && lz != null) break;
+            }
+            if (lx != null) sx = lx;
+            if (ly != null) sy = ly;
+            if (lz != null) sz = lz;
+        }
+        if (sx != 1.0f || sy != 1.0f || sz != 1.0f) {
+            withScale(sx, sy, sz);
+        }
+
+        // 平移
+        double tx = 0, ty = 0, tz = 0;
+        if (hologram != null) {
+            tx = hologram.getTranslationX();
+            ty = hologram.getTranslationY();
+            tz = hologram.getTranslationZ();
+        }
+        if (lines != null) {
+            Double dx = null, dy = null, dz = null;
+            for (HologramLine line : lines) {
+                if (dx == null) dx = line.getTranslationX();
+                if (dy == null) dy = line.getTranslationY();
+                if (dz == null) dz = line.getTranslationZ();
+                if (dx != null && dy != null && dz != null) break;
+            }
+            if (dx != null) tx = dx;
+            if (dy != null) ty = dy;
+            if (dz != null) tz = dz;
+        }
+        if (tx != 0 || ty != 0 || tz != 0) {
+            withTranslation(tx, ty, tz);
+        }
+
+        // 阴影半径
+        float sRadius = 0;
+        if (hologram != null) sRadius = hologram.getShadowRadius();
+        if (lines != null) {
+            for (HologramLine line : lines) {
+                if (line.getShadowRadius() != null) { sRadius = line.getShadowRadius(); break; }
+            }
+        }
+        if (sRadius != 0) {
+            withShadowRadius(sRadius);
+        }
+
+        // 阴影强度
+        float sStrength = 1.0f;
+        if (hologram != null) sStrength = hologram.getShadowStrength();
+        if (lines != null) {
+            for (HologramLine line : lines) {
+                if (line.getShadowStrength() != null) { sStrength = line.getShadowStrength(); break; }
+            }
+        }
+        if (sStrength != 1.0f) {
+            withShadowStrength(sStrength);
+        }
+
+        // 发光颜色
+        if (!skipGlowColor) {
+            int gc = -1;
+            if (hologram != null) gc = hologram.getGlowColor();
+            if (lines != null) {
+                for (HologramLine line : lines) {
+                    if (line.getGlowColor() != null) { gc = line.getGlowColor(); break; }
+                }
+            }
+            if (gc != -1) {
+                withGlowColor(gc);
+            }
+        }
+
+        // 亮度覆盖：组内第一个非 null 行值优先，否则继承全息图级别
+        Brightness effectiveBrightness = null;
+        if (hologram != null) effectiveBrightness = hologram.getBrightness();
+        if (lines != null) {
+            for (HologramLine line : lines) {
+                if (line.getBrightness() != null) { effectiveBrightness = line.getBrightness(); break; }
+            }
+        }
+        withDisplayBrightness(effectiveBrightness);
+
+        return this;
+    }
+
+    /**
+     * 设置 Display Entity 的属性（行列表版本，不跳过发光颜色）
+     */
+    public EntityMetadataBuilder withDisplayProperties(List<HologramLine> lines, Hologram hologram) {
+        return withDisplayProperties(lines, hologram, false);
     }
 
     /**
