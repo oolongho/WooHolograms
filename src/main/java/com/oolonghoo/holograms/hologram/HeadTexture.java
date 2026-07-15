@@ -13,6 +13,29 @@ import java.util.UUID;
 
 public class HeadTexture {
 
+    // 反射缓存：类加载时一次性初始化，运行时零反射开销
+    private static final Field PROFILE_FIELD;
+    private static final Method SET_PROFILE_METHOD;
+
+    static {
+        Field field = null;
+        Method method = null;
+        try {
+            Class<?> craftMetaSkull = Class.forName("org.bukkit.craftbukkit.inventory.CraftMetaSkull");
+            try {
+                field = craftMetaSkull.getDeclaredField("profile");
+                field.setAccessible(true);
+            } catch (NoSuchFieldException e) {
+                method = craftMetaSkull.getDeclaredMethod("setProfile", GameProfile.class);
+                method.setAccessible(true);
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+            // CraftMetaSkull 不可用，createHeadFromBase64 将不设置纹理
+        }
+        PROFILE_FIELD = field;
+        SET_PROFILE_METHOD = method;
+    }
+
     public enum Type {
         BASE64,
         PLAYER,
@@ -133,16 +156,12 @@ public class HeadTexture {
             profile.properties().put("textures", new Property("textures", base64));
 
             try {
-                Field profileField = meta.getClass().getDeclaredField("profile");
-                profileField.setAccessible(true);
-                profileField.set(meta, profile);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                try {
-                    Method setProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-                    setProfileMethod.setAccessible(true);
-                    setProfileMethod.invoke(meta, profile);
-                } catch (NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException ignored) {
+                if (PROFILE_FIELD != null) {
+                    PROFILE_FIELD.set(meta, profile);
+                } else if (SET_PROFILE_METHOD != null) {
+                    SET_PROFILE_METHOD.invoke(meta, profile);
                 }
+            } catch (IllegalAccessException | java.lang.reflect.InvocationTargetException ignored) {
             }
 
             head.setItemMeta(meta);
