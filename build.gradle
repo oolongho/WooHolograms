@@ -3,6 +3,8 @@ plugins {
     id 'io.papermc.paperweight.userdev' version '2.0.0-beta.21'
 }
 
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
+
 group = 'com.oolonghoo'
 version = '1.0.1'
 
@@ -55,7 +57,7 @@ tasks.register('buildInfo') {
         println "=========================================="
         println "Version: ${version}"
         println "Java: ${java.sourceCompatibility}"
-        println "Paper: 1.21+ (1.21.x / 1.21.11)"
+        println "Paper: 1.21+"
         println "=========================================="
     }
 }
