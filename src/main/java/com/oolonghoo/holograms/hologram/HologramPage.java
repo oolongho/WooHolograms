@@ -4,7 +4,7 @@ import com.oolonghoo.holograms.WooHolograms;
 import com.oolonghoo.holograms.action.Action;
 import com.oolonghoo.holograms.action.ClickType;
 import com.oolonghoo.holograms.hologram.HologramManager;
-import com.oolonghoo.holograms.nms.versions.renderer.PageTextRenderer;
+import com.oolonghoo.holograms.nms.versions.renderer.PageTextRendererImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -38,7 +38,7 @@ public class HologramPage {
     private final Set<EnumFlag> flags;
 
     // 页面级文本渲染器（合并连续TEXT行为单个TextDisplay实体）
-    private volatile PageTextRenderer pageTextRenderer;
+    private volatile PageTextRendererImpl pageTextRenderer;
 
     // pageTextRenderer 惰性创建的锁对象
     private final Object textRendererLock = new Object();
@@ -211,7 +211,7 @@ public class HologramPage {
 
         lines.add(index, line);
 
-        // 重建 PageTextRenderer（行结构变化，内部已销毁旧实体）
+        // 重建 PageTextRendererImpl（行结构变化，内部已销毁旧实体）
         rebuildPageTextRenderer();
 
         // 显示给当前观看者
@@ -268,7 +268,7 @@ public class HologramPage {
         line.setContent(content);
 
         if (line.getType() != previousType) {
-            // 类型变化，需要重建 PageTextRenderer
+            // 类型变化，需要重建 PageTextRendererImpl
             rebuildPageTextRenderer();
             // 重新渲染整个页面给所有观看者
             if (parent != null) {
@@ -281,7 +281,7 @@ public class HologramPage {
             }
             realignLines();
         } else if (line.getType() == HologramType.TEXT) {
-            // TEXT 行内容变化，更新 PageTextRenderer
+            // TEXT 行内容变化，更新 PageTextRendererImpl
             if (pageTextRenderer != null && parent != null) {
                 for (Player player : parent.getViewerPlayers(this.index)) {
                     if (player != null && player.isOnline()) {
@@ -308,7 +308,7 @@ public class HologramPage {
         HologramLine line = lines.remove(index);
         if (line != null) {
             line.destroy();
-            // 重建 PageTextRenderer（行结构变化，内部已销毁旧实体）
+            // 重建 PageTextRendererImpl（行结构变化，内部已销毁旧实体）
             rebuildPageTextRenderer();
             // 重新渲染所有文本（rebuildPageTextRenderer 已销毁旧实体，只需 render）
             if (pageTextRenderer != null && parent != null) {
@@ -360,7 +360,7 @@ public class HologramPage {
             line.destroy();
         }
         lines.clear();
-        // 行结构变化，重建 PageTextRenderer
+        // 行结构变化，重建 PageTextRendererImpl
         rebuildPageTextRenderer();
     }
 
@@ -436,7 +436,7 @@ public class HologramPage {
             }
         }
 
-        // 更新 PageTextRenderer 的实体位置
+        // 更新 PageTextRendererImpl 的实体位置
         if (pageTextRenderer != null) {
             for (UUID uuid : getViewers()) {
                 Player p = Bukkit.getPlayer(uuid);
@@ -459,7 +459,7 @@ public class HologramPage {
             return;
         }
 
-        // TEXT 行通过 PageTextRenderer 隐藏
+        // TEXT 行通过 PageTextRendererImpl 隐藏
         if (pageTextRenderer != null) {
             pageTextRenderer.destroy(player);
         }
@@ -491,13 +491,13 @@ public class HologramPage {
     }
 
     /**
-     * 获取或创建 PageTextRenderer
+     * 获取或创建 PageTextRendererImpl
      */
-    public PageTextRenderer getPageTextRenderer() {
+    public PageTextRendererImpl getPageTextRenderer() {
         if (pageTextRenderer == null) {
             synchronized (textRendererLock) {
                 if (pageTextRenderer == null) {
-                    pageTextRenderer = new PageTextRenderer(this, WooHolograms.getInstance().getRendererFactory().getEntityIdGenerator());
+                    pageTextRenderer = new PageTextRendererImpl(this, WooHolograms.getInstance().getRendererFactory().getEntityIdGenerator());
                     // 注册实体ID到 HologramManager
                     if (parent != null) {
                         HologramManager manager = WooHolograms.getInstance().getHologramManager();
@@ -512,7 +512,7 @@ public class HologramPage {
     }
 
     /**
-     * 重建 PageTextRenderer（在行结构变化时调用）
+     * 重建 PageTextRendererImpl（在行结构变化时调用）
      */
     public void rebuildPageTextRenderer() {
         HologramManager manager = WooHolograms.getInstance().getHologramManager();
@@ -529,7 +529,7 @@ public class HologramPage {
             pageTextRenderer.reset();
             pageTextRenderer.rebuildGroups();
         } else {
-            pageTextRenderer = new PageTextRenderer(this, WooHolograms.getInstance().getRendererFactory().getEntityIdGenerator());
+            pageTextRenderer = new PageTextRendererImpl(this, WooHolograms.getInstance().getRendererFactory().getEntityIdGenerator());
         }
         // 注册新实体ID
         if (parent != null) {
@@ -540,10 +540,10 @@ public class HologramPage {
     }
 
     /**
-     * 显示此页给指定玩家（TEXT行通过PageTextRenderer，非TEXT行通过各自渲染器）
+     * 显示此页给指定玩家（TEXT行通过PageTextRendererImpl，非TEXT行通过各自渲染器）
      */
     public void showTo(Player player) {
-        // TEXT 行通过 PageTextRenderer 渲染
+        // TEXT 行通过 PageTextRendererImpl 渲染
         getPageTextRenderer().render(player, parent.getLocation());
 
         // 非 TEXT 行通过各自的渲染器渲染
@@ -555,10 +555,30 @@ public class HologramPage {
     }
 
     /**
-     * 从指定玩家隐藏此页（TEXT行通过PageTextRenderer，非TEXT行通过各自渲染器）
+     * 更新此页的 Display Entity 属性给指定玩家（即时刷新，无闪烁）
+     * TEXT 行通过 metadata update 更新，非 TEXT 行通过 hide+show 更新
+     */
+    public void updateDisplayProperties(Player player) {
+        // TEXT 行通过 PageTextRendererImpl 的 metadata update 更新
+        PageTextRendererImpl renderer = getPageTextRenderer();
+        if (renderer != null) {
+            renderer.updateMetadata(player);
+        }
+
+        // 非 TEXT 行通过 hide+show 更新（实体数量少，性能影响小）
+        for (HologramLine line : lines) {
+            if (line.getType() != HologramType.TEXT) {
+                line.hide(player);
+                line.show(player);
+            }
+        }
+    }
+
+    /**
+     * 从指定玩家隐藏此页（TEXT行通过PageTextRendererImpl，非TEXT行通过各自渲染器）
      */
     public void hideFromPlayer(Player player) {
-        // TEXT 行通过 PageTextRenderer 销毁
+        // TEXT 行通过 PageTextRendererImpl 销毁
         if (pageTextRenderer != null) {
             pageTextRenderer.destroy(player);
         }
@@ -575,7 +595,7 @@ public class HologramPage {
      * 从所有玩家隐藏
      */
     public void hideFromAll() {
-        // TEXT 行通过 PageTextRenderer 隐藏
+        // TEXT 行通过 PageTextRendererImpl 隐藏
         if (pageTextRenderer != null) {
             for (UUID uuid : getViewers()) {
                 Player p = Bukkit.getPlayer(uuid);
@@ -618,7 +638,7 @@ public class HologramPage {
             }
         }
 
-        // TEXT 行通过 PageTextRenderer 更新
+        // TEXT 行通过 PageTextRendererImpl 更新
         if (pageTextRenderer != null) {
             for (Player player : players) {
                 pageTextRenderer.updateText(player);
@@ -647,7 +667,7 @@ public class HologramPage {
             }
         }
 
-        // TEXT 行动画通过 PageTextRenderer 更新
+        // TEXT 行动画通过 PageTextRendererImpl 更新
         if (pageTextRenderer != null) {
             for (Player player : players) {
                 pageTextRenderer.updateText(player);
@@ -785,7 +805,7 @@ public class HologramPage {
      * @return 是否包含
      */
     public boolean hasEntity(int entityId) {
-        // 检查 PageTextRenderer 的实体
+        // 检查 PageTextRendererImpl 的实体
         if (pageTextRenderer != null) {
             for (int id : pageTextRenderer.getEntityIds()) {
                 if (id == entityId) {
@@ -827,7 +847,7 @@ public class HologramPage {
      * @return 行，如果不存在返回 null
      */
     public HologramLine getLineByEntityId(int entityId, Float hitY) {
-        // 先检查 PageTextRenderer 的实体（支持 Y 坐标路由）
+        // 先检查 PageTextRendererImpl 的实体（支持 Y 坐标路由）
         if (pageTextRenderer != null) {
             HologramLine line = pageTextRenderer.getLineByEntityId(entityId, hitY);
             if (line != null) {
@@ -1007,7 +1027,7 @@ public class HologramPage {
      * 销毁此页
      */
     public void destroy() {
-        // 销毁 PageTextRenderer
+        // 销毁 PageTextRendererImpl
         if (pageTextRenderer != null) {
             for (UUID uuid : getViewers()) {
                 Player p = Bukkit.getPlayer(uuid);

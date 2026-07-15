@@ -25,6 +25,7 @@ public class HologramManager {
 
     private static final long TELEPORT_DELAY_TICKS = 20L;
     private static final int MAX_NAME_LENGTH = 50;
+    private static final long FLUSH_INTERVAL_TICKS = 100L; // 5 秒批量保存
 
     private final WooHolograms plugin;
     private final HologramStorage storage;
@@ -39,6 +40,7 @@ public class HologramManager {
 
     // 更新任务
     private TaskHandle updateTaskHandle;
+    private TaskHandle flushTaskHandle;
 
     /*
      * 构造函数
@@ -309,28 +311,71 @@ public class HologramManager {
 
         // 启动更新任务
         startUpdateTask();
+        startFlushTask();
     }
 
     /**
-     * 保存所有全息图
+     * 保存所有全息图（同步 flush 所有 dirty）
      */
     public void saveAll() {
+        flushAllSync();
+    }
+
+    /**
+     * 立即同步保存所有 dirty 全息图（停服/reload 用）
+     */
+    public void flushAllSync() {
+        stopFlushTask();
         int count = 0;
         for (Hologram hologram : holograms.values()) {
-            if (hologram.isSaveToFile()) {
-                hologram.save();
-                count++;
+            if (hologram.isDirty()) {
+                hologram.clearDirty();
+                if (storage.save(hologram)) {
+                    count++;
+                }
             }
         }
-
         int finalCount = count;
         plugin.getLogger().info(() -> "已保存 " + finalCount + " 个全息图");
+    }
+
+    /**
+     * 启动 flush 后台任务（延迟批量保存）
+     */
+    private void startFlushTask() {
+        if (flushTaskHandle != null) {
+            flushTaskHandle.cancel();
+        }
+        flushTaskHandle = SchedulerUtil.runAtFixedRate(this::flushDirty, FLUSH_INTERVAL_TICKS, FLUSH_INTERVAL_TICKS);
+    }
+
+    /**
+     * 停止 flush 后台任务
+     */
+    private void stopFlushTask() {
+        if (flushTaskHandle != null) {
+            flushTaskHandle.cancel();
+            flushTaskHandle = null;
+        }
+    }
+
+    /**
+     * 异步批量保存所有 dirty 全息图
+     */
+    private void flushDirty() {
+        for (Hologram hologram : holograms.values()) {
+            if (hologram.isDirty()) {
+                hologram.clearDirty();
+                storage.saveAsync(hologram);
+            }
+        }
     }
 
     /**
      * 重载所有全息图
      */
     public void reload() {
+        flushAllSync();
         stopUpdateTask();
 
         for (Hologram hologram : holograms.values()) {
@@ -347,6 +392,7 @@ public class HologramManager {
      */
     public void clear() {
         stopUpdateTask();
+        stopFlushTask();
 
         for (Hologram hologram : holograms.values()) {
             hologram.destroy();
@@ -475,7 +521,6 @@ public class HologramManager {
                 Hologram hologram = entry.getValue();
                 if (holograms.putIfAbsent(name, hologram) == null) {
                     addToWorldCache(hologram);
-                    showToNearby(hologram);
                 }
             }
             if (!pending.isEmpty()) {
@@ -483,6 +528,7 @@ public class HologramManager {
             }
         }
 
+        // 统一显示该世界所有全息图（包括刚恢复的 pending 和世界重载后需要重新显示的）
         for (Hologram hologram : getHologramsInWorld(worldName)) {
             showToNearby(hologram);
         }

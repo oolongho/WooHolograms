@@ -5,7 +5,7 @@ import com.oolonghoo.holograms.action.ClickType;
 import com.oolonghoo.holograms.api.event.HologramClickEvent;
 import com.oolonghoo.holograms.nms.NmsHologramRenderer;
 import com.oolonghoo.holograms.nms.renderer.NmsClickableHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.storage.HologramStorage;
 import com.oolonghoo.holograms.util.LocationUtil;
 import com.oolonghoo.holograms.util.Profiler;
@@ -35,6 +35,7 @@ public class Hologram {
     private Location location;
     private volatile boolean enabled;
     private boolean saveToFile;
+    private volatile boolean dirty = false;
 
     // 显示设置
     private volatile double displayRange;
@@ -92,6 +93,16 @@ public class Hologram {
     private final List<NmsHologramRenderer> clickableRenderers;
 
     protected final Object visibilityMutex = new Object();
+
+    /**
+     * 获取状态锁（与所有状态修改方法使用的 visibilityMutex 相同）
+     * 外部（如存储层）读取 Hologram 状态时应同步获取此锁以保证一致性
+     *
+     * @return 状态锁对象
+     */
+    public Object getStateLock() {
+        return visibilityMutex;
+    }
 
     // 存储器
     private HologramStorage storage;
@@ -389,7 +400,7 @@ public class Hologram {
     public void setAlignment(TextAlignment alignment) {
         synchronized (visibilityMutex) {
             this.alignment = alignment != null ? alignment : TextAlignment.LEFT;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -400,7 +411,7 @@ public class Hologram {
     public void setBackgroundAlpha(int backgroundAlpha) {
         synchronized (visibilityMutex) {
             this.backgroundAlpha = Math.max(0, Math.min(255, backgroundAlpha));
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -411,7 +422,7 @@ public class Hologram {
     public void setBackgroundColor(int backgroundColor) {
         synchronized (visibilityMutex) {
             this.backgroundColor = backgroundColor & 0xFFFFFF; // 只保留 RGB 部分
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -422,7 +433,7 @@ public class Hologram {
     public void setLineWidth(int lineWidth) {
         synchronized (visibilityMutex) {
             this.lineWidth = Math.max(1, lineWidth);
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -445,7 +456,7 @@ public class Hologram {
             this.scaleX = x;
             this.scaleY = y;
             this.scaleZ = z;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -466,7 +477,7 @@ public class Hologram {
             this.translationX = x;
             this.translationY = y;
             this.translationZ = z;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -477,7 +488,7 @@ public class Hologram {
     public void setShadowRadius(float shadowRadius) {
         synchronized (visibilityMutex) {
             this.shadowRadius = shadowRadius;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -488,7 +499,7 @@ public class Hologram {
     public void setShadowStrength(float shadowStrength) {
         synchronized (visibilityMutex) {
             this.shadowStrength = shadowStrength;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -499,7 +510,7 @@ public class Hologram {
     public void setGlowColor(int glowColor) {
         synchronized (visibilityMutex) {
             this.glowColor = glowColor;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -510,7 +521,7 @@ public class Hologram {
     public void setBrightness(Brightness brightness) {
         synchronized (visibilityMutex) {
             this.brightness = brightness;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -521,7 +532,7 @@ public class Hologram {
     public void setChromaBackground(boolean chromaBackground) {
         synchronized (visibilityMutex) {
             this.chromaBackground = chromaBackground;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -532,7 +543,7 @@ public class Hologram {
     public void setChromaGlow(boolean chromaGlow) {
         synchronized (visibilityMutex) {
             this.chromaGlow = chromaGlow;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
@@ -545,13 +556,13 @@ public class Hologram {
         synchronized (visibilityMutex) {
             this.chromaBackground = enabled;
             this.chromaGlow = enabled;
-            refreshAllViewers();
+            updateDisplayPropertiesAllViewers();
         }
     }
 
     /**
      * 刷新所有观看者的全息图显示
-     * 重新渲染所有行和可点击实体
+     * 重新渲染所有行和可点击实体（完整 hide+show，用于类型变化等需要重建的场景）
      */
     public void refreshAllViewers() {
         synchronized (visibilityMutex) {
@@ -571,6 +582,27 @@ public class Hologram {
 
             hideClickableEntitiesAll();
             showClickableEntitiesAll();
+        }
+    }
+
+    /**
+     * 即时更新所有观看者的 Display Entity 属性（metadata update，无闪烁）
+     * 用于属性编辑后即时刷新，避免 hide+show 的性能开销和闪烁
+     */
+    public void updateDisplayPropertiesAllViewers() {
+        synchronized (visibilityMutex) {
+            if (!enabled) {
+                return;
+            }
+
+            List<Player> viewerList = new ArrayList<>(getViewerPlayers());
+            for (Player player : viewerList) {
+                int pageIndex = getPlayerPage(player);
+                HologramPage page = getPage(pageIndex);
+                if (page != null) {
+                    page.updateDisplayProperties(player);
+                }
+            }
         }
     }
 
@@ -631,11 +663,15 @@ public class Hologram {
     
     /**
      * 设置全息图类型
-     * 
+     * 类型变化需要完整重建实体（不同类型使用不同的 Display Entity），因此使用 refreshAllViewers
+     *
      * @param type 全息图类型
      */
     public void setType(HologramType type) {
-        this.type = type != null ? type : HologramType.TEXT;
+        synchronized (visibilityMutex) {
+            this.type = type != null ? type : HologramType.TEXT;
+            refreshAllViewers();
+        }
     }
     
     /**
@@ -696,8 +732,10 @@ public class Hologram {
      * @param lineHeight 行高
      */
     public void setLineHeight(double lineHeight) {
-        this.lineHeight = lineHeight;
-        realignLines();
+        synchronized (visibilityMutex) {
+            this.lineHeight = lineHeight;
+            realignLines();
+        }
     }
 
     /*
@@ -1441,8 +1479,8 @@ public class Hologram {
             return;
         }
 
-        // 5. 更新文本内容（TEXT行通过PageTextRenderer，非TEXT行通过各自渲染器）
-        // TEXT 行通过 PageTextRenderer 更新
+        // 5. 更新文本内容（TEXT行通过PageTextRendererImpl，非TEXT行通过各自渲染器）
+        // TEXT 行通过 PageTextRendererImpl 更新
         if (page.getPageTextRenderer() != null) {
             page.getPageTextRenderer().updateText(player);
         }
@@ -1480,7 +1518,7 @@ public class Hologram {
     public void updateText() {
         synchronized (visibilityMutex) {
             for (HologramPage page : pages) {
-                // TEXT 行通过 PageTextRenderer 更新
+                // TEXT 行通过 PageTextRendererImpl 更新
                 if (page.getPageTextRenderer() != null) {
                     for (UUID uuid : page.getViewers()) {
                         Player p = Bukkit.getPlayer(uuid);
@@ -1563,7 +1601,7 @@ public class Hologram {
             return;
         }
 
-        // 5. TEXT 行动画通过 PageTextRenderer 更新
+        // 5. TEXT 行动画通过 PageTextRendererImpl 更新
         if (page.getPageTextRenderer() != null) {
             page.getPageTextRenderer().updateText(player);
         }
@@ -1631,7 +1669,7 @@ public class Hologram {
                     teleportClickableEntitiesAll();
 
                     for (HologramPage page : pages) {
-                        // TEXT 行通过 PageTextRenderer 传送
+                        // TEXT 行通过 PageTextRendererImpl 传送
                         if (page.getPageTextRenderer() != null) {
                             for (UUID uuid : page.getViewers()) {
                                 Player p = Bukkit.getPlayer(uuid);
@@ -1672,7 +1710,7 @@ public class Hologram {
             // 3. 传送可点击实体
             teleportClickableEntities(player);
 
-            // 4. TEXT 行通过 PageTextRenderer 传送
+            // 4. TEXT 行通过 PageTextRendererImpl 传送
             if (page.getPageTextRenderer() != null) {
                 page.getPageTextRenderer().teleport(player);
             }
@@ -1973,7 +2011,7 @@ public class Hologram {
         }
 
         int amount = (int) (page.getHeight() / 2) + 1;
-        DecentPosition pos = getClickableBasePosition(page);
+        HologramPosition pos = getClickableBasePosition(page);
 
         for (int i = 0; i < amount; i++) {
             NmsClickableHologramRenderer renderer = (NmsClickableHologramRenderer) getClickableRenderer(i);
@@ -2030,7 +2068,7 @@ public class Hologram {
         }
 
         int amount = (int) (page.getHeight() / 2) + 1;
-        DecentPosition pos = getClickableBasePosition(page);
+        HologramPosition pos = getClickableBasePosition(page);
 
         for (int i = 0; i < amount; i++) {
             NmsClickableHologramRenderer renderer = (NmsClickableHologramRenderer) getClickableRenderer(i);
@@ -2072,9 +2110,9 @@ public class Hologram {
         return clickableRenderers.get(index);
     }
 
-    private DecentPosition getClickableBasePosition(HologramPage page) {
+    private HologramPosition getClickableBasePosition(HologramPage page) {
         double baseY = Math.floor(location.getY() - page.getHeight()) + 0.5;
-        return new DecentPosition(location.getX(), baseY, location.getZ());
+        return new HologramPosition(location.getX(), baseY, location.getZ());
     }
 
     public void destroyClickableRenderers() {
@@ -2224,14 +2262,34 @@ public class Hologram {
     }
 
     /**
-     * 保存
+     * 保存（标记为 dirty，由后台任务批量异步保存）
      */
     public void save() {
         if (!saveToFile || storage == null) {
             return;
         }
+        markDirty();
+    }
 
-        storage.save(this);
+    /**
+     * 标记为需要保存
+     */
+    public void markDirty() {
+        dirty = true;
+    }
+
+    /**
+     * 检查是否需要保存
+     */
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    /**
+     * 清除 dirty 标记（包私有，仅 HologramManager 调用）
+     */
+    void clearDirty() {
+        dirty = false;
     }
 
     /**

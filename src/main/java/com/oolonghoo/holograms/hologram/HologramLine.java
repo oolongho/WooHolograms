@@ -353,7 +353,7 @@ public class HologramLine {
                 return;
             }
 
-            // TEXT 行由 PageTextRenderer 统一管理显示
+            // TEXT 行由 PageTextRendererImpl 统一管理显示
             if (type == HologramType.TEXT) {
                 // 如果从其他类型变为TEXT，需要清理旧渲染器
                 hidePreviousIfNecessary();
@@ -412,7 +412,7 @@ public class HologramLine {
             return;
         }
 
-        // TEXT 行由 PageTextRenderer 统一渲染，不需要独立渲染器
+        // TEXT 行由 PageTextRendererImpl 统一渲染，不需要独立渲染器
         if (type == HologramType.TEXT) {
             this.renderer = null;
             return;
@@ -448,7 +448,7 @@ public class HologramLine {
      */
     public void hide(Player... players) {
         synchronized (renderMutex) {
-            // TEXT 行由 PageTextRenderer 统一管理隐藏
+            // TEXT 行由 PageTextRendererImpl 统一管理隐藏
             if (type == HologramType.TEXT) {
                 return;
             }
@@ -499,7 +499,7 @@ public class HologramLine {
                 return;
             }
 
-            // TEXT 行由 PageTextRenderer 统一管理更新
+            // TEXT 行由 PageTextRendererImpl 统一管理更新
             if (type == HologramType.TEXT) {
                 // 如果从其他类型变为TEXT，需要清理旧渲染器
                 hidePreviousIfNecessary();
@@ -536,7 +536,7 @@ public class HologramLine {
                 return;
             }
 
-            // TEXT 行动画由 PageTextRenderer 统一管理
+            // TEXT 行动画由 PageTextRendererImpl 统一管理
             if (type == HologramType.TEXT) {
                 return;
             }
@@ -570,7 +570,7 @@ public class HologramLine {
                 return;
             }
 
-            // TEXT 行位置由 PageTextRenderer 统一管理
+            // TEXT 行位置由 PageTextRendererImpl 统一管理
             if (type == HologramType.TEXT) {
                 return;
             }
@@ -1207,7 +1207,7 @@ public class HologramLine {
      */
     public void destroy() {
         synchronized (renderMutex) {
-            // TEXT 行的渲染器由 PageTextRenderer 管理，此处只清理缓存
+            // TEXT 行的渲染器由 PageTextRendererImpl 管理，此处只清理缓存
             if (type == HologramType.TEXT) {
                 // 清理 previousRenderer（从其他类型变为TEXT时遗留的旧渲染器）
                 if (previousRenderer != null) {
@@ -1279,7 +1279,7 @@ public class HologramLine {
             Location oldLocation = this.location;
             this.location = location != null ? location.clone() : null;
 
-            // TEXT 行位置由 PageTextRenderer 管理
+            // TEXT 行位置由 PageTextRendererImpl 管理
             if (type == HologramType.TEXT) {
                 return;
             }
@@ -1332,7 +1332,7 @@ public class HologramLine {
     }
 
     public double getHeight() {
-        // TEXT 行使用 hologram 的 lineHeight（由 PageTextRenderer 统一管理合并渲染）
+        // TEXT 行使用 hologram 的 lineHeight（由 PageTextRendererImpl 统一管理合并渲染）
         if (type == HologramType.TEXT) {
             if (parent != null && parent.getParent() != null) {
                 return parent.getParent().getLineHeight();
@@ -1678,7 +1678,7 @@ public class HologramLine {
     }
 
     public int[] getEntityIds() {
-        // TEXT 行的实体ID由 PageTextRenderer 管理
+        // TEXT 行的实体ID由 PageTextRendererImpl 管理
         if (type == HologramType.TEXT) {
             return EMPTY_IDS;
         }

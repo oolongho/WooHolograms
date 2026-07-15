@@ -174,9 +174,9 @@ public class WooHolograms extends JavaPlugin {
             return;
         }
         
-        // 保存所有全息图
+        // 同步保存所有 dirty 全息图（确保停服时数据不丢）
         try {
-            hologramManager.saveAll();
+            hologramManager.flushAllSync();
         } catch (Exception e) {
             getLogger().severe("保存全息图时出错: " + e.getMessage());
         }
