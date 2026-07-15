@@ -8,17 +8,17 @@ import org.bukkit.Location;
  */
 public class DecentPosition {
 
-	private final com.oolonghoo.holograms.nms.util.DecentPosition handle;
+	private final com.oolonghoo.holograms.nms.util.HologramPosition handle;
 
 	public DecentPosition(double x, double y, double z) {
-		this.handle = new com.oolonghoo.holograms.nms.util.DecentPosition(x, y, z);
+		this.handle = new com.oolonghoo.holograms.nms.util.HologramPosition(x, y, z);
 	}
 
 	public DecentPosition(double x, double y, double z, float yaw, float pitch) {
-		this.handle = new com.oolonghoo.holograms.nms.util.DecentPosition(x, y, z, yaw, pitch);
+		this.handle = new com.oolonghoo.holograms.nms.util.HologramPosition(x, y, z, yaw, pitch);
 	}
 
-	private DecentPosition(com.oolonghoo.holograms.nms.util.DecentPosition handle) {
+	private DecentPosition(com.oolonghoo.holograms.nms.util.HologramPosition handle) {
 		this.handle = handle;
 	}
 
@@ -37,14 +37,14 @@ public class DecentPosition {
 	}
 
 	public static DecentPosition fromBukkitLocation(Location location) {
-		return new DecentPosition(com.oolonghoo.holograms.nms.util.DecentPosition.fromBukkitLocation(location));
+		return new DecentPosition(com.oolonghoo.holograms.nms.util.HologramPosition.fromBukkitLocation(location));
 	}
 
 	public Location toBukkitLocation(String worldName) {
 		return handle.toBukkitLocation(worldName);
 	}
 
-	public com.oolonghoo.holograms.nms.util.DecentPosition getHandle() {
+	public com.oolonghoo.holograms.nms.util.HologramPosition getHandle() {
 		return handle;
 	}
 }
