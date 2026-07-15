@@ -56,162 +56,184 @@ public class YamlHologramStorage implements HologramStorage {
 
     @Override
     public boolean save(Hologram hologram) {
+        String id = hologram.getId();
+        File file = getHologramFile(id);
+
+        // 在 visibilityMutex 内读取状态构建快照，保证与状态修改方法的一致性
+        YamlConfiguration yaml;
+        synchronized (hologram.getStateLock()) {
+            yaml = buildYamlSnapshot(hologram);
+        }
+        if (yaml == null) {
+            return false;
+        }
+
         saveLock.lock();
         try {
-            String id = hologram.getId();
-            File file = getHologramFile(id);
-            YamlConfiguration yaml = new YamlConfiguration();
-
-            Location loc = hologram.getLocation();
-            if (loc == null) {
-                plugin.getLogger().warning(() -> "Cannot save hologram " + id + ": location is null");
-                return false;
-            }
-
-            World world = loc.getWorld();
-            if (world == null) {
-                plugin.getLogger().warning(() -> "Cannot save hologram " + id + ": world is null");
-                return false;
-            }
-
-            yaml.set("location", LocationUtil.toString(loc));
-            yaml.set("enabled", hologram.isEnabled());
-            yaml.set("type", hologram.getType().getId());
-            yaml.set("visible", hologram.isVisible());
-            yaml.set("persistent", hologram.isPersistent());
-            yaml.set("line-height", hologram.getLineHeight());
-            yaml.set("billboard", hologram.getBillboard().getId());
-            yaml.set("facing", hologram.getFacing());
-            yaml.set("double-sided", hologram.isDoubleSided());
-            yaml.set("display-range", hologram.getDisplayRange());
-            yaml.set("update-range", hologram.getUpdateRange());
-            yaml.set("update-interval", hologram.getUpdateInterval());
-            yaml.set("alignment", hologram.getAlignment().getId());
-            yaml.set("background-alpha", hologram.getBackgroundAlpha());
-            yaml.set("background-color", hologram.getBackgroundColor());
-            yaml.set("line-width", hologram.getLineWidth());
-            yaml.set("scale-x", hologram.getScaleX());
-            yaml.set("scale-y", hologram.getScaleY());
-            yaml.set("scale-z", hologram.getScaleZ());
-            yaml.set("translation-x", hologram.getTranslationX());
-            yaml.set("translation-y", hologram.getTranslationY());
-            yaml.set("translation-z", hologram.getTranslationZ());
-            yaml.set("shadow-radius", hologram.getShadowRadius());
-            yaml.set("shadow-strength", hologram.getShadowStrength());
-            yaml.set("glow-color", hologram.getGlowColor());
-            if (hologram.getBrightness() != null) {
-                yaml.set("brightness", hologram.getBrightness().getSkyLight() + "," + hologram.getBrightness().getBlockLight());
-            } else {
-                yaml.set("brightness", null);
-            }
-            yaml.set("chroma-background", hologram.isChromaBackground());
-            yaml.set("chroma-glow", hologram.isChromaGlow());
-
-            if (hologram.getPermission() != null && !hologram.getPermission().isEmpty()) {
-                yaml.set("permission", hologram.getPermission());
-            }
-
-            if (!hologram.getFlags().isEmpty()) {
-                yaml.set("flags", hologram.getFlags().stream()
-                        .map(EnumFlag::name)
-                        .collect(Collectors.toList()));
-            }
-
-            List<HologramPage> pages = hologram.getPages();
-            for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
-                HologramPage page = pages.get(pageIndex);
-                String pagePath = "pages." + pageIndex;
-
-                saveActions(yaml, pagePath + ".actions", page.getActions());
-
-                if (!page.getFlags().isEmpty()) {
-                    yaml.set(pagePath + ".flags", page.getFlags().stream()
-                            .map(EnumFlag::name)
-                            .collect(Collectors.toList()));
-                }
-
-                List<HologramLine> lines = page.getLines();
-                for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-                    HologramLine line = lines.get(lineIndex);
-                    String linePath = pagePath + ".lines." + lineIndex;
-
-                    yaml.set(linePath + ".content", line.getContent());
-                    yaml.set(linePath + ".height", line.getBaseHeight());
-                    yaml.set(linePath + ".offsetX", line.getOffsetX());
-                    yaml.set(linePath + ".offsetY", line.getOffsetY());
-                    yaml.set(linePath + ".offsetZ", line.getOffsetZ());
-                    yaml.set(linePath + ".facing", line.getFacing());
-
-                    if (line.getCustomYaw() != null) {
-                        yaml.set(linePath + ".custom-yaw", line.getCustomYaw());
-                    }
-
-                    if (line.getCustomPitch() != null) {
-                        yaml.set(linePath + ".custom-pitch", line.getCustomPitch());
-                    }
-
-                    if (line.getBrightness() != null) {
-                        yaml.set(linePath + ".brightness",
-                                line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
-                    }
-
-                    if (line.getBillboard() != null) {
-                        yaml.set(linePath + ".billboard", line.getBillboard().getId());
-                    }
-
-                    // Display Entity 行级别属性
-                    if (line.getScaleX() != null || line.getScaleY() != null || line.getScaleZ() != null) {
-                        if (line.getScaleX() != null) yaml.set(linePath + ".scale-x", line.getScaleX());
-                        if (line.getScaleY() != null) yaml.set(linePath + ".scale-y", line.getScaleY());
-                        if (line.getScaleZ() != null) yaml.set(linePath + ".scale-z", line.getScaleZ());
-                    }
-
-                    if (line.getTranslationX() != null || line.getTranslationY() != null || line.getTranslationZ() != null) {
-                        if (line.getTranslationX() != null) yaml.set(linePath + ".translation-x", line.getTranslationX());
-                        if (line.getTranslationY() != null) yaml.set(linePath + ".translation-y", line.getTranslationY());
-                        if (line.getTranslationZ() != null) yaml.set(linePath + ".translation-z", line.getTranslationZ());
-                    }
-
-                    if (line.getShadowRadius() != null) {
-                        yaml.set(linePath + ".shadow-radius", line.getShadowRadius());
-                    }
-
-                    if (line.getShadowStrength() != null) {
-                        yaml.set(linePath + ".shadow-strength", line.getShadowStrength());
-                    }
-
-                    if (line.getGlowColor() != null) {
-                        yaml.set(linePath + ".glow-color", line.getGlowColor());
-                    }
-
-                    if (line.getChromaBackground() != null) {
-                        yaml.set(linePath + ".chroma-background", line.getChromaBackground());
-                    }
-
-                    if (line.getChromaGlow() != null) {
-                        yaml.set(linePath + ".chroma-glow", line.getChromaGlow());
-                    }
-
-                    if (line.getPermission() != null && !line.getPermission().isEmpty()) {
-                        yaml.set(linePath + ".permission", line.getPermission());
-                    }
-
-                    if (!line.getFlags().isEmpty()) {
-                        yaml.set(linePath + ".flags", line.getFlags().stream()
-                                .map(EnumFlag::name)
-                                .collect(Collectors.toList()));
-                    }
-
-                    if (line.hasActions()) {
-                        saveActions(yaml, linePath + ".actions", line.getActions());
-                    }
-                }
-            }
-
             return saveYaml(yaml, file);
         } finally {
             saveLock.unlock();
         }
+    }
+
+    /**
+     * 构建 Hologram 状态的 YamlConfiguration 快照
+     * 调用者必须在 synchronized (hologram.getStateLock()) 内调用，以保证读取状态的一致性
+     *
+     * @param hologram 全息图
+     * @return YamlConfiguration 快照，location/world 无效时返回 null
+     */
+    private YamlConfiguration buildYamlSnapshot(Hologram hologram) {
+        String id = hologram.getId();
+        YamlConfiguration yaml = new YamlConfiguration();
+
+        Location loc = hologram.getLocation();
+        if (loc == null) {
+            plugin.getLogger().warning(() -> "Cannot save hologram " + id + ": location is null");
+            return null;
+        }
+
+        World world = loc.getWorld();
+        if (world == null) {
+            plugin.getLogger().warning(() -> "Cannot save hologram " + id + ": world is null");
+            return null;
+        }
+
+        yaml.set("location", LocationUtil.toString(loc));
+        yaml.set("enabled", hologram.isEnabled());
+        yaml.set("type", hologram.getType().getId());
+        yaml.set("visible", hologram.isVisible());
+        yaml.set("persistent", hologram.isPersistent());
+        yaml.set("line-height", hologram.getLineHeight());
+        yaml.set("billboard", hologram.getBillboard().getId());
+        yaml.set("facing", hologram.getFacing());
+        yaml.set("double-sided", hologram.isDoubleSided());
+        yaml.set("display-range", hologram.getDisplayRange());
+        yaml.set("update-range", hologram.getUpdateRange());
+        yaml.set("update-interval", hologram.getUpdateInterval());
+        yaml.set("alignment", hologram.getAlignment().getId());
+        yaml.set("background-alpha", hologram.getBackgroundAlpha());
+        yaml.set("background-color", hologram.getBackgroundColor());
+        yaml.set("line-width", hologram.getLineWidth());
+        yaml.set("scale-x", hologram.getScaleX());
+        yaml.set("scale-y", hologram.getScaleY());
+        yaml.set("scale-z", hologram.getScaleZ());
+        yaml.set("translation-x", hologram.getTranslationX());
+        yaml.set("translation-y", hologram.getTranslationY());
+        yaml.set("translation-z", hologram.getTranslationZ());
+        yaml.set("shadow-radius", hologram.getShadowRadius());
+        yaml.set("shadow-strength", hologram.getShadowStrength());
+        yaml.set("glow-color", hologram.getGlowColor());
+        if (hologram.getBrightness() != null) {
+            yaml.set("brightness", hologram.getBrightness().getSkyLight() + "," + hologram.getBrightness().getBlockLight());
+        } else {
+            yaml.set("brightness", null);
+        }
+        yaml.set("chroma-background", hologram.isChromaBackground());
+        yaml.set("chroma-glow", hologram.isChromaGlow());
+
+        if (hologram.getPermission() != null && !hologram.getPermission().isEmpty()) {
+            yaml.set("permission", hologram.getPermission());
+        }
+
+        if (!hologram.getFlags().isEmpty()) {
+            yaml.set("flags", hologram.getFlags().stream()
+                    .map(EnumFlag::name)
+                    .collect(Collectors.toList()));
+        }
+
+        List<HologramPage> pages = hologram.getPages();
+        for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
+            HologramPage page = pages.get(pageIndex);
+            String pagePath = "pages." + pageIndex;
+
+            saveActions(yaml, pagePath + ".actions", page.getActions());
+
+            if (!page.getFlags().isEmpty()) {
+                yaml.set(pagePath + ".flags", page.getFlags().stream()
+                        .map(EnumFlag::name)
+                        .collect(Collectors.toList()));
+            }
+
+            List<HologramLine> lines = page.getLines();
+            for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
+                HologramLine line = lines.get(lineIndex);
+                String linePath = pagePath + ".lines." + lineIndex;
+
+                yaml.set(linePath + ".content", line.getContent());
+                yaml.set(linePath + ".height", line.getBaseHeight());
+                yaml.set(linePath + ".offsetX", line.getOffsetX());
+                yaml.set(linePath + ".offsetY", line.getOffsetY());
+                yaml.set(linePath + ".offsetZ", line.getOffsetZ());
+                yaml.set(linePath + ".facing", line.getFacing());
+
+                if (line.getCustomYaw() != null) {
+                    yaml.set(linePath + ".custom-yaw", line.getCustomYaw());
+                }
+
+                if (line.getCustomPitch() != null) {
+                    yaml.set(linePath + ".custom-pitch", line.getCustomPitch());
+                }
+
+                if (line.getBrightness() != null) {
+                    yaml.set(linePath + ".brightness",
+                            line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
+                }
+
+                if (line.getBillboard() != null) {
+                    yaml.set(linePath + ".billboard", line.getBillboard().getId());
+                }
+
+                // Display Entity 行级别属性
+                if (line.getScaleX() != null || line.getScaleY() != null || line.getScaleZ() != null) {
+                    if (line.getScaleX() != null) yaml.set(linePath + ".scale-x", line.getScaleX());
+                    if (line.getScaleY() != null) yaml.set(linePath + ".scale-y", line.getScaleY());
+                    if (line.getScaleZ() != null) yaml.set(linePath + ".scale-z", line.getScaleZ());
+                }
+
+                if (line.getTranslationX() != null || line.getTranslationY() != null || line.getTranslationZ() != null) {
+                    if (line.getTranslationX() != null) yaml.set(linePath + ".translation-x", line.getTranslationX());
+                    if (line.getTranslationY() != null) yaml.set(linePath + ".translation-y", line.getTranslationY());
+                    if (line.getTranslationZ() != null) yaml.set(linePath + ".translation-z", line.getTranslationZ());
+                }
+
+                if (line.getShadowRadius() != null) {
+                    yaml.set(linePath + ".shadow-radius", line.getShadowRadius());
+                }
+
+                if (line.getShadowStrength() != null) {
+                    yaml.set(linePath + ".shadow-strength", line.getShadowStrength());
+                }
+
+                if (line.getGlowColor() != null) {
+                    yaml.set(linePath + ".glow-color", line.getGlowColor());
+                }
+
+                if (line.getChromaBackground() != null) {
+                    yaml.set(linePath + ".chroma-background", line.getChromaBackground());
+                }
+
+                if (line.getChromaGlow() != null) {
+                    yaml.set(linePath + ".chroma-glow", line.getChromaGlow());
+                }
+
+                if (line.getPermission() != null && !line.getPermission().isEmpty()) {
+                    yaml.set(linePath + ".permission", line.getPermission());
+                }
+
+                if (!line.getFlags().isEmpty()) {
+                    yaml.set(linePath + ".flags", line.getFlags().stream()
+                            .map(EnumFlag::name)
+                            .collect(Collectors.toList()));
+                }
+
+                if (line.hasActions()) {
+                    saveActions(yaml, linePath + ".actions", line.getActions());
+                }
+            }
+        }
+
+        return yaml;
     }
 
     private void saveActions(YamlConfiguration yaml, String path, Map<ClickType, List<Action>> actionsMap) {
@@ -327,167 +349,29 @@ public class YamlHologramStorage implements HologramStorage {
 
     @Override
     public void saveAsync(Hologram hologram) {
-        // 在主线程读取 Hologram 状态生成 YamlConfiguration，避免异步线程读取导致数据竞争
-        YamlConfiguration yaml = new YamlConfiguration();
-        File file;
-        saveLock.lock();
-        try {
-            String id = hologram.getId();
-            file = getHologramFile(id);
+        String id = hologram.getId();
+        File file = getHologramFile(id);
 
-            Location loc = hologram.getLocation();
-            if (loc == null) {
-                plugin.getLogger().warning(() -> "Cannot save hologram " + id + ": location is null");
-                return;
-            }
-
-            World world = loc.getWorld();
-            if (world == null) {
-                plugin.getLogger().warning(() -> "Cannot save hologram " + id + ": world is null");
-                return;
-            }
-
-            yaml.set("location", LocationUtil.toString(loc));
-            yaml.set("enabled", hologram.isEnabled());
-            yaml.set("type", hologram.getType().getId());
-            yaml.set("visible", hologram.isVisible());
-            yaml.set("persistent", hologram.isPersistent());
-            yaml.set("line-height", hologram.getLineHeight());
-            yaml.set("billboard", hologram.getBillboard().getId());
-            yaml.set("facing", hologram.getFacing());
-            yaml.set("double-sided", hologram.isDoubleSided());
-            yaml.set("display-range", hologram.getDisplayRange());
-            yaml.set("update-range", hologram.getUpdateRange());
-            yaml.set("update-interval", hologram.getUpdateInterval());
-            yaml.set("alignment", hologram.getAlignment().getId());
-            yaml.set("background-alpha", hologram.getBackgroundAlpha());
-            yaml.set("background-color", hologram.getBackgroundColor());
-            yaml.set("line-width", hologram.getLineWidth());
-            yaml.set("scale-x", hologram.getScaleX());
-            yaml.set("scale-y", hologram.getScaleY());
-            yaml.set("scale-z", hologram.getScaleZ());
-            yaml.set("translation-x", hologram.getTranslationX());
-            yaml.set("translation-y", hologram.getTranslationY());
-            yaml.set("translation-z", hologram.getTranslationZ());
-            yaml.set("shadow-radius", hologram.getShadowRadius());
-            yaml.set("shadow-strength", hologram.getShadowStrength());
-            yaml.set("glow-color", hologram.getGlowColor());
-            if (hologram.getBrightness() != null) {
-                yaml.set("brightness", hologram.getBrightness().getSkyLight() + "," + hologram.getBrightness().getBlockLight());
-            } else {
-                yaml.set("brightness", null);
-            }
-            yaml.set("chroma-background", hologram.isChromaBackground());
-            yaml.set("chroma-glow", hologram.isChromaGlow());
-
-            if (hologram.getPermission() != null && !hologram.getPermission().isEmpty()) {
-                yaml.set("permission", hologram.getPermission());
-            }
-
-            if (!hologram.getFlags().isEmpty()) {
-                yaml.set("flags", hologram.getFlags().stream()
-                        .map(EnumFlag::name)
-                        .collect(Collectors.toList()));
-            }
-
-            List<HologramPage> pages = hologram.getPages();
-            for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
-                HologramPage page = pages.get(pageIndex);
-                String pagePath = "pages." + pageIndex;
-
-                saveActions(yaml, pagePath + ".actions", page.getActions());
-
-                if (!page.getFlags().isEmpty()) {
-                    yaml.set(pagePath + ".flags", page.getFlags().stream()
-                            .map(EnumFlag::name)
-                            .collect(Collectors.toList()));
-                }
-
-                List<HologramLine> lines = page.getLines();
-                for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-                    HologramLine line = lines.get(lineIndex);
-                    String linePath = pagePath + ".lines." + lineIndex;
-
-                    yaml.set(linePath + ".content", line.getContent());
-                    yaml.set(linePath + ".height", line.getBaseHeight());
-                    yaml.set(linePath + ".offsetX", line.getOffsetX());
-                    yaml.set(linePath + ".offsetY", line.getOffsetY());
-                    yaml.set(linePath + ".offsetZ", line.getOffsetZ());
-                    yaml.set(linePath + ".facing", line.getFacing());
-
-                    if (line.getCustomYaw() != null) {
-                        yaml.set(linePath + ".custom-yaw", line.getCustomYaw());
-                    }
-
-                    if (line.getCustomPitch() != null) {
-                        yaml.set(linePath + ".custom-pitch", line.getCustomPitch());
-                    }
-
-                    if (line.getBrightness() != null) {
-                        yaml.set(linePath + ".brightness",
-                                line.getBrightness().getSkyLight() + "," + line.getBrightness().getBlockLight());
-                    }
-
-                    if (line.getBillboard() != null) {
-                        yaml.set(linePath + ".billboard", line.getBillboard().getId());
-                    }
-
-                    // Display Entity 行级别属性
-                    if (line.getScaleX() != null || line.getScaleY() != null || line.getScaleZ() != null) {
-                        if (line.getScaleX() != null) yaml.set(linePath + ".scale-x", line.getScaleX());
-                        if (line.getScaleY() != null) yaml.set(linePath + ".scale-y", line.getScaleY());
-                        if (line.getScaleZ() != null) yaml.set(linePath + ".scale-z", line.getScaleZ());
-                    }
-
-                    if (line.getTranslationX() != null || line.getTranslationY() != null || line.getTranslationZ() != null) {
-                        if (line.getTranslationX() != null) yaml.set(linePath + ".translation-x", line.getTranslationX());
-                        if (line.getTranslationY() != null) yaml.set(linePath + ".translation-y", line.getTranslationY());
-                        if (line.getTranslationZ() != null) yaml.set(linePath + ".translation-z", line.getTranslationZ());
-                    }
-
-                    if (line.getShadowRadius() != null) {
-                        yaml.set(linePath + ".shadow-radius", line.getShadowRadius());
-                    }
-
-                    if (line.getShadowStrength() != null) {
-                        yaml.set(linePath + ".shadow-strength", line.getShadowStrength());
-                    }
-
-                    if (line.getGlowColor() != null) {
-                        yaml.set(linePath + ".glow-color", line.getGlowColor());
-                    }
-
-                    if (line.getChromaBackground() != null) {
-                        yaml.set(linePath + ".chroma-background", line.getChromaBackground());
-                    }
-
-                    if (line.getChromaGlow() != null) {
-                        yaml.set(linePath + ".chroma-glow", line.getChromaGlow());
-                    }
-
-                    if (line.getPermission() != null && !line.getPermission().isEmpty()) {
-                        yaml.set(linePath + ".permission", line.getPermission());
-                    }
-
-                    if (!line.getFlags().isEmpty()) {
-                        yaml.set(linePath + ".flags", line.getFlags().stream()
-                                .map(EnumFlag::name)
-                                .collect(Collectors.toList()));
-                    }
-
-                    if (line.hasActions()) {
-                        saveActions(yaml, linePath + ".actions", line.getActions());
-                    }
-                }
-            }
-        } finally {
-            saveLock.unlock();
+        // 在 visibilityMutex 内读取状态构建快照，保证与状态修改方法的一致性
+        YamlConfiguration yaml;
+        synchronized (hologram.getStateLock()) {
+            yaml = buildYamlSnapshot(hologram);
+        }
+        if (yaml == null) {
+            return;
         }
 
-        // 仅将文件写入操作提交到异步线程
+        // 仅将文件写入操作提交到异步线程，saveLock 串行化文件写入避免交叉
         YamlConfiguration yamlSnapshot = yaml;
         File fileSnapshot = file;
-        SchedulerUtil.runTaskAsynchronously(() -> saveYaml(yamlSnapshot, fileSnapshot));
+        SchedulerUtil.runTaskAsynchronously(() -> {
+            saveLock.lock();
+            try {
+                saveYaml(yamlSnapshot, fileSnapshot);
+            } finally {
+                saveLock.unlock();
+            }
+        });
     }
 
     @Override
