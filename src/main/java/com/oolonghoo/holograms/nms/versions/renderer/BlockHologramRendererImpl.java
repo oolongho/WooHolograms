@@ -4,7 +4,7 @@ import com.oolonghoo.holograms.hologram.Billboard;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.renderer.NmsBlockHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -89,7 +89,7 @@ public class BlockHologramRendererImpl implements NmsBlockHologramRenderer {
 
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, org.bukkit.entity.EntityType.BLOCK_DISPLAY,
-                        new DecentPosition(location.getX(), location.getY(), location.getZ()),
+                        new HologramPosition(location.getX(), location.getY(), location.getZ()),
                         yaw, pitch)
                 .withEntityMetadata(entityId, metadataBuilder.toWatchableObjects())
                 .sendTo(player);
@@ -188,7 +188,7 @@ public class BlockHologramRendererImpl implements NmsBlockHologramRenderer {
         }
 
         EntityPacketsBuilder.create()
-                .withTeleportEntity(entityId, new DecentPosition(
+                .withTeleportEntity(entityId, new HologramPosition(
                         location.getX(), location.getY(), location.getZ(),
                         currentYaw, currentPitch))
                 .sendTo(player);

@@ -2,7 +2,7 @@ package com.oolonghoo.holograms.nms.versions.renderer;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.renderer.NmsEntityHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -61,7 +61,7 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, entityType,
-                        new DecentPosition(
+                        new HologramPosition(
                                 location.getX(), location.getY(), location.getZ()),
                         yaw, pitch)
                 .withEntityMetadata(entityId, metadataBuilder.toWatchableObjects())
@@ -123,7 +123,7 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
         }
 
         EntityPacketsBuilder.create()
-                .withTeleportEntity(entityId, new DecentPosition(
+                .withTeleportEntity(entityId, new HologramPosition(
                         location.getX(), location.getY(), location.getZ()))
                 .sendTo(player);
     }

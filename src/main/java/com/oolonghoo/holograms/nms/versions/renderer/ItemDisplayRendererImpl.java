@@ -5,7 +5,7 @@ import com.oolonghoo.holograms.hologram.HeadTexture;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.renderer.NmsItemDisplayRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -97,7 +97,7 @@ public class ItemDisplayRendererImpl implements NmsItemDisplayRenderer {
             metadataBuilder.withGlow();
         }
 
-        DecentPosition position = DecentPosition.fromLocation(location);
+        HologramPosition position = HologramPosition.fromLocation(location);
 
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, org.bukkit.entity.EntityType.ITEM_DISPLAY,
@@ -178,7 +178,7 @@ public class ItemDisplayRendererImpl implements NmsItemDisplayRenderer {
             return;
         }
         EntityPacketsBuilder.create()
-                .withTeleportEntity(entityId, new DecentPosition(
+                .withTeleportEntity(entityId, new HologramPosition(
                         location.getX(), location.getY(), location.getZ(),
                         currentYaw, currentPitch))
                 .sendTo(player);

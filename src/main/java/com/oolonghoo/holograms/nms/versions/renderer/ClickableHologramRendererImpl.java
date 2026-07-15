@@ -1,6 +1,6 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 import com.oolonghoo.holograms.nms.renderer.NmsClickableHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -25,7 +25,7 @@ public class ClickableHologramRendererImpl implements NmsClickableHologramRender
     }
 
     @Override
-    public void display(Player player, DecentPosition position) {
+    public void display(Player player, HologramPosition position) {
         EntityPacketsBuilder.create()
                 .withSpawnEntity(entityId, EntityType.ARMOR_STAND, position)
                 .withEntityMetadata(entityId, EntityMetadataBuilder.create()
@@ -37,7 +37,7 @@ public class ClickableHologramRendererImpl implements NmsClickableHologramRender
     }
 
     @Override
-    public void move(Player player, DecentPosition position) {
+    public void move(Player player, HologramPosition position) {
         EntityPacketsBuilder.create()
                 .withTeleportEntity(entityId, position)
                 .sendTo(player);

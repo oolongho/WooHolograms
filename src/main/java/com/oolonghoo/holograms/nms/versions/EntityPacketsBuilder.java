@@ -1,7 +1,9 @@
 package com.oolonghoo.holograms.nms.versions;
 
 import com.mojang.datafixers.util.Pair;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
+import com.oolonghoo.holograms.nms.versions.adapter.EntityPacketHelper;
+import com.oolonghoo.holograms.nms.versions.adapter.EntityPacketHelperFactory;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -57,7 +59,7 @@ public class EntityPacketsBuilder {
      * @param position 位置
      * @return this
      */
-    public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, DecentPosition position) {
+    public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, HologramPosition position) {
         Packet<?> packet = PACKET_HELPER.createSpawnPacket(
                 entityId,
                 UUID.randomUUID(),
@@ -86,7 +88,7 @@ public class EntityPacketsBuilder {
      * @param pitch    俯仰角
      * @return this
      */
-    public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, DecentPosition position, float yaw, float pitch) {
+    public EntityPacketsBuilder withSpawnEntity(int entityId, EntityType type, HologramPosition position, float yaw, float pitch) {
         Packet<?> packet = PACKET_HELPER.createSpawnPacket(
                 entityId,
                 UUID.randomUUID(),
@@ -150,7 +152,7 @@ public class EntityPacketsBuilder {
      * @param position 位置
      * @return this
      */
-    public EntityPacketsBuilder withTeleportEntity(int entityId, DecentPosition position) {
+    public EntityPacketsBuilder withTeleportEntity(int entityId, HologramPosition position) {
         Packet<?> packet = PACKET_HELPER.createTeleportPacket(
                 entityId,
                 position.getX(),

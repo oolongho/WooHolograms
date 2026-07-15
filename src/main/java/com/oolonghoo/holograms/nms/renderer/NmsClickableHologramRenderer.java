@@ -1,7 +1,7 @@
 package com.oolonghoo.holograms.nms.renderer;
 
 import com.oolonghoo.holograms.nms.NmsHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -23,7 +23,7 @@ public interface NmsClickableHologramRenderer extends NmsHologramRenderer {
      * @param player   为其生成实体的玩家
      * @param position 生成实体的位置
      */
-    void display(Player player, DecentPosition position);
+    void display(Player player, HologramPosition position);
 
     /**
      * 移动可点击实体
@@ -31,7 +31,7 @@ public interface NmsClickableHologramRenderer extends NmsHologramRenderer {
      * @param player   为其移动实体的玩家
      * @param position 移动到的位置
      */
-    void move(Player player, DecentPosition position);
+    void move(Player player, HologramPosition position);
 
     /**
      * 隐藏可点击实体
@@ -112,7 +112,7 @@ public interface NmsClickableHologramRenderer extends NmsHologramRenderer {
      */
     @Override
     default void teleport(Player player, Location location) {
-        move(player, DecentPosition.fromLocation(location));
+        move(player, HologramPosition.fromLocation(location));
     }
     
     /**
@@ -120,7 +120,7 @@ public interface NmsClickableHologramRenderer extends NmsHologramRenderer {
      */
     @Override
     default void teleport(java.util.Collection<Player> players, Location location) {
-        DecentPosition position = DecentPosition.fromLocation(location);
+        HologramPosition position = HologramPosition.fromLocation(location);
         for (Player player : players) {
             move(player, position);
         }

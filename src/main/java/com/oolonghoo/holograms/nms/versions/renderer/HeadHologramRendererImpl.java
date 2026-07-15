@@ -4,7 +4,7 @@ import com.oolonghoo.holograms.hologram.HeadTexture;
 import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.renderer.NmsHeadHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -61,8 +61,8 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         }
 
         ItemStack headItem = createHeadItem(line, player);
-        DecentPosition position = DecentPosition.fromLocation(location);
-        DecentPosition offsetPosition = offsetPosition(position);
+        HologramPosition position = HologramPosition.fromLocation(location);
+        HologramPosition offsetPosition = offsetPosition(position);
         
         Hologram hologram = line.getHologram();
         Billboard billboard = line.getBillboard() != null ? line.getBillboard() : (hologram != null ? hologram.getBillboard() : Billboard.CENTER);
@@ -168,7 +168,7 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         if (destroyed || location == null) {
             return;
         }
-        DecentPosition position = DecentPosition.fromLocation(location);
+        HologramPosition position = HologramPosition.fromLocation(location);
         EntityPacketsBuilder.create()
                 .withTeleportEntity(entityId, offsetPosition(position))
                 .sendTo(player);
@@ -187,7 +187,7 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         lastContentPerPlayer.clear();
     }
 
-    protected DecentPosition offsetPosition(DecentPosition position) {
+    protected HologramPosition offsetPosition(HologramPosition position) {
         double offsetY = small ? 1.1875d : 2.0d;
         return position.subtractY(offsetY);
     }

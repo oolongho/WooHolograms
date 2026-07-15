@@ -4,7 +4,7 @@ import com.oolonghoo.holograms.hologram.Hologram;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.hologram.TextAlignment;
 import com.oolonghoo.holograms.nms.renderer.NmsTextHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 使用 TextDisplay 实体显示文本
  * 支持双面渲染（创建两个背对背的 TextDisplay）
  *
- * 注意：TEXT 行现在由 PageTextRenderer 统一管理渲染，
+ * 注意：TEXT 行现在由 PageTextRendererImpl 统一管理渲染，
  * 此类仅作为渲染器池的兼容保留，不再用于实际 TEXT 行渲染。
  *
  *
@@ -94,14 +94,14 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
 
         EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
                 .withSpawnEntity(frontEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
-                        new DecentPosition(
+                        new HologramPosition(
                                 location.getX(), location.getY(), location.getZ()),
                         yaw, pitch)
                 .withEntityMetadata(frontEntityId, metadata);
 
         if (doubleSided) {
             packetsBuilder.withSpawnEntity(backEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
-                            new DecentPosition(
+                            new HologramPosition(
                                     location.getX(), location.getY(), location.getZ()),
                             yaw + 180.0f, pitch)
                     .withEntityMetadata(backEntityId, metadata);
@@ -191,12 +191,12 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
         }
 
         EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
-                .withTeleportEntity(frontEntityId, new DecentPosition(
+                .withTeleportEntity(frontEntityId, new HologramPosition(
                         location.getX(), location.getY(), location.getZ(),
                         currentYaw, currentPitch));
 
         if (currentDoubleSided) {
-            packetsBuilder.withTeleportEntity(backEntityId, new DecentPosition(
+            packetsBuilder.withTeleportEntity(backEntityId, new HologramPosition(
                     location.getX(), location.getY(), location.getZ(),
                     currentYaw + 180.0f, currentPitch));
         }

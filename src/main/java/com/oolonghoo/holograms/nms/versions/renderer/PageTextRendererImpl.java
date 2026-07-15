@@ -1,7 +1,7 @@
 package com.oolonghoo.holograms.nms.versions.renderer;
 
 import com.oolonghoo.holograms.hologram.*;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 将连续的 TEXT 行合并为单个 TextDisplay 实体渲染
  * 解决背景宽度不一致、文本换行重叠和对齐问题
  */
-public class PageTextRenderer {
+public class PageTextRendererImpl {
 
     /** 一个文本行组：连续的TEXT行 */
     private static class TextGroup {
@@ -46,7 +46,7 @@ public class PageTextRenderer {
     /** 每个玩家每组的文本缓存，用于增量更新 */
     private final Map<UUID, Map<Integer, String>> lastTextPerPlayerGroup = new ConcurrentHashMap<>();
 
-    public PageTextRenderer(HologramPage page, EntityIdGenerator entityIdGenerator) {
+    public PageTextRendererImpl(HologramPage page, EntityIdGenerator entityIdGenerator) {
         this.page = page;
         this.entityIdGenerator = entityIdGenerator;
         rebuildGroups();
@@ -163,13 +163,13 @@ public class PageTextRenderer {
 
             EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
                     .withSpawnEntity(group.frontEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
-                            new DecentPosition(groupLocation.getX(), groupLocation.getY(), groupLocation.getZ()),
+                            new HologramPosition(groupLocation.getX(), groupLocation.getY(), groupLocation.getZ()),
                             yaw, pitch)
                     .withEntityMetadata(group.frontEntityId, metadata);
 
             if (doubleSided) {
                 packetsBuilder.withSpawnEntity(group.backEntityId, org.bukkit.entity.EntityType.TEXT_DISPLAY,
-                                new DecentPosition(groupLocation.getX(), groupLocation.getY(), groupLocation.getZ()),
+                                new HologramPosition(groupLocation.getX(), groupLocation.getY(), groupLocation.getZ()),
                                 yaw + 180.0f, pitch)
                         .withEntityMetadata(group.backEntityId, metadata);
             }
@@ -267,6 +267,53 @@ public class PageTextRenderer {
     }
 
     /**
+     * 强制更新所有文本行组的 Display Entity 属性（billboard/alignment/背景色/线宽/scale 等）
+     * 用于属性编辑后即时刷新，避免 hide+show 的闪烁和性能开销
+     */
+    public void updateMetadata(Player player) {
+        if (destroyed) return;
+
+        Hologram hologram = page.getParent();
+        if (hologram == null) return;
+
+        Billboard billboard = hologram.getBillboard();
+        boolean doubleSided = hologram.isDoubleSided();
+        TextAlignment alignment = hologram.getAlignment();
+        int backgroundColor = (hologram.getBackgroundAlpha() << 24) | hologram.getBackgroundColor();
+        int lineWidth = hologram.getLineWidth();
+
+        for (int gi = 0; gi < textGroups.size(); gi++) {
+            TextGroup group = textGroups.get(gi);
+
+            List<String> textLines = new ArrayList<>();
+            for (HologramLine line : group.lines) {
+                textLines.add(line.getDisplayText(player));
+            }
+
+            EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
+                    .withInvisible()
+                    .withNoGravity()
+                    .withTextDisplayText(textLines)
+                    .withBillboard(billboard)
+                    .withTextAlignment(alignment)
+                    .withTextBackgroundColor(backgroundColor)
+                    .withTextLineWidth(lineWidth)
+                    .withDisplayProperties(group.lines.get(0), hologram);
+
+            List<SynchedEntityData.DataItem<?>> metadata = metadataBuilder.toWatchableObjects();
+
+            EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
+                    .withEntityMetadata(group.frontEntityId, metadata);
+
+            if (doubleSided) {
+                packetsBuilder.withEntityMetadata(group.backEntityId, metadata);
+            }
+
+            packetsBuilder.sendTo(player);
+        }
+    }
+
+    /**
      * 销毁所有文本行组实体（指定玩家）
      */
     public void destroy(Player player) {
@@ -298,12 +345,12 @@ public class PageTextRenderer {
             if (groupLocation == null) continue;
 
             EntityPacketsBuilder packetsBuilder = EntityPacketsBuilder.create()
-                    .withTeleportEntity(group.frontEntityId, new DecentPosition(
+                    .withTeleportEntity(group.frontEntityId, new HologramPosition(
                             groupLocation.getX(), groupLocation.getY(), groupLocation.getZ(),
                             currentYaw, currentPitch));
 
             if (currentDoubleSided) {
-                packetsBuilder.withTeleportEntity(group.backEntityId, new DecentPosition(
+                packetsBuilder.withTeleportEntity(group.backEntityId, new HologramPosition(
                         groupLocation.getX(), groupLocation.getY(), groupLocation.getZ(),
                         currentYaw + 180.0f, currentPitch));
             }

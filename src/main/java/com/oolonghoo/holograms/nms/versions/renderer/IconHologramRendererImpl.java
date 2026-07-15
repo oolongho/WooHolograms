@@ -2,7 +2,7 @@ package com.oolonghoo.holograms.nms.versions.renderer;
 import com.oolonghoo.holograms.hologram.HeadTexture;
 import com.oolonghoo.holograms.hologram.HologramLine;
 import com.oolonghoo.holograms.nms.renderer.NmsIconHologramRenderer;
-import com.oolonghoo.holograms.nms.util.DecentPosition;
+import com.oolonghoo.holograms.nms.util.HologramPosition;
 import com.oolonghoo.holograms.nms.versions.EntityIdGenerator;
 import com.oolonghoo.holograms.nms.versions.EntityMetadataBuilder;
 import com.oolonghoo.holograms.nms.versions.EntityPacketsBuilder;
@@ -55,7 +55,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
         if (rawContent != null && player != null) {
             lastContentPerPlayer.put(player.getUniqueId(), PlaceholderUtil.replace(rawContent, player));
         }
-        DecentPosition position = DecentPosition.fromLocation(location);
+        HologramPosition position = HologramPosition.fromLocation(location);
 
         EntityPacketsBuilder.create()
                 .withSpawnEntity(armorStandEntityId, EntityType.ARMOR_STAND, offsetPosition(position))
@@ -134,7 +134,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
         if (destroyed || location == null) {
             return;
         }
-        DecentPosition position = DecentPosition.fromLocation(location);
+        HologramPosition position = HologramPosition.fromLocation(location);
         EntityPacketsBuilder.create()
                 .withRemovePassenger(armorStandEntityId)
                 .withTeleportEntity(armorStandEntityId, offsetPosition(position))
@@ -156,7 +156,7 @@ public class IconHologramRendererImpl implements NmsIconHologramRenderer {
         lastContentPerPlayer.clear();
     }
 
-    private DecentPosition offsetPosition(DecentPosition position) {
+    private HologramPosition offsetPosition(HologramPosition position) {
         return position.subtractY(0.55);
     }
 
