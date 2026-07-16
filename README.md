@@ -21,7 +21,7 @@
 1. 将 `WooHolograms.jar` 放入 `plugins/` 目录
 2. 重启服务器
 3. 使用 `/wh create <名称>` 创建全息图
-4. 使用 `/wh gui <名称>` 打开 GUI 编辑
+4. 使用 `/hologram`或 `/wh` 打开 GUI 编辑
 
 ## 📖 详细文档
 

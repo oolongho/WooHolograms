@@ -21,7 +21,7 @@
 1. Place `WooHolograms.jar` in `plugins/` directory
 2. Restart server
 3. Use `/wh create <name>` to create a hologram
-4. Use `/wh gui <name>` to open the GUI editor
+4. Use `/hologram` or `/wh` to open the GUI editor
 
 ## 📖 Full Documentation
 
