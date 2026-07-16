@@ -13,11 +13,11 @@ public enum EnumFlag {
 	ALWAYS_FACE_PLAYER,
 	CLICKABLE;
 
-	public com.oolonghoo.holograms.hologram.EnumFlag toWoo() {
-		return com.oolonghoo.holograms.hologram.EnumFlag.valueOf(this.name());
+	public com.oolongho.holograms.hologram.EnumFlag toWoo() {
+		return com.oolongho.holograms.hologram.EnumFlag.valueOf(this.name());
 	}
 
-	public static EnumFlag fromWoo(com.oolonghoo.holograms.hologram.EnumFlag wooFlag) {
+	public static EnumFlag fromWoo(com.oolongho.holograms.hologram.EnumFlag wooFlag) {
 		if (wooFlag == null) return null;
 		return valueOf(wooFlag.name());
 	}

@@ -15,9 +15,9 @@ import java.util.UUID;
  */
 public class HologramPage {
 
-	private final com.oolonghoo.holograms.hologram.HologramPage handle;
+	private final com.oolongho.holograms.hologram.HologramPage handle;
 
-	public HologramPage(com.oolonghoo.holograms.hologram.HologramPage handle) {
+	public HologramPage(com.oolongho.holograms.hologram.HologramPage handle) {
 		this.handle = handle;
 	}
 
@@ -43,19 +43,19 @@ public class HologramPage {
 
 	public List<HologramLine> getLines() {
 		List<HologramLine> result = new ArrayList<>();
-		for (com.oolonghoo.holograms.hologram.HologramLine line : handle.getLines()) {
+		for (com.oolongho.holograms.hologram.HologramLine line : handle.getLines()) {
 			result.add(new HologramLine(line));
 		}
 		return result;
 	}
 
 	public HologramLine getLine(int index) {
-		com.oolonghoo.holograms.hologram.HologramLine line = handle.getLine(index);
+		com.oolongho.holograms.hologram.HologramLine line = handle.getLine(index);
 		return line != null ? new HologramLine(line) : null;
 	}
 
 	public HologramLine addLine(String content) {
-		com.oolonghoo.holograms.hologram.HologramLine line = handle.addLine(content);
+		com.oolongho.holograms.hologram.HologramLine line = handle.addLine(content);
 		return line != null ? new HologramLine(line) : null;
 	}
 
@@ -68,7 +68,7 @@ public class HologramPage {
 	}
 
 	public HologramLine removeLine(int index) {
-		com.oolonghoo.holograms.hologram.HologramLine line = handle.removeLine(index);
+		com.oolongho.holograms.hologram.HologramLine line = handle.removeLine(index);
 		return line != null ? new HologramLine(line) : null;
 	}
 
@@ -84,11 +84,11 @@ public class HologramPage {
 		return handle.hasActions();
 	}
 
-	public void addAction(ClickType clickType, com.oolonghoo.holograms.action.Action action) {
+	public void addAction(ClickType clickType, com.oolongho.holograms.action.Action action) {
 		handle.addAction(clickType.toWoo(), action);
 	}
 
-	public List<com.oolonghoo.holograms.action.Action> getActions(ClickType clickType) {
+	public List<com.oolongho.holograms.action.Action> getActions(ClickType clickType) {
 		return handle.getActions(clickType.toWoo());
 	}
 
@@ -106,8 +106,8 @@ public class HologramPage {
 
 	public void addFlags(EnumFlag... flags) {
 		if (flags == null) return;
-		com.oolonghoo.holograms.hologram.EnumFlag[] wooFlags =
-				new com.oolonghoo.holograms.hologram.EnumFlag[flags.length];
+		com.oolongho.holograms.hologram.EnumFlag[] wooFlags =
+				new com.oolongho.holograms.hologram.EnumFlag[flags.length];
 		for (int i = 0; i < flags.length; i++) {
 			wooFlags[i] = flags[i].toWoo();
 		}
@@ -118,7 +118,7 @@ public class HologramPage {
 		handle.removeFlag(flag.toWoo());
 	}
 
-	public com.oolonghoo.holograms.hologram.HologramPage getHandle() {
+	public com.oolongho.holograms.hologram.HologramPage getHandle() {
 		return handle;
 	}
 }

@@ -11,9 +11,9 @@ import java.util.*;
  */
 public class Hologram {
 
-	private final com.oolonghoo.holograms.hologram.Hologram handle;
+	private final com.oolongho.holograms.hologram.Hologram handle;
 
-	public Hologram(com.oolonghoo.holograms.hologram.Hologram handle) {
+	public Hologram(com.oolongho.holograms.hologram.Hologram handle) {
 		this.handle = handle;
 	}
 
@@ -130,18 +130,18 @@ public class Hologram {
 	}
 
 	public HologramPage getPage(int index) {
-		com.oolonghoo.holograms.hologram.HologramPage page = handle.getPage(index);
+		com.oolongho.holograms.hologram.HologramPage page = handle.getPage(index);
 		return page != null ? new HologramPage(page) : null;
 	}
 
 	public HologramPage getPage(Player player) {
-		com.oolonghoo.holograms.hologram.HologramPage page = handle.getPage(player);
+		com.oolongho.holograms.hologram.HologramPage page = handle.getPage(player);
 		return page != null ? new HologramPage(page) : null;
 	}
 
 	public List<HologramPage> getPages() {
 		List<HologramPage> result = new ArrayList<>();
-		for (com.oolonghoo.holograms.hologram.HologramPage page : handle.getPages()) {
+		for (com.oolongho.holograms.hologram.HologramPage page : handle.getPages()) {
 			result.add(new HologramPage(page));
 		}
 		return result;
@@ -156,7 +156,7 @@ public class Hologram {
 	}
 
 	public HologramPage insertPage(int index) {
-		com.oolonghoo.holograms.hologram.HologramPage page = handle.insertPage(index);
+		com.oolongho.holograms.hologram.HologramPage page = handle.insertPage(index);
 		return page != null ? new HologramPage(page) : null;
 	}
 
@@ -218,7 +218,7 @@ public class Hologram {
 
 	public Set<EnumFlag> getFlags() {
 		Set<EnumFlag> result = EnumSet.noneOf(EnumFlag.class);
-		for (com.oolonghoo.holograms.hologram.EnumFlag flag : handle.getFlags()) {
+		for (com.oolongho.holograms.hologram.EnumFlag flag : handle.getFlags()) {
 			EnumFlag dhFlag = EnumFlag.fromWoo(flag);
 			if (dhFlag != null) {
 				result.add(dhFlag);
@@ -229,8 +229,8 @@ public class Hologram {
 
 	public void addFlags(EnumFlag... flags) {
 		if (flags == null) return;
-		com.oolonghoo.holograms.hologram.EnumFlag[] wooFlags =
-				new com.oolonghoo.holograms.hologram.EnumFlag[flags.length];
+		com.oolongho.holograms.hologram.EnumFlag[] wooFlags =
+				new com.oolongho.holograms.hologram.EnumFlag[flags.length];
 		for (int i = 0; i < flags.length; i++) {
 			wooFlags[i] = flags[i].toWoo();
 		}
@@ -266,7 +266,7 @@ public class Hologram {
 	// ===== 克隆 =====
 
 	public Hologram clone(String name, Location location, boolean temp) {
-		com.oolonghoo.holograms.hologram.Hologram cloned = handle.clone(name, location, temp);
+		com.oolongho.holograms.hologram.Hologram cloned = handle.clone(name, location, temp);
 		return cloned != null ? new Hologram(cloned) : null;
 	}
 
@@ -346,7 +346,7 @@ public class Hologram {
 
 	// ===== 内部访问 =====
 
-	public com.oolonghoo.holograms.hologram.Hologram getHandle() {
+	public com.oolongho.holograms.hologram.Hologram getHandle() {
 		return handle;
 	}
 }

@@ -12,9 +12,9 @@ import java.util.UUID;
  */
 public class HologramLine {
 
-	private final com.oolonghoo.holograms.hologram.HologramLine handle;
+	private final com.oolongho.holograms.hologram.HologramLine handle;
 
-	public HologramLine(com.oolonghoo.holograms.hologram.HologramLine handle) {
+	public HologramLine(com.oolongho.holograms.hologram.HologramLine handle) {
 		this.handle = handle;
 	}
 
@@ -116,8 +116,8 @@ public class HologramLine {
 
 	public void addFlags(EnumFlag... flags) {
 		if (flags == null) return;
-		com.oolonghoo.holograms.hologram.EnumFlag[] wooFlags =
-				new com.oolonghoo.holograms.hologram.EnumFlag[flags.length];
+		com.oolongho.holograms.hologram.EnumFlag[] wooFlags =
+				new com.oolongho.holograms.hologram.EnumFlag[flags.length];
 		for (int i = 0; i < flags.length; i++) {
 			wooFlags[i] = flags[i].toWoo();
 		}
@@ -210,7 +210,7 @@ public class HologramLine {
 		handle.setChromaGlow(chromaGlow);
 	}
 
-	public com.oolonghoo.holograms.hologram.HologramLine getHandle() {
+	public com.oolongho.holograms.hologram.HologramLine getHandle() {
 		return handle;
 	}
 }

@@ -1,6 +1,6 @@
 name: WooHolograms
 version: ${project.version}
-main: com.oolonghoo.holograms.WooHolograms
+main: com.oolongho.holograms.WooHolograms
 api-version: '1.21'
 folia-supported: true
 author: oolongho

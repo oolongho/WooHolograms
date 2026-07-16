@@ -5,7 +5,7 @@ plugins {
 
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
 
-group = 'com.oolonghoo'
+group = 'com.oolongho'
 version = '1.0.2'
 
 java {
