@@ -6,7 +6,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ReloadCommand extends Subcommand {
@@ -14,7 +13,7 @@ public class ReloadCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ReloadCommand(WooHolograms plugin) {
-        super("reload", "重新加载插件配置", "/wh reload", "wooholograms.admin", Arrays.asList("rl"));
+        super("reload", "重新加载插件配置", "/wh reload", "wooholograms.admin");
         this.plugin = plugin;
     }
 

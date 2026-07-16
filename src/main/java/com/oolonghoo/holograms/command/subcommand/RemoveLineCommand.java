@@ -8,7 +8,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class RemoveLineCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public RemoveLineCommand(WooHolograms plugin) {
-        super("removeline", "删除全息图的一行", "/wh removeline <名称> <行号>", "wooholograms.edit", Arrays.asList("rl", "delline"));
+        super("removeline", "删除全息图的一行", "/wh removeline <名称> <行号>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

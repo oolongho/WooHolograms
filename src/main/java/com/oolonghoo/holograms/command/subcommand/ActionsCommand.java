@@ -19,7 +19,7 @@ public class ActionsCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ActionsCommand(WooHolograms plugin) {
-        super("actions", "列出点击动作", "/wh actions <名称> <页码> <点击类型>", "wooholograms.edit", Arrays.asList("acts"));
+        super("actions", "列出点击动作", "/wh actions <名称> <页码> <点击类型>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

@@ -17,7 +17,7 @@ public class AddPageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public AddPageCommand(WooHolograms plugin) {
-        super("addpage", "添加一个新页面", "/wh addpage <名称> [内容]", "wooholograms.edit", Arrays.asList("ap"));
+        super("addpage", "添加一个新页面", "/wh addpage <名称> [内容]", "wooholograms.edit");
         this.plugin = plugin;
     }
 

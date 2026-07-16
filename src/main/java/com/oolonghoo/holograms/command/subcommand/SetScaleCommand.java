@@ -24,7 +24,7 @@ public class SetScaleCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetScaleCommand(WooHolograms plugin) {
-        super("setscale", "设置缩放", "/wh setscale <名称> [行号] <x> <y> <z>", "wooholograms.edit", Arrays.asList("scale"));
+        super("setscale", "设置缩放", "/wh setscale <名称> [行号] <x> <y> <z>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

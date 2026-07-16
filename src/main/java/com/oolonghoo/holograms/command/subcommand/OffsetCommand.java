@@ -18,7 +18,7 @@ public class OffsetCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public OffsetCommand(WooHolograms plugin) {
-        super("offset", "设置行偏移", "/wh offset <名称> <行号> <x> <y> <z>", "wooholograms.edit", Arrays.asList("off"));
+        super("offset", "设置行偏移", "/wh offset <名称> <行号> <x> <y> <z>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

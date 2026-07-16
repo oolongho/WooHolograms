@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class EnableCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public EnableCommand(WooHolograms plugin) {
-        super("enable", "启用一个全息图", "/wh enable <名称>", "wooholograms.admin", Arrays.asList("on"));
+        super("enable", "启用一个全息图", "/wh enable <名称>", "wooholograms.admin");
         this.plugin = plugin;
     }
 

@@ -6,7 +6,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +15,7 @@ public class HelpCommand extends Subcommand {
     private final Map<String, Subcommand> subcommandMap;
 
     public HelpCommand(WooHolograms plugin, Map<String, Subcommand> subcommandMap) {
-        super("help", "显示帮助信息", "/wh help", null, Arrays.asList("?"));
+        super("help", "显示帮助信息", "/wh help", null);
         this.plugin = plugin;
         this.subcommandMap = subcommandMap;
     }

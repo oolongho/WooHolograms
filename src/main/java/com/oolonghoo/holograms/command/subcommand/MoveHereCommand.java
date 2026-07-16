@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class MoveHereCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public MoveHereCommand(WooHolograms plugin) {
-        super("movehere", "将全息图移动到你的位置", "/wh movehere <名称>", "wooholograms.move", Arrays.asList("mv"));
+        super("movehere", "将全息图移动到你的位置", "/wh movehere <名称>", "wooholograms.move");
         this.plugin = plugin;
         setPlayerOnly(true);
     }

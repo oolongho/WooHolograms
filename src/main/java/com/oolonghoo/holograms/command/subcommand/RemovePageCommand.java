@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ public class RemovePageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public RemovePageCommand(WooHolograms plugin) {
-        super("removepage", "删除全息图的一页", "/wh removepage <名称> <页码>", "wooholograms.edit", Arrays.asList("rp", "delpage"));
+        super("removepage", "删除全息图的一页", "/wh removepage <名称> <页码>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

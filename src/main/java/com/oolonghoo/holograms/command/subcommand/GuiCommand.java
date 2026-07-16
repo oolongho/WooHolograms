@@ -13,7 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class GuiCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public GuiCommand(WooHolograms plugin) {
-        super("gui", "打开GUI管理界面", "/wh gui [名称]", "wooholograms.admin", Arrays.asList("g", "menu"));
+        super("gui", "打开GUI管理界面", "/wh gui [名称]", "wooholograms.admin");
         this.plugin = plugin;
         setPlayerOnly(true);
     }

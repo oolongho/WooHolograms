@@ -23,7 +23,7 @@ public class AddLineCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public AddLineCommand(WooHolograms plugin) {
-        super("addline", "向全息图添加一行", "/wh addline <名称> <内容>", "wooholograms.edit", Arrays.asList("al"));
+        super("addline", "向全息图添加一行", "/wh addline <名称> <内容>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

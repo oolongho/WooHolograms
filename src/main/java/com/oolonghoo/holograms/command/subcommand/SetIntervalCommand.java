@@ -16,7 +16,7 @@ public class SetIntervalCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetIntervalCommand(WooHolograms plugin) {
-        super("setinterval", "设置更新间隔", "/wh setinterval <名称> <tick>", "wooholograms.edit", Arrays.asList("si"));
+        super("setinterval", "设置更新间隔", "/wh setinterval <名称> <tick>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

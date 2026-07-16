@@ -17,7 +17,7 @@ public class SetFacingCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetFacingCommand(WooHolograms plugin) {
-        super("setfacing", "设置全息图朝向", "/wh setfacing <名称> <模式> [角度]", "wooholograms.edit", Arrays.asList("sf"));
+        super("setfacing", "设置全息图朝向", "/wh setfacing <名称> <模式> [角度]", "wooholograms.edit");
         this.plugin = plugin;
     }
 

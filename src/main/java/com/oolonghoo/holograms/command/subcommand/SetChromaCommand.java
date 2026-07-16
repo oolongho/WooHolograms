@@ -9,7 +9,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,7 @@ public class SetChromaCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetChromaCommand(WooHolograms plugin) {
-        super("setchroma", "设置Chroma彩虹色效果", "/wh setchroma <名称> [行号] <background|glow> <true|false>", "wooholograms.edit", Arrays.asList("chroma"));
+        super("setchroma", "设置Chroma彩虹色效果", "/wh setchroma <名称> [行号] <background|glow> <true|false>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

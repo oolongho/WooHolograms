@@ -1,6 +1,5 @@
 package com.oolonghoo.holograms.command.subcommand;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public class MoveToCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public MoveToCommand(WooHolograms plugin) {
-        super("moveto", "将全息图移动到指定位置", "/wh moveto <名称> <x> <y> <z> [世界]", "wooholograms.move", Arrays.asList("mvt"));
+        super("moveto", "将全息图移动到指定位置", "/wh moveto <名称> <x> <y> <z> [世界]", "wooholograms.move");
         this.plugin = plugin;
     }
 

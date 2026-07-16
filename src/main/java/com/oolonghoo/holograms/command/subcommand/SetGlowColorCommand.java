@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.Color;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,7 @@ public class SetGlowColorCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetGlowColorCommand(WooHolograms plugin) {
-        super("setglowcolor", "设置发光颜色", "/wh setglowcolor <名称> [行号] <颜色|#RRGGBB|reset>", "wooholograms.edit", Arrays.asList("glowcolor", "glow"));
+        super("setglowcolor", "设置发光颜色", "/wh setglowcolor <名称> [行号] <颜色|#RRGGBB|reset>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

@@ -16,7 +16,7 @@ public class SetDoubleSidedCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetDoubleSidedCommand(WooHolograms plugin) {
-        super("setdoublesided", "设置双面显示", "/wh setdoublesided <名称> <true|false>", "wooholograms.edit", Arrays.asList("sds"));
+        super("setdoublesided", "设置双面显示", "/wh setdoublesided <名称> <true|false>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

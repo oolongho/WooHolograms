@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class SetPageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetPageCommand(WooHolograms plugin) {
-        super("setpage", "设置你查看的全息图页码", "/wh setpage <名称> <页码>", "wooholograms.use", Arrays.asList("sp"));
+        super("setpage", "设置你查看的全息图页码", "/wh setpage <名称> <页码>", "wooholograms.use");
         this.plugin = plugin;
         setPlayerOnly(true);
     }

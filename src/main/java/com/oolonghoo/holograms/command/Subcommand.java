@@ -2,13 +2,13 @@ package com.oolonghoo.holograms.command;
 
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 子命令抽象类
  * 定义子命令的基本结构
- * 
+ *
+ *
  */
 public abstract class Subcommand {
 
@@ -17,25 +17,22 @@ public abstract class Subcommand {
     private final String usage;
     private final String permission;
     private final String commandPermission;
-    private final List<String> aliases;
     private boolean playerOnly = false;
 
-    public Subcommand(String name, String description, String permission, List<String> aliases) {
+    public Subcommand(String name, String description, String permission) {
         this.name = name;
         this.description = description;
         this.usage = "/" + name;
         this.permission = permission;
         this.commandPermission = "wooholograms.command." + name;
-        this.aliases = aliases != null ? aliases : new ArrayList<>();
     }
 
-    public Subcommand(String name, String description, String usage, String permission, List<String> aliases) {
+    public Subcommand(String name, String description, String usage, String permission) {
         this.name = name;
         this.description = description;
         this.usage = usage;
         this.permission = permission;
         this.commandPermission = "wooholograms.command." + name;
-        this.aliases = aliases != null ? aliases : new ArrayList<>();
     }
 
     public String getName() {
@@ -56,10 +53,6 @@ public abstract class Subcommand {
 
     public String getCommandPermission() {
         return commandPermission;
-    }
-
-    public List<String> getAliases() {
-        return aliases;
     }
 
     public boolean isPlayerOnly() {

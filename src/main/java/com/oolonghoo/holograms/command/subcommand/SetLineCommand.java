@@ -23,7 +23,7 @@ public class SetLineCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetLineCommand(WooHolograms plugin) {
-        super("setline", "设置全息图的一行文本", "/wh setline <名称> <行号> <内容>", "wooholograms.edit", Arrays.asList("sl"));
+        super("setline", "设置全息图的一行文本", "/wh setline <名称> <行号> <内容>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

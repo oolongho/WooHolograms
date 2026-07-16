@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class CopyCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public CopyCommand(WooHolograms plugin) {
-        super("copy", "克隆一个全息图", "/wh copy <源名称> <目标名称>", "wooholograms.admin", Arrays.asList("cp", "clone"));
+        super("copy", "克隆一个全息图", "/wh copy <源名称> <目标名称>", "wooholograms.admin");
         this.plugin = plugin;
     }
 

@@ -22,7 +22,7 @@ public class ProfilerCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ProfilerCommand(WooHolograms plugin) {
-        super("profiler", "性能分析器", "/wh profiler [on|off|reset]", "wooholograms.command.profiler", null);
+        super("profiler", "性能分析器", "/wh profiler [on|off|reset]", "wooholograms.command.profiler");
         this.plugin = plugin;
     }
 

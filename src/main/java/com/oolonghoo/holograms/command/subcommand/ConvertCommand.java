@@ -28,7 +28,7 @@ public class ConvertCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ConvertCommand(WooHolograms plugin) {
-        super("convert", "从其他插件导入全息图数据", "/wh convert <holographicdisplays|hd|cmi>", "wooholograms.convert", Arrays.asList("cv"));
+        super("convert", "从其他插件导入全息图数据", "/wh convert <holographicdisplays|hd|cmi>", "wooholograms.convert");
         this.plugin = plugin;
     }
 

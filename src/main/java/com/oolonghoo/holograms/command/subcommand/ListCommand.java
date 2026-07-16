@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ public class ListCommand extends Subcommand {
     private static final int ITEMS_PER_PAGE = 10;
 
     public ListCommand(WooHolograms plugin) {
-        super("list", "列出所有全息图", "/wh list [页码]", "wooholograms.list", Arrays.asList("ls"));
+        super("list", "列出所有全息图", "/wh list [页码]", "wooholograms.list");
         this.plugin = plugin;
     }
 

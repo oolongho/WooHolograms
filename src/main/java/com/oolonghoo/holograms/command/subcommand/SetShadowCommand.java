@@ -24,7 +24,7 @@ public class SetShadowCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetShadowCommand(WooHolograms plugin) {
-        super("setshadow", "设置阴影", "/wh setshadow <名称> [行号] <半径> <强度>", "wooholograms.edit", Arrays.asList("shadow"));
+        super("setshadow", "设置阴影", "/wh setshadow <名称> [行号] <半径> <强度>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

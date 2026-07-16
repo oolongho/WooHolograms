@@ -20,7 +20,7 @@ public class AddActionCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public AddActionCommand(WooHolograms plugin) {
-        super("addaction", "添加点击动作", "/wh addaction <名称> <页码> <点击类型> <动作类型> [值]", "wooholograms.edit", Arrays.asList("aa"));
+        super("addaction", "添加点击动作", "/wh addaction <名称> <页码> <点击类型> <动作类型> [值]", "wooholograms.edit");
         this.plugin = plugin;
     }
 

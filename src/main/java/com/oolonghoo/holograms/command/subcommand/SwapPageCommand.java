@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class SwapPageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SwapPageCommand(WooHolograms plugin) {
-        super("swappage", "交换两个页面的位置", "/wh swappage <名称> <页码1> <页码2>", "wooholograms.edit", Arrays.asList("swapp"));
+        super("swappage", "交换两个页面的位置", "/wh swappage <名称> <页码1> <页码2>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

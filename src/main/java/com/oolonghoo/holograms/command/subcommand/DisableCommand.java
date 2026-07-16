@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class DisableCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public DisableCommand(WooHolograms plugin) {
-        super("disable", "禁用一个全息图", "/wh disable <名称>", "wooholograms.admin", Arrays.asList("off"));
+        super("disable", "禁用一个全息图", "/wh disable <名称>", "wooholograms.admin");
         this.plugin = plugin;
     }
 

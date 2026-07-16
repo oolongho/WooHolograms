@@ -23,7 +23,7 @@ public class CreateCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public CreateCommand(WooHolograms plugin) {
-        super("create", "创建一个新的全息图", "/wh create <名称> [内容]", "wooholograms.create", Arrays.asList("c", "new"));
+        super("create", "创建一个新的全息图", "/wh create <名称> [内容]", "wooholograms.create");
         this.plugin = plugin;
         setPlayerOnly(true);
     }

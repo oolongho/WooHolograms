@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class SetPermissionCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetPermissionCommand(WooHolograms plugin) {
-        super("setpermission", "设置查看权限", "/wh setpermission <名称> [权限]", "wooholograms.admin", Arrays.asList("spm"));
+        super("setpermission", "设置查看权限", "/wh setpermission <名称> [权限]", "wooholograms.admin");
         this.plugin = plugin;
     }
 

@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,7 @@ public class TeleportCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public TeleportCommand(WooHolograms plugin) {
-        super("teleport", "传送到全息图位置", "/wh teleport <名称>", "wooholograms.admin", Arrays.asList("tp"));
+        super("teleport", "传送到全息图位置", "/wh teleport <名称>", "wooholograms.admin");
         this.plugin = plugin;
         setPlayerOnly(true);
     }

@@ -19,7 +19,7 @@ public class DeleteActionCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public DeleteActionCommand(WooHolograms plugin) {
-        super("deleteaction", "删除点击动作", "/wh deleteaction <名称> <页码> <点击类型> <索引>", "wooholograms.edit", Arrays.asList("da"));
+        super("deleteaction", "删除点击动作", "/wh deleteaction <名称> <页码> <点击类型> <索引>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

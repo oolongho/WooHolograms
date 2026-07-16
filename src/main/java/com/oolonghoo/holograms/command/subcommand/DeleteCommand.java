@@ -7,7 +7,6 @@ import com.oolonghoo.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ public class DeleteCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public DeleteCommand(WooHolograms plugin) {
-        super("delete", "删除一个全息图", "/wh delete <名称>", "wooholograms.delete", Arrays.asList("del", "remove", "rm"));
+        super("delete", "删除一个全息图", "/wh delete <名称>", "wooholograms.delete");
         this.plugin = plugin;
     }
 

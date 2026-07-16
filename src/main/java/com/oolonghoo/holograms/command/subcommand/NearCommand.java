@@ -20,7 +20,7 @@ public class NearCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public NearCommand(WooHolograms plugin) {
-        super("near", "查找附近的全息图", "/wh near [范围]", "wooholograms.use", Arrays.asList("nearby"));
+        super("near", "查找附近的全息图", "/wh near [范围]", "wooholograms.use");
         this.plugin = plugin;
         setPlayerOnly(true);
     }

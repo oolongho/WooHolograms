@@ -18,7 +18,7 @@ public class HeightCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public HeightCommand(WooHolograms plugin) {
-        super("height", "设置行高度", "/wh height <名称> <行号> <高度>", "wooholograms.edit", Arrays.asList("lh"));
+        super("height", "设置行高度", "/wh height <名称> <行号> <高度>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

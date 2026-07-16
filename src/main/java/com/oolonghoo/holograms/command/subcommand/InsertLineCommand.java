@@ -22,7 +22,7 @@ public class InsertLineCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public InsertLineCommand(WooHolograms plugin) {
-        super("insertline", "在指定位置插入一行", "/wh insertline <名称> <行号> <内容>", "wooholograms.edit", Arrays.asList("il"));
+        super("insertline", "在指定位置插入一行", "/wh insertline <名称> <行号> <内容>", "wooholograms.edit");
         this.plugin = plugin;
     }
 

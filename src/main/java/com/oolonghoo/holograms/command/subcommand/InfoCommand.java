@@ -10,7 +10,6 @@ import com.oolonghoo.holograms.util.LocationUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,7 @@ public class InfoCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public InfoCommand(WooHolograms plugin) {
-        super("info", "查看全息图详细信息", "/wh info <名称>", "wooholograms.admin", Arrays.asList("i"));
+        super("info", "查看全息图详细信息", "/wh info <名称>", "wooholograms.admin");
         this.plugin = plugin;
     }
 

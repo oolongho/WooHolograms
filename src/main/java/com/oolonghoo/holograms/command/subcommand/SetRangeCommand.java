@@ -16,7 +16,7 @@ public class SetRangeCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetRangeCommand(WooHolograms plugin) {
-        super("setrange", "设置显示范围", "/wh setrange <名称> <范围>", "wooholograms.edit", Arrays.asList("sr"));
+        super("setrange", "设置显示范围", "/wh setrange <名称> <范围>", "wooholograms.edit");
         this.plugin = plugin;
     }
 
