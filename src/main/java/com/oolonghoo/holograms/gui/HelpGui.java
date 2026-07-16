@@ -45,11 +45,11 @@ public class HelpGui extends GuiScreen {
                         "",
                         "&f#HEAD:<玩家名>",
                         "&7显示大头颅（0.6格高）",
-                        "&7例: #HEAD:Notch",
+                        "&7例: #HEAD:oolongho",
                         "",
                         "&f#SMALLHEAD:<玩家名>",
                         "&7显示小头颅（0.4格高）",
-                        "&7例: #SMALLHEAD:Notch"
+                        "&7例: #SMALLHEAD:oolongho"
                 ))
                 .build());
         
@@ -60,7 +60,7 @@ public class HelpGui extends GuiScreen {
                         "",
                         "&f#HEAD:PLAYER_HEAD (玩家名)",
                         "&7显示玩家头颅",
-                        "&7例: #HEAD:Notch",
+                        "&7例: #HEAD:oolongho",
                         "",
                         "&f#HEAD:PLAYER_HEAD ({player})",
                         "&7显示查看者的头颅",
