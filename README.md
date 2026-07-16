@@ -1,3 +1,5 @@
+[简体中文](README.md) | [English](README_en.md)
+
 # WooHolograms
 
 🍵 一款多功能、有GUI的 Minecraft 全息文字插件
