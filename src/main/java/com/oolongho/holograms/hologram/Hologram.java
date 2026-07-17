@@ -2057,6 +2057,26 @@ public class Hologram {
     }
 
     /**
+     * 刷新所有观看者的可点击实体（动作增删后调用）
+     * showClickableEntities 内部会检查 isClickable()，自动处理状态切换
+     */
+    public void refreshClickableEntitiesAll() {
+        if (enabled) {
+            getViewerPlayers().forEach(p -> {
+                hideClickableEntities(p);
+                showClickableEntities(p);
+            });
+        }
+    }
+
+    /**
+     * 动作变化回调（由 HologramPage / HologramLine 在动作增删时调用）
+     */
+    public void onActionsChanged() {
+        refreshClickableEntitiesAll();
+    }
+
+    /**
      * 传送可点击实体
      * 
      * @param player 玩家

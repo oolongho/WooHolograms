@@ -720,6 +720,9 @@ public class HologramPage {
      */
     public void addAction(ClickType clickType, Action action) {
         actions.computeIfAbsent(clickType, k -> new ArrayList<>()).add(action);
+        if (parent != null) {
+            parent.onActionsChanged();
+        }
     }
 
     /**
@@ -749,6 +752,9 @@ public class HologramPage {
      */
     public void clearActions(ClickType clickType) {
         actions.remove(clickType);
+        if (parent != null) {
+            parent.onActionsChanged();
+        }
     }
 
     /**
@@ -761,6 +767,9 @@ public class HologramPage {
         List<Action> actionList = actions.get(clickType);
         if (actionList != null && index >= 0 && index < actionList.size()) {
             actionList.remove(index);
+            if (parent != null) {
+                parent.onActionsChanged();
+            }
         }
     }
 

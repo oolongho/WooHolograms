@@ -31,7 +31,7 @@ public class ClickableHologramRendererImpl implements NmsClickableHologramRender
                 .withEntityMetadata(entityId, EntityMetadataBuilder.create()
                         .withInvisible()
                         .withNoGravity()
-                        .withArmorStandProperties(false, true)
+                        .withArmorStandProperties(false, false)
                         .toWatchableObjects())
                 .sendTo(player);
     }

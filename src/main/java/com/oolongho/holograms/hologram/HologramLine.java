@@ -1419,8 +1419,15 @@ public class HologramLine {
         return actions.values().stream().anyMatch(list -> list != null && !list.isEmpty());
     }
 
+    private void notifyActionsChanged() {
+        if (parent != null && parent.getParent() != null) {
+            parent.getParent().onActionsChanged();
+        }
+    }
+
     public void addAction(ClickType clickType, Action action) {
         actions.computeIfAbsent(clickType, k -> new ArrayList<>()).add(action);
+        notifyActionsChanged();
     }
 
     public List<Action> getActions(ClickType clickType) {
@@ -1434,16 +1441,19 @@ public class HologramLine {
 
     public void clearActions(ClickType clickType) {
         actions.remove(clickType);
+        notifyActionsChanged();
     }
 
     public void clearAllActions() {
         actions.clear();
+        notifyActionsChanged();
     }
 
     public void removeAction(ClickType clickType, int index) {
         List<Action> actionList = actions.get(clickType);
         if (actionList != null && index >= 0 && index < actionList.size()) {
             actionList.remove(index);
+            notifyActionsChanged();
         }
     }
 
