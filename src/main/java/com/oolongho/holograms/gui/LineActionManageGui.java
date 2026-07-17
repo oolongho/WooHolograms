@@ -289,10 +289,7 @@ public class LineActionManageGui extends AbstractActionManageGui {
     protected void updateAction(int actionIndex, Action newAction) {
         HologramLine line = getLine();
         if (line != null) {
-            List<Action> actions = line.getActions(currentClickType);
-            if (actionIndex < actions.size()) {
-                actions.set(actionIndex, newAction);
-            }
+            line.setAction(currentClickType, actionIndex, newAction);
         }
     }
 

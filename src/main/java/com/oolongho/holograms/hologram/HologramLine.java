@@ -1447,6 +1447,13 @@ public class HologramLine {
         }
     }
 
+    public void setAction(ClickType clickType, int index, Action action) {
+        List<Action> actionList = actions.get(clickType);
+        if (actionList != null && index >= 0 && index < actionList.size()) {
+            actionList.set(index, action);
+        }
+    }
+
     public void executeActions(Player player, ClickType clickType) {
         List<Action> actionsToExecute = new ArrayList<>();
         

@@ -765,8 +765,22 @@ public class HologramPage {
     }
 
     /**
+     * 替换指定位置的动作
+     *
+     * @param clickType 点击类型
+     * @param index 动作索引
+     * @param action 新动作
+     */
+    public void setAction(ClickType clickType, int index, Action action) {
+        List<Action> actionList = actions.get(clickType);
+        if (actionList != null && index >= 0 && index < actionList.size()) {
+            actionList.set(index, action);
+        }
+    }
+
+    /**
      * 执行动作
-     * 
+     *
      * @param player 玩家
      * @param clickType 点击类型
      */

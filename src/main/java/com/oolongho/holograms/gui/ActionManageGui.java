@@ -75,10 +75,7 @@ public class ActionManageGui extends AbstractActionManageGui {
         HologramPage page = hologram.getPage(pageIndex);
         if (page == null) return;
 
-        List<Action> actions = page.getActions(currentClickType);
-        if (actionIndex < actions.size()) {
-            actions.remove(actionIndex);
-        }
+        page.removeAction(currentClickType, actionIndex);
     }
 
     @Override
@@ -89,10 +86,7 @@ public class ActionManageGui extends AbstractActionManageGui {
         HologramPage page = hologram.getPage(pageIndex);
         if (page == null) return;
 
-        List<Action> actions = page.getActions(currentClickType);
-        if (actionIndex < actions.size()) {
-            actions.set(actionIndex, newAction);
-        }
+        page.setAction(currentClickType, actionIndex, newAction);
     }
 
     @Override
