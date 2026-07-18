@@ -104,7 +104,7 @@ public class Action {
 
     /**
      * 执行动作
-     * 
+     *
      * @param player 玩家
      * @return 是否成功
      */
@@ -113,9 +113,9 @@ public class Action {
             return false;
         }
         if (data != null) {
-            return type.execute(player, data);
+            return type.executeWithDebug(player, data);
         }
-        return type.execute(player);
+        return type.executeWithDebug(player);
     }
 
     /**

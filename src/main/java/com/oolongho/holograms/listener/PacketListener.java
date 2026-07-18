@@ -92,9 +92,14 @@ public class PacketListener {
 
     /**
      * 在管道中注入处理器，成功后记录到 playerChannels
+     * 幂等：若处理器已存在则跳过
      */
     private void injectHandler(Player player, Channel channel, ChannelDuplexHandler handler) {
         try {
+            if (channel.pipeline().get(HANDLER_NAME) != null) {
+                playerChannels.putIfAbsent(player, channel);
+                return;
+            }
             channel.pipeline().addBefore("packet_handler", HANDLER_NAME, handler);
             playerChannels.putIfAbsent(player, channel);
         } catch (Exception e) {
@@ -200,6 +205,14 @@ public class PacketListener {
                 buf.readFloat(); // targetZ - 暂不使用
             }
 
+            // 节点 2: debug 日志 - 方法入口
+            final int actionOrdinalFinal = actionOrdinal;
+            final Float hitYFinal = hitY;
+            plugin.debug(() -> String.format(
+                    "[Node2 handleInteractPacket] player=%s, entityId=%d, actionOrdinal=%d, hitY=%s",
+                    player.getName(), entityId, actionOrdinalFinal,
+                    hitYFinal == null ? "null" : String.format("%.3f", hitYFinal)));
+
             // 切换到主线程处理点击逻辑（mapActionToClickType 需要调用 Bukkit API）
             final Float finalHitY = hitY;
             SchedulerUtil.runTask(player, () -> {
@@ -248,6 +261,10 @@ public class PacketListener {
 
         Hologram hologram = findHologramByEntityId(player, entityId);
         if (hologram == null) {
+            // 节点 3: debug 日志 - hologram 未找到
+            plugin.debug(() -> String.format(
+                    "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=false",
+                    player.getName(), entityId, clickType));
             return;
         }
 
@@ -270,12 +287,25 @@ public class PacketListener {
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
+            // 节点 3: debug 日志 - 事件被取消
+            final boolean pageFound = page != null;
+            plugin.debug(() -> String.format(
+                    "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=true, pageFound=%s, eventCancelled=true",
+                    player.getName(), entityId, clickType, pageFound));
             return;
         }
 
         if (page != null) {
             // 优先使用 Y 坐标路由（合并 TextDisplay 组的场景）
             HologramLine line = page.getLineByEntityId(entityId, hitY);
+            boolean lineFound = line != null && line.hasActions();
+            int actionCount = lineFound
+                    ? countActions(line, clickType)
+                    : countActions(page, clickType);
+            // 节点 3: debug 日志 - 页面内路由结果
+            plugin.debug(() -> String.format(
+                    "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=true, pageFound=true, lineFound=%s, actionCount=%d",
+                    player.getName(), entityId, clickType, lineFound, actionCount));
             if (line != null && line.hasActions()) {
                 line.executeActions(player, clickType);
                 return;
@@ -285,7 +315,38 @@ public class PacketListener {
             return;
         }
 
+        // 节点 3: debug 日志 - 全息图级动作
+        HologramPage playerPage = hologram.getPage(player);
+        int holoActionCount = playerPage != null ? countActions(playerPage, clickType) : 0;
+        plugin.debug(() -> String.format(
+                "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=true, pageFound=false, lineFound=false, actionCount=%d",
+                player.getName(), entityId, clickType, holoActionCount));
         hologram.executeActions(player, clickType);
+    }
+
+    /**
+     * 计算指定 ClickType 实际会执行的动作数量（包含 ANY 类型，避免重复计算）
+     * 用于 debug 日志输出
+     *
+     * @param provider 动作持有者（HologramPage 或 HologramLine）
+     * @param clickType 点击类型
+     * @return 动作数量
+     */
+    private int countActions(Object provider, ClickType clickType) {
+        if (provider instanceof HologramPage page) {
+            int count = page.getActions(clickType).size();
+            if (clickType != ClickType.ANY) {
+                count += page.getActions(ClickType.ANY).size();
+            }
+            return count;
+        } else if (provider instanceof HologramLine line) {
+            int count = line.getActions(clickType).size();
+            if (clickType != ClickType.ANY) {
+                count += line.getActions(ClickType.ANY).size();
+            }
+            return count;
+        }
+        return 0;
     }
 
     /**

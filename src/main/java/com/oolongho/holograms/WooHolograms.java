@@ -26,6 +26,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
+import java.util.logging.Level;
 
 /**
  * WooHolograms 全息图插件主类
@@ -253,6 +255,28 @@ public class WooHolograms extends JavaPlugin {
     @NotNull
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+
+    /**
+     * 是否启用调试模式（便捷转发到 ConfigManager）
+     * 用于点击检测全链路 debug 日志的开关判断
+     *
+     * @return 是否启用调试模式
+     */
+    public boolean isDebug() {
+        return configManager.isDebug();
+    }
+
+    /**
+     * 输出调试日志（带统一前缀 [WooHolograms-Debug]，便于过滤）
+     * 仅在 isDebug() 为 true 时输出，调用方使用 Supplier 延迟构造字符串避免性能开销
+     *
+     * @param messageSupplier 消息提供者
+     */
+    public void debug(Supplier<String> messageSupplier) {
+        if (configManager.isDebug()) {
+            getLogger().log(Level.INFO, "[WooHolograms-Debug] " + messageSupplier.get());
+        }
     }
     
     /**

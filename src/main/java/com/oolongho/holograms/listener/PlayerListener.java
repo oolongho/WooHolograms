@@ -23,6 +23,8 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        // 立即注入数据包监听器（PlayerJoinEvent 时 channel 已就绪）
+        plugin.getPacketListener().inject(event.getPlayer());
         // 延迟一 tick 确保玩家完全加载
         SchedulerUtil.runTaskLater(event.getPlayer(), () -> {
             plugin.getHologramManager().onPlayerJoin(event.getPlayer());

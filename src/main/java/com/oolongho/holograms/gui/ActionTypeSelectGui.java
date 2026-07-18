@@ -3,40 +3,44 @@ package com.oolongho.holograms.gui;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.Action;
 import com.oolongho.holograms.action.ActionType;
-import com.oolongho.holograms.action.ClickType;
-import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.hologram.HologramPage;
 import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
+/**
+ * 动作类型选择 GUI
+ * 通过回调模式支持页面级和行级动作添加。
+ * 调用方通过 {@code onActionCreated} 回调接收创建好的 Action 对象，
+ * 自行决定如何持久化（page 或 line）以及如何返回上一级 GUI。
+ */
 public class ActionTypeSelectGui extends GuiScreen {
 
     private final WooHolograms plugin;
     private final GuiManager guiManager;
     private final ChatInputManager chatInputManager;
     private final String hologramName;
-    private final int pageIndex;
-    private final ClickType clickType;
+    private final Consumer<Action> onActionCreated;
+    private final Runnable onBack;
 
     public ActionTypeSelectGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
-                               String hologramName, int pageIndex, ClickType clickType) {
+                               String hologramName, Consumer<Action> onActionCreated, Runnable onBack) {
         super("action_type_select", ColorUtil.colorize("&8选择动作类型"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
         this.hologramName = hologramName;
-        this.pageIndex = pageIndex;
-        this.clickType = clickType;
-        
+        this.onActionCreated = onActionCreated;
+        this.onBack = onBack;
+
         render();
     }
 
     private void render() {
         fillBackground();
-        
+
         setButton(0, GuiButton.builder(Material.BOOK)
                 .name("&f返回")
                 .lore(Arrays.asList(
@@ -44,11 +48,9 @@ public class ActionTypeSelectGui extends GuiScreen {
                         "",
                         "&e点击返回"
                 ))
-                .onClick(context -> {
-                    guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, clickType));
-                })
+                .onClick(context -> onBack.run())
                 .build());
-        
+
         setButton(10, GuiButton.builder(Material.PAPER)
                 .name("&f消息 &7(MESSAGE)")
                 .lore(Arrays.asList(
@@ -61,7 +63,7 @@ public class ActionTypeSelectGui extends GuiScreen {
                     requestInputAndCreateAction(context.getPlayer(), ActionType.MESSAGE, "请输入要发送的消息内容:");
                 })
                 .build());
-        
+
         setButton(11, GuiButton.builder(Material.COMMAND_BLOCK)
                 .name("&f玩家命令 &7(COMMAND)")
                 .lore(Arrays.asList(
@@ -74,7 +76,7 @@ public class ActionTypeSelectGui extends GuiScreen {
                     requestInputAndCreateAction(context.getPlayer(), ActionType.COMMAND, "请输入命令 (不需要/):");
                 })
                 .build());
-        
+
         setButton(12, GuiButton.builder(Material.COMMAND_BLOCK_MINECART)
                 .name("&f控制台命令 &7(CONSOLE)")
                 .lore(Arrays.asList(
@@ -87,7 +89,7 @@ public class ActionTypeSelectGui extends GuiScreen {
                     requestInputAndCreateAction(context.getPlayer(), ActionType.CONSOLE, "请输入命令:");
                 })
                 .build());
-        
+
         setButton(13, GuiButton.builder(Material.NOTE_BLOCK)
                 .name("&f声音 &7(SOUND)")
                 .lore(Arrays.asList(
@@ -101,7 +103,7 @@ public class ActionTypeSelectGui extends GuiScreen {
                     requestInputAndCreateAction(context.getPlayer(), ActionType.SOUND, "请输入声音名称:");
                 })
                 .build());
-        
+
         setButton(14, GuiButton.builder(Material.ENDER_PEARL)
                 .name("&f传送 &7(TELEPORT)")
                 .lore(Arrays.asList(
@@ -115,7 +117,7 @@ public class ActionTypeSelectGui extends GuiScreen {
                     requestInputAndCreateAction(context.getPlayer(), ActionType.TELEPORT, "请输入坐标 (x y z [世界]):");
                 })
                 .build());
-        
+
         setButton(15, GuiButton.builder(Material.ENDER_CHEST)
                 .name("&f服务器 &7(SERVER)")
                 .lore(Arrays.asList(
@@ -128,7 +130,7 @@ public class ActionTypeSelectGui extends GuiScreen {
                     requestInputAndCreateAction(context.getPlayer(), ActionType.SERVER, "请输入目标服务器名称:");
                 })
                 .build());
-        
+
         setButton(16, GuiButton.builder(Material.ARROW)
                 .name("&f下一页 &7(NEXT_PAGE)")
                 .lore(Arrays.asList(
@@ -138,12 +140,10 @@ public class ActionTypeSelectGui extends GuiScreen {
                         "&e点击添加"
                 ))
                 .onClick(context -> {
-                    createAction(ActionType.NEXT_PAGE, hologramName);
-                    context.getPlayer().sendMessage(ColorUtil.colorize("&a已添加下一页动作！"));
-                    guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, clickType));
+                    createActionDirect(context.getPlayer(), ActionType.NEXT_PAGE, hologramName);
                 })
                 .build());
-        
+
         setButton(17, GuiButton.builder(Material.TIPPED_ARROW)
                 .name("&f上一页 &7(PREV_PAGE)")
                 .lore(Arrays.asList(
@@ -153,12 +153,10 @@ public class ActionTypeSelectGui extends GuiScreen {
                         "&e点击添加"
                 ))
                 .onClick(context -> {
-                    createAction(ActionType.PREV_PAGE, hologramName);
-                    context.getPlayer().sendMessage(ColorUtil.colorize("&a已添加上一页动作！"));
-                    guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, clickType));
+                    createActionDirect(context.getPlayer(), ActionType.PREV_PAGE, hologramName);
                 })
                 .build());
-        
+
         setButton(18, GuiButton.builder(Material.BOOK)
                 .name("&f页面跳转 &7(PAGE)")
                 .lore(Arrays.asList(
@@ -172,34 +170,34 @@ public class ActionTypeSelectGui extends GuiScreen {
                 })
                 .build());
     }
-    
+
+    /**
+     * 通过聊天输入请求动作值，然后创建动作并触发回调
+     */
     private void requestInputAndCreateAction(Player player, ActionType actionType, String prompt) {
         player.closeInventory();
-        
-        chatInputManager.requestInput(player, "&a" + prompt, ChatInputManager.InputType.ACTION_VALUE, hologramName, input -> {
-            createAction(actionType, input);
+
+        chatInputManager.requestInput(player, "&a" + prompt, ChatInputManager.InputType.ACTION_VALUE, input -> {
+            Action action = new Action(actionType, input);
             player.sendMessage(ColorUtil.colorize("&a已添加 " + actionType.getName() + " 动作！"));
-            guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, clickType));
+            onActionCreated.accept(action);
         });
     }
-    
-    private void createAction(ActionType actionType, String value) {
-        Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
-        if (hologram != null) {
-            HologramPage page = hologram.getPage(pageIndex);
-            if (page != null) {
-                Action action = new Action(actionType, value);
-                page.addAction(clickType, action);
-                hologram.save();
-            }
-        }
+
+    /**
+     * 直接创建无需输入值的动作（NEXT_PAGE / PREV_PAGE），并触发回调
+     */
+    private void createActionDirect(Player player, ActionType actionType, String value) {
+        Action action = new Action(actionType, value);
+        player.sendMessage(ColorUtil.colorize("&a已添加 " + actionType.getName() + " 动作！"));
+        onActionCreated.accept(action);
     }
 
     private void fillBackground() {
         GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
                 .name(" ")
                 .build();
-        
+
         for (int i = 0; i < 27; i++) {
             if (getButton(i) == null) {
                 setButton(i, background);

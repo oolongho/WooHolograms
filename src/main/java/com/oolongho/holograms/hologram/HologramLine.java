@@ -1466,25 +1466,39 @@ public class HologramLine {
 
     public void executeActions(Player player, ClickType clickType) {
         List<Action> actionsToExecute = new ArrayList<>();
-        
+
         if (actions.containsKey(clickType)) {
             List<Action> actionList = actions.get(clickType);
             if (actionList != null) {
                 actionsToExecute.addAll(actionList);
             }
         }
-        
+
         if (clickType != ClickType.ANY && actions.containsKey(ClickType.ANY)) {
             List<Action> anyActions = actions.get(ClickType.ANY);
             if (anyActions != null) {
                 actionsToExecute.addAll(anyActions);
             }
         }
-        
+
         if (actionsToExecute.isEmpty()) {
             return;
         }
-        
+
+        // 节点 4: debug 日志 - 待执行动作列表
+        final List<Action> finalActions = new ArrayList<>(actionsToExecute);
+        WooHolograms.getInstance().debug(() -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format("[Node4 HologramLine.executeActions] player=%s, clickType=%s, actionCount=%d",
+                    player.getName(), clickType, finalActions.size()));
+            for (int i = 0; i < finalActions.size(); i++) {
+                Action a = finalActions.get(i);
+                sb.append(String.format("%n  [%d] type=%s, data=%s",
+                        i, a.getType().getName(), a.getData()));
+            }
+            return sb.toString();
+        });
+
         for (Action action : actionsToExecute) {
             if (!action.execute(player)) {
                 break;

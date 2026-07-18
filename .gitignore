@@ -26,6 +26,5 @@ Thumbs.db
 *.jar
 !gradle-wrapper.jar
 
-legacy/
 .oolongho/
 WooHolograms.wiki/

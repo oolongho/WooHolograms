@@ -203,9 +203,10 @@ public abstract class AbstractActionManageGui extends GuiScreen {
                 });
     }
 
-    protected void addAction(Player player) {
-        guiManager.openGui(player, new ActionTypeSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
-    }
+    /**
+     * 由子类决定如何添加动作（通常打开 ActionTypeSelectGui，并通过回调持久化到 page 或 line）
+     */
+    protected abstract void addAction(Player player);
 
     protected abstract void removeAction(int actionIndex);
 

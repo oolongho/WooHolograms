@@ -795,26 +795,46 @@ public class HologramPage {
      */
     public void executeActions(Player player, ClickType clickType) {
         List<Action> actionsToExecute = new ArrayList<>();
-        
+
         if (actions.containsKey(clickType)) {
             List<Action> actionList = actions.get(clickType);
             if (actionList != null) {
                 actionsToExecute.addAll(actionList);
             }
         }
-        
+
         if (clickType != ClickType.ANY && actions.containsKey(ClickType.ANY)) {
             List<Action> anyActions = actions.get(ClickType.ANY);
             if (anyActions != null) {
                 actionsToExecute.addAll(anyActions);
             }
         }
-        
+
+        // 节点 4: debug 日志 - 待执行动作列表
+        final List<Action> finalActions = new ArrayList<>(actionsToExecute);
+        WooHolograms.getInstance().debug(() -> formatActionsLog(
+                "Node4 HologramPage.executeActions", player, clickType, finalActions));
+
         for (Action action : actionsToExecute) {
             if (!action.execute(player)) {
                 return;
             }
         }
+    }
+
+    /**
+     * 格式化动作列表 debug 日志（节点 4 共用）
+     */
+    private static String formatActionsLog(String tag, Player player, ClickType clickType, List<Action> actions) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("[%s] player=%s, clickType=%s, actionCount=%d",
+                tag, player.getName(), clickType, actions.size()));
+        for (int i = 0; i < actions.size(); i++) {
+            Action a = actions.get(i);
+            sb.append(String.format("%n  [%d] type=%s, data=%s",
+                    i, a.getType().getName(), a.getData()));
+        }
+        return sb.toString();
     }
 
     /*

@@ -2020,6 +2020,21 @@ public class Hologram {
         }
 
         trimExcessClickableRenderers(amount);
+
+        // 节点 1: debug 日志 - ArmorStand 创建后输出
+        final int pageIdx = getPlayerPage(player);
+        final List<Integer> entityIds = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            for (int id : clickableRenderers.get(i).getEntityIds()) {
+                entityIds.add(id);
+            }
+        }
+        final HologramPosition basePos = getClickableBasePosition(page);
+        WooHolograms.getInstance().debug(() -> String.format(
+                "[Node1 showClickableEntities] hologram=%s, player=%s, page=%d, isClickable=%s, " +
+                        "armorStandCount=%d, entityIds=%s, basePos=(%.2f, %.2f, %.2f)",
+                name, player.getName(), pageIdx, page.isClickable(), amount, entityIds,
+                basePos.getX(), basePos.getY(), basePos.getZ()));
     }
 
     /**

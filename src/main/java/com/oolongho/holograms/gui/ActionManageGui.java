@@ -93,4 +93,22 @@ public class ActionManageGui extends AbstractActionManageGui {
     protected void reopenGui(Player player) {
         guiManager.openGui(player, new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, currentClickType));
     }
+
+    @Override
+    protected void addAction(Player player) {
+        guiManager.openGui(player, new ActionTypeSelectGui(
+                plugin, guiManager, chatInputManager, hologramName,
+                action -> {
+                    Hologram hologram = getHologram();
+                    if (hologram == null) return;
+                    HologramPage page = hologram.getPage(pageIndex);
+                    if (page == null) return;
+                    action.setClickType(currentClickType);
+                    page.addAction(currentClickType, action);
+                    hologram.save();
+                    reopenGui(player);
+                },
+                () -> reopenGui(player)
+        ));
+    }
 }

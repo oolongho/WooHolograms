@@ -422,6 +422,45 @@ public abstract class ActionType {
      */
     public abstract boolean execute(Player player, String... args);
 
+    /**
+     * 执行动作（带 debug 日志，节点 5）
+     * 包装 {@link #execute(Player, String...)}，在入口和出口输出 debug 日志
+     * 仅在 {@code config.yml: debug=true} 时输出，不影响性能（使用 Supplier 延迟构造）
+     *
+     * @param player 玩家
+     * @param args 参数
+     * @return 是否成功
+     */
+    public boolean executeWithDebug(Player player, String... args) {
+        final String actionType = this.name;
+        final String actionData = (args != null && args.length > 0) ? String.join(" ", args) : "";
+        final String playerName = (player != null) ? player.getName() : "null";
+
+        // 节点 5: debug 日志 - 入口
+        WooHolograms.getInstance().debug(() -> String.format(
+                "[Node5 ActionType.execute ENTRY] type=%s, data=%s, player=%s",
+                actionType, actionData, playerName));
+
+        boolean result;
+        try {
+            result = execute(player, args);
+        } catch (RuntimeException e) {
+            final String errorMsg = e.getMessage();
+            WooHolograms.getInstance().debug(() -> String.format(
+                    "[Node5 ActionType.execute EXIT] type=%s, data=%s, player=%s, result=exception: %s",
+                    actionType, actionData, playerName, errorMsg));
+            throw e;
+        }
+
+        // 节点 5: debug 日志 - 出口（包含执行结果）
+        final boolean finalResult = result;
+        WooHolograms.getInstance().debug(() -> String.format(
+                "[Node5 ActionType.execute EXIT] type=%s, data=%s, player=%s, result=%s",
+                actionType, actionData, playerName, finalResult));
+
+        return result;
+    }
+
     @Override
     public String toString() {
         return name;
