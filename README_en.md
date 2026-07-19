@@ -2,15 +2,17 @@
 
 # WooHolograms
 
-🍵 A feature-rich Minecraft hologram plugin with GUI support
+🍵 A Hologram plugin, with rich and detailed functions, and GUI for easier use
 
 ## Features
 
 - **Multiple display types**: Text, item, block, player head, custom entity
+- **New action system**: Interaction-entity-based precise clicks, per-line/page dual-layer actions, 4 trigger types, 7 action types, click cooldown
+- **Layout freedom**: Per-line X/Z offset independent grouped rendering, supporting staggered, waterfall, and dual-column layouts
 - **Visual effects**: Brightness, alignment, background opacity/color, billboard, chroma
 - **Animation system**: Wave, typewriter, blink, scroll, gradient, custom animations
-- **Interaction**: Click actions, per-line/page actions, cooldown
 - **Performance**: Display Entity, incremental rendering, object pool, pre-compiled animations
+- **Full-chain debug logging**: Enable debug to view the complete click routing
 - **Folia support**: Full compatibility with regionized multithreading
 - **GUI management**: Visual editor, all features accessible via GUI
 - **Data migration**: Import from HolographicDisplays, CMI, DecentHolograms
