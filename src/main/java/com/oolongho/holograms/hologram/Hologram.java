@@ -3,9 +3,6 @@ package com.oolongho.holograms.hologram;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.ClickType;
 import com.oolongho.holograms.api.event.HologramClickEvent;
-import com.oolongho.holograms.nms.NmsHologramRenderer;
-import com.oolongho.holograms.nms.renderer.NmsClickableHologramRenderer;
-import com.oolongho.holograms.nms.util.HologramPosition;
 import com.oolongho.holograms.storage.HologramStorage;
 import com.oolongho.holograms.util.LocationUtil;
 import com.oolongho.holograms.util.Profiler;
@@ -89,9 +86,6 @@ public class Hologram {
     private final Set<UUID> showPlayers;
     private boolean defaultVisibleState;
 
-    // 可点击实体渲染器
-    private final List<NmsHologramRenderer> clickableRenderers;
-
     protected final Object visibilityMutex = new Object();
 
     /**
@@ -167,7 +161,6 @@ public class Hologram {
         this.hidePlayers = ConcurrentHashMap.newKeySet();
         this.showPlayers = ConcurrentHashMap.newKeySet();
         this.defaultVisibleState = true;
-        this.clickableRenderers = new CopyOnWriteArrayList<>();
 
         // 添加默认页（直接创建，避免在构造函数中调用可覆盖的方法）
         pages.add(new HologramPage(this, 0));
@@ -1034,7 +1027,7 @@ public class Hologram {
                     }
                 }
             } else {
-                destroyClickableRenderers();
+                // pages 已全部销毁（page.destroy 内部清理 Interaction 实体），无需额外操作
                 viewerPages.clear();
                 viewers.clear();
             }
@@ -1051,13 +1044,11 @@ public class Hologram {
             // 1. 隐藏所有观看者
             hideAll();
 
-            // 2. 销毁所有页面
+            // 2. 销毁所有页面（page.destroy 内部清理 Interaction 实体）
             for (HologramPage page : pages) {
                 page.destroy();
             }
             pages.clear();
-
-            destroyClickableRenderers();
 
             viewerPages.clear();
             viewers.clear();
@@ -2000,41 +1991,20 @@ public class Hologram {
      */
 
     /**
-     * 显示可点击实体
-     * 
+     * 显示可点击实体（委托给当前页的 pageTextRenderer）
+     *
      * @param player 玩家
      */
     public void showClickableEntities(Player player) {
         HologramPage page = getPage(player);
-        if (page == null || !page.isClickable()) {
-            return;
-        }
+        if (page == null) return;
+        page.showClickableEntities(player);
 
-        int amount = (int) (page.getHeight() / 2) + 1;
-        HologramPosition pos = getClickableBasePosition(page);
-
-        for (int i = 0; i < amount; i++) {
-            NmsClickableHologramRenderer renderer = (NmsClickableHologramRenderer) getClickableRenderer(i);
-            renderer.display(player, pos);
-            pos = pos.addY(1.8);
-        }
-
-        trimExcessClickableRenderers(amount);
-
-        // 节点 1: debug 日志 - ArmorStand 创建后输出
+        // Interaction 显示入口
         final int pageIdx = getPlayerPage(player);
-        final List<Integer> entityIds = new ArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            for (int id : clickableRenderers.get(i).getEntityIds()) {
-                entityIds.add(id);
-            }
-        }
-        final HologramPosition basePos = getClickableBasePosition(page);
         WooHolograms.getInstance().debug(() -> String.format(
-                "[Node1 showClickableEntities] hologram=%s, player=%s, page=%d, isClickable=%s, " +
-                        "armorStandCount=%d, entityIds=%s, basePos=(%.2f, %.2f, %.2f)",
-                name, player.getName(), pageIdx, page.isClickable(), amount, entityIds,
-                basePos.getX(), basePos.getY(), basePos.getZ()));
+                "[Debug.interaction] show, hologram=%s, player=%s, page=%d, isClickable=%s",
+                name, player.getName(), pageIdx, page.isClickable()));
     }
 
     /**
@@ -2047,19 +2017,14 @@ public class Hologram {
     }
 
     /**
-     * 隐藏可点击实体
-     * 
+     * 隐藏可点击实体（委托给当前页的 pageTextRenderer）
+     *
      * @param player 玩家
      */
     public void hideClickableEntities(Player player) {
         HologramPage page = getPage(player);
-        if (page == null) {
-            return;
-        }
-
-        for (NmsHologramRenderer renderer : clickableRenderers) {
-            renderer.destroy(player);
-        }
+        if (page == null) return;
+        page.hideClickableEntities(player);
     }
 
     /**
@@ -2092,24 +2057,14 @@ public class Hologram {
     }
 
     /**
-     * 传送可点击实体
-     * 
+     * 传送可点击实体（委托给当前页的 pageTextRenderer）
+     *
      * @param player 玩家
      */
     public void teleportClickableEntities(Player player) {
         HologramPage page = getPage(player);
-        if (page == null || !page.isClickable()) {
-            return;
-        }
-
-        int amount = (int) (page.getHeight() / 2) + 1;
-        HologramPosition pos = getClickableBasePosition(page);
-
-        for (int i = 0; i < amount; i++) {
-            NmsClickableHologramRenderer renderer = (NmsClickableHologramRenderer) getClickableRenderer(i);
-            renderer.move(player, pos);
-            pos = pos.addY(1.8);
-        }
+        if (page == null) return;
+        page.teleportClickableEntities(player);
     }
 
     /**
@@ -2118,60 +2073,6 @@ public class Hologram {
     public void teleportClickableEntitiesAll() {
         if (enabled) {
             getViewerPlayers().forEach(this::teleportClickableEntities);
-        }
-    }
-
-    /**
-     * 获取可点击渲染器
-     * 
-     * @param index 索引
-     * @return 渲染器
-     */
-    public NmsHologramRenderer getClickableRenderer(int index) {
-        if (index >= clickableRenderers.size()) {
-            synchronized (this) {
-                // Double-check after acquiring lock
-                if (index >= clickableRenderers.size()) {
-                    NmsHologramRenderer renderer = WooHolograms.getInstance()
-                            .getRendererFactory()
-                            .createClickableRenderer();
-                    clickableRenderers.add(renderer);
-                    for (int id : renderer.getEntityIds()) {
-                        WooHolograms.getInstance().getHologramManager().registerEntityId(id, this);
-                    }
-                }
-            }
-        }
-        return clickableRenderers.get(index);
-    }
-
-    private HologramPosition getClickableBasePosition(HologramPage page) {
-        double baseY = Math.floor(location.getY() - page.getHeight()) + 0.5;
-        return new HologramPosition(location.getX(), baseY, location.getZ());
-    }
-
-    public void destroyClickableRenderers() {
-        List<Player> viewerList = getViewerPlayers();
-        for (NmsHologramRenderer renderer : clickableRenderers) {
-            for (int id : renderer.getEntityIds()) {
-                WooHolograms.getInstance().getHologramManager().unregisterEntityId(id);
-            }
-            for (Player player : viewerList) {
-                renderer.destroy(player);
-            }
-        }
-        clickableRenderers.clear();
-    }
-
-    private void trimExcessClickableRenderers(int activeCount) {
-        while (clickableRenderers.size() > activeCount) {
-            NmsHologramRenderer extra = clickableRenderers.remove(clickableRenderers.size() - 1);
-            for (int id : extra.getEntityIds()) {
-                WooHolograms.getInstance().getHologramManager().unregisterEntityId(id);
-            }
-            for (Player player : getViewerPlayers()) {
-                extra.destroy(player);
-            }
         }
     }
 
@@ -2237,20 +2138,12 @@ public class Hologram {
      * @return 是否属于此全息图
      */
     public boolean hasEntity(int entityId) {
-        // 检查所有页面
+        // 检查所有页面（page.hasEntity 已包含 pageTextRenderer 的所有实体 ID，含 Interaction）
         for (HologramPage page : pages) {
             if (page.hasEntity(entityId)) {
                 return true;
             }
         }
-
-        // 检查可点击实体
-        for (NmsHologramRenderer renderer : clickableRenderers) {
-            if (renderer.getEntityIds().contains(entityId)) {
-                return true;
-            }
-        }
-
         return false;
     }
 
@@ -2371,8 +2264,6 @@ public class Hologram {
                 page.destroy();
             }
             pages.clear();
-
-            destroyClickableRenderers();
         }
     }
 

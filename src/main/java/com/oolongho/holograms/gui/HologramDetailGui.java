@@ -860,14 +860,6 @@ public class HologramDetailGui extends GuiScreen {
                 material = Material.STONE;
                 typeDisplay = "&6方块显示";
                 break;
-            case NEXT:
-                material = Material.ARROW;
-                typeDisplay = "&a下一页按钮";
-                break;
-            case PREV:
-                material = Material.ARROW;
-                typeDisplay = "&e上一页按钮";
-                break;
             case TEXT:
             default:
                 material = Material.PAPER;
@@ -883,14 +875,18 @@ public class HologramDetailGui extends GuiScreen {
         lore.add("&7高度: &f" + line.getHeight());
         lore.add("");
         lore.add("&e点击编辑");
-        
-        return GuiButton.builder(material)
+
+        // X/Z 偏移非零的行会分裂为独立 TextGroup（独立背景与 Interaction），用附魔光效标识
+        GuiButton.Builder builder = GuiButton.builder(material)
                 .name("&f第 " + (lineIndex + 1) + " 行")
                 .lore(lore)
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new LineEditGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex, lineIndex));
-                })
-                .build();
+                });
+        if (line.getOffsetX() != 0.0 || line.getOffsetZ() != 0.0) {
+            builder.glow();
+        }
+        return builder.build();
     }
 
     private static int parseColor(String input) {

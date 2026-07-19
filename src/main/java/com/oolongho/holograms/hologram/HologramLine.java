@@ -2,7 +2,6 @@ package com.oolongho.holograms.hologram;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.Action;
-import com.oolongho.holograms.action.ActionType;
 import com.oolongho.holograms.action.ClickType;
 import com.oolongho.holograms.hologram.HologramManager;
 import com.oolongho.holograms.nms.NmsHologramRenderer;
@@ -199,32 +198,6 @@ public class HologramLine {
                     this.renderer = null;
                 }
                 parseEntityType(content);
-            } else if (upperContent.equals("#NEXT") || upperContent.startsWith("#NEXT ")) {
-                this.type = HologramType.NEXT;
-                if (prevType != this.type) {
-                    this.height = DEFAULT_HEIGHT_TEXT;
-                    this.previousRenderer = this.renderer;
-                    this.renderer = null;
-                }
-                removeAutoPageActions(ClickType.ANY, ActionType.NEXT_PAGE);
-                Hologram hologram = getHologram();
-                if (hologram != null) {
-                    this.actions.computeIfAbsent(ClickType.ANY, k -> new ArrayList<>())
-                            .add(new Action(ActionType.NEXT_PAGE, hologram.getName()));
-                }
-            } else if (upperContent.equals("#PREV") || upperContent.startsWith("#PREV ")) {
-                this.type = HologramType.PREV;
-                if (prevType != this.type) {
-                    this.height = DEFAULT_HEIGHT_TEXT;
-                    this.previousRenderer = this.renderer;
-                    this.renderer = null;
-                }
-                removeAutoPageActions(ClickType.ANY, ActionType.PREV_PAGE);
-                Hologram hologram = getHologram();
-                if (hologram != null) {
-                    this.actions.computeIfAbsent(ClickType.ANY, k -> new ArrayList<>())
-                            .add(new Action(ActionType.PREV_PAGE, hologram.getName()));
-                }
             } else {
                 this.type = HologramType.TEXT;
                 if (prevType != this.type) {
@@ -268,16 +241,6 @@ public class HologramLine {
             return false;
         }
         return ANIMATION_PATTERN.matcher(text).find();
-    }
-
-    private void removeAutoPageActions(ClickType clickType, ActionType pageActionType) {
-        List<Action> actionList = actions.get(clickType);
-        if (actionList != null) {
-            actionList.removeIf(a -> a.getType() == pageActionType);
-            if (actionList.isEmpty()) {
-                actions.remove(clickType);
-            }
-        }
     }
 
     /**
@@ -1374,6 +1337,26 @@ public class HologramLine {
         this.offsetZ = offsetZ;
     }
 
+    /**
+     * 一次性设置 X/Y/Z 偏移并触发分组重建和位置重新对齐
+     * 用于 GUI 编辑偏移时调用（X/Z 偏移变化会触发 TextGroup 分裂/合并）
+     *
+     * 注意：fromMap 加载和 clone 时不调用此方法（使用裸 setter setOffsetX/Y/Z），
+     * 因为此时 PageTextRendererImpl 尚未创建或行尚未加入页面。
+     *
+     * @param x X 偏移
+     * @param y Y 偏移
+     * @param z Z 偏移
+     */
+    public void setOffset(double x, double y, double z) {
+        this.offsetX = x;
+        this.offsetY = y;
+        this.offsetZ = z;
+        if (parent != null) {
+            parent.onLineOffsetChanged();
+        }
+    }
+
     public float getFacing() {
         return facing;
     }
@@ -1419,15 +1402,12 @@ public class HologramLine {
         return actions.values().stream().anyMatch(list -> list != null && !list.isEmpty());
     }
 
-    private void notifyActionsChanged() {
-        if (parent != null && parent.getParent() != null) {
-            parent.getParent().onActionsChanged();
-        }
-    }
-
     public void addAction(ClickType clickType, Action action) {
+        boolean wasClickable = parent != null && parent.isClickable();
         actions.computeIfAbsent(clickType, k -> new ArrayList<>()).add(action);
-        notifyActionsChanged();
+        if (parent != null) {
+            parent.onLineActionsChanged(wasClickable);
+        }
     }
 
     public List<Action> getActions(ClickType clickType) {
@@ -1440,20 +1420,29 @@ public class HologramLine {
     }
 
     public void clearActions(ClickType clickType) {
+        boolean wasClickable = parent != null && parent.isClickable();
         actions.remove(clickType);
-        notifyActionsChanged();
+        if (parent != null) {
+            parent.onLineActionsChanged(wasClickable);
+        }
     }
 
     public void clearAllActions() {
+        boolean wasClickable = parent != null && parent.isClickable();
         actions.clear();
-        notifyActionsChanged();
+        if (parent != null) {
+            parent.onLineActionsChanged(wasClickable);
+        }
     }
 
     public void removeAction(ClickType clickType, int index) {
         List<Action> actionList = actions.get(clickType);
         if (actionList != null && index >= 0 && index < actionList.size()) {
+            boolean wasClickable = parent != null && parent.isClickable();
             actionList.remove(index);
-            notifyActionsChanged();
+            if (parent != null) {
+                parent.onLineActionsChanged(wasClickable);
+            }
         }
     }
 
@@ -1485,11 +1474,11 @@ public class HologramLine {
             return;
         }
 
-        // 节点 4: debug 日志 - 待执行动作列表
+        // 动作执行：行级
         final List<Action> finalActions = new ArrayList<>(actionsToExecute);
         WooHolograms.getInstance().debug(() -> {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("[Node4 HologramLine.executeActions] player=%s, clickType=%s, actionCount=%d",
+            sb.append(String.format("[Debug.click] line-execute, player=%s, clickType=%s, actionCount=%d",
                     player.getName(), clickType, finalActions.size()));
             for (int i = 0; i < finalActions.size(); i++) {
                 Action a = finalActions.get(i);

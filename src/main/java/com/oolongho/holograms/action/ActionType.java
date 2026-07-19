@@ -436,9 +436,9 @@ public abstract class ActionType {
         final String actionData = (args != null && args.length > 0) ? String.join(" ", args) : "";
         final String playerName = (player != null) ? player.getName() : "null";
 
-        // 节点 5: debug 日志 - 入口
+        // 动作执行：单个动作入口
         WooHolograms.getInstance().debug(() -> String.format(
-                "[Node5 ActionType.execute ENTRY] type=%s, data=%s, player=%s",
+                "[Debug.click] action-entry, type=%s, data=%s, player=%s",
                 actionType, actionData, playerName));
 
         boolean result;
@@ -447,15 +447,15 @@ public abstract class ActionType {
         } catch (RuntimeException e) {
             final String errorMsg = e.getMessage();
             WooHolograms.getInstance().debug(() -> String.format(
-                    "[Node5 ActionType.execute EXIT] type=%s, data=%s, player=%s, result=exception: %s",
+                    "[Debug.click] action-exit, type=%s, data=%s, player=%s, result=exception: %s",
                     actionType, actionData, playerName, errorMsg));
             throw e;
         }
 
-        // 节点 5: debug 日志 - 出口（包含执行结果）
+        // 动作执行：单个动作出口（包含执行结果）
         final boolean finalResult = result;
         WooHolograms.getInstance().debug(() -> String.format(
-                "[Node5 ActionType.execute EXIT] type=%s, data=%s, player=%s, result=%s",
+                "[Debug.click] action-exit, type=%s, data=%s, player=%s, result=%s",
                 actionType, actionData, playerName, finalResult));
 
         return result;

@@ -566,7 +566,8 @@ public class YamlHologramStorage implements HologramStorage {
                                 }
                             }
                         }
-                        page.realignLines();
+                        // 加载完所有行后统一重建分组（addLine 时偏移=0，setOffsetX/Y/Z 是裸 setter 不触发 rebuild）
+                        page.onLoadComplete();
                     }
                 }
             }
@@ -613,7 +614,8 @@ public class YamlHologramStorage implements HologramStorage {
                                 page.addLine((String) lineObj);
                             }
                         }
-                        page.realignLines();
+                        // 加载完所有行后统一重建分组（addLine 时偏移=0，setOffsetX/Y/Z 是裸 setter 不触发 rebuild）
+                        page.onLoadComplete();
                     }
                 }
             }

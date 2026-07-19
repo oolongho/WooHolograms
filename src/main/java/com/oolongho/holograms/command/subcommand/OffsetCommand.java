@@ -51,11 +51,8 @@ public class OffsetCommand extends Subcommand {
 
             HologramLine line = page.getLine(lineNumber - 1);
             if (line != null) {
-                line.setOffsetX(offsetX);
-                line.setOffsetY(offsetY);
-                line.setOffsetZ(offsetZ);
+                line.setOffset(offsetX, offsetY, offsetZ);
                 hologram.save();
-                hologram.realignLines();
 
                 sender.sendMessage(ColorUtil.colorize("&a已设置第 " + lineNumber + " 行的偏移为 (" + offsetX + ", " + offsetY + ", " + offsetZ + ")！"));
             }

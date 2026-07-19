@@ -196,12 +196,12 @@ public class LineEditGui extends GuiScreen {
 
     /**
      * TEXT 行的紧凑布局（27格 = 3行）
-     * [0返回] [_] [_] [_] [4内容] [_] [_] [_] [_]
+     * [0返回] [_] [_] [3偏移] [4内容] [_] [_] [_] [_]
      * [9设置文本] [_] [_] [_] [13动作管理] [_] [_] [_] [_]
      * [18上移] [_] [_] [_] [22删除行] [_] [_] [_] [26下移]
      */
     private void renderTextLine(HologramLine line, Hologram hologram, HologramPage page) {
-        // Row 1: 返回 | 内容
+        // Row 1: 返回 | 偏移 | 内容
         setButton(0, GuiButton.builder(Material.BOOK)
                 .name("&f返回")
                 .lore(Arrays.asList(
@@ -213,6 +213,9 @@ public class LineEditGui extends GuiScreen {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
                 })
                 .build());
+
+        // 偏移按钮 (slot 3)
+        addOffsetButton(3, line, hologram);
 
         setButton(4, GuiButton.builder(Material.PAPER)
                 .name("&f当前内容")
@@ -477,47 +480,8 @@ public class LineEditGui extends GuiScreen {
         addGlowColorButton(15, line, hologram);
 
         // === Row 3: Position & Orientation ===
-        setButton(18, GuiButton.builder(Material.STICK)
-                .name("&f设置偏移")
-                .lore(Arrays.asList(
-                        "&7设置此行的位置偏移",
-                        "&7当前: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()),
-                        "",
-                        "&e点击设置"
-                ))
-                .onClick(context -> {
-                    Player player = context.getPlayer();
-                    player.closeInventory();
-
-                    chatInputManager.requestInput(player, "&a请输入偏移值 (x y z):",
-                            ChatInputManager.InputType.LINE_OFFSET, hologramName, lineIndex, pageIndex, input -> {
-                                try {
-                                    String[] parts = input.split(" ");
-                                    if (parts.length == 3) {
-                                        double x = Double.parseDouble(parts[0]);
-                                        double y = Double.parseDouble(parts[1]);
-                                        double z = Double.parseDouble(parts[2]);
-                                        if (withHologramLine(player, (h, p, l) -> {
-                                            l.setOffsetX(x);
-                                            l.setOffsetY(y);
-                                            l.setOffsetZ(z);
-                                            h.save();
-                                            h.realignLines();
-                                            player.sendMessage(ColorUtil.colorize("&a已设置偏移为 (" + x + ", " + y + ", " + z + ")！"));
-                                        })) {
-                                            reopenGui(player);
-                                        }
-                                    } else {
-                                        player.sendMessage(ColorUtil.colorize("&c请输入三个数字，用空格分隔！"));
-                                        reopenGui(player);
-                                    }
-                                } catch (NumberFormatException e) {
-                                    player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
-                                    reopenGui(player);
-                                }
-                            });
-                })
-                .build());
+        // 偏移按钮 (slot 18)
+        addOffsetButton(18, line, hologram);
 
         // 高度按钮 (slot 20)
         addHeightButton(20, line);
@@ -948,6 +912,54 @@ public class LineEditGui extends GuiScreen {
     }
 
     // ==================== 共享按钮构建方法 ====================
+
+    /**
+     * 偏移按钮（TEXT 和非 TEXT 行共用）
+     * 用于设置行的 X/Y/Z 位置偏移
+     */
+    private void addOffsetButton(int slot, HologramLine line, Hologram hologram) {
+        setButton(slot, GuiButton.builder(Material.STICK)
+                .name("&f设置偏移")
+                .lore(Arrays.asList(
+                        "&7设置此行的位置偏移",
+                        "&7当前: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()),
+                        "",
+                        "&7X/Z 偏移非零时会分裂为",
+                        "&7独立 TextGroup（独立背景）",
+                        "",
+                        "&e点击设置"
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    player.closeInventory();
+
+                    chatInputManager.requestInput(player, "&a请输入偏移值 (x y z):",
+                            ChatInputManager.InputType.LINE_OFFSET, hologramName, lineIndex, pageIndex, input -> {
+                                try {
+                                    String[] parts = input.split(" ");
+                                    if (parts.length == 3) {
+                                        double x = Double.parseDouble(parts[0]);
+                                        double y = Double.parseDouble(parts[1]);
+                                        double z = Double.parseDouble(parts[2]);
+                                        if (withHologramLine(player, (h, p, l) -> {
+                                            l.setOffset(x, y, z);
+                                            h.save();
+                                            player.sendMessage(ColorUtil.colorize("&a已设置偏移为 (" + x + ", " + y + ", " + z + ")！"));
+                                        })) {
+                                            reopenGui(player);
+                                        }
+                                    } else {
+                                        player.sendMessage(ColorUtil.colorize("&c请输入三个数字，用空格分隔！"));
+                                        reopenGui(player);
+                                    }
+                                } catch (NumberFormatException e) {
+                                    player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                    reopenGui(player);
+                                }
+                            });
+                })
+                .build());
+    }
 
     /**
      * 发光颜色按钮

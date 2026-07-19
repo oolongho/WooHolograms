@@ -32,14 +32,17 @@ public class PageTextRendererImpl {
         final int frontEntityId;
         final int backEntityId;
         final NmsClickableHologramRenderer interactionRenderer;
+        final int debugBoxEntityId;
         final List<HologramLine> lines;
 
         TextGroup(int frontEntityId, int backEntityId,
                   NmsClickableHologramRenderer interactionRenderer,
+                  int debugBoxEntityId,
                   List<HologramLine> lines) {
             this.frontEntityId = frontEntityId;
             this.backEntityId = backEntityId;
             this.interactionRenderer = interactionRenderer;
+            this.debugBoxEntityId = debugBoxEntityId;
             this.lines = lines;
         }
 
@@ -51,6 +54,31 @@ public class PageTextRendererImpl {
 
     /** Interaction 实体的位置和尺寸参数 */
     private record InteractionBounds(double x, double y, double z, float width, float height) {}
+
+    /**
+     * Interaction 高度系数（每行判定高度 = lineHeight × scaleY × 此系数）
+     * 1.0 = 覆盖完整行高（推荐，与文字渲染范围一致）
+     * 0.5 = 仅覆盖字体可见高度（行间存在死区，多行组会出现部分文字无法点击）
+     * 调小：判定区域变窄，点击更精准但更难点中
+     * 调大：判定区域变宽，更容易点中但容易误触相邻行
+     */
+    private static final double INTERACTION_HEIGHT_RATIO = 1.0;
+
+    /**
+     * Interaction 垂直偏移（格）
+     * 正值：判定区域上移（远离地面）
+     * 负值：判定区域下移（靠近地面）
+     * 用于微调判定区域与可见文字的垂直对齐
+     * 默认 0.0
+     */
+    private static final double INTERACTION_VERTICAL_SHIFT = 0.0;
+
+    /**
+     * 是否显示 Interaction 调试可视化（半透明玻璃框标记判定区域）
+     * 仅在 plugin config 的 debug 为 true 时生效
+     * 方便直观对比判定区域与文字的位置关系
+     */
+    private static final boolean DEBUG_SHOW_INTERACTION_BOX = true;
 
     private final HologramPage page;
     private final EntityIdGenerator entityIdGenerator;
@@ -72,9 +100,9 @@ public class PageTextRendererImpl {
 
     /**
      * 计算 TextGroup 的 Interaction 实体边界参数
-     * 位置 = 首行位置 - (0, height, 0)（文本底部，与 TextDisplay 渲染底部对齐）
-     * 宽度 = 2.0 × scaleX（覆盖常见文本宽度，随缩放）
-     * 高度 = N × lineHeight × scaleY（与文本显示高度一致）
+     * 位置 = 首行位置 + 垂直偏移（文本从首行位置向上渲染）
+     * 宽度 = 1.0 × scaleX（避免相邻 TextGroup 的 Interaction 水平重叠，随缩放）
+     * 高度 = N × lineHeight × scaleY × INTERACTION_HEIGHT_RATIO
      *
      * @param group 文本组
      * @return 边界参数；若 scaleX/scaleY ≤ 0、位置无效或 parent 为 null 返回 null
@@ -89,9 +117,9 @@ public class PageTextRendererImpl {
         Location firstLine = group.lines.get(0).getLocation();
         if (firstLine == null) return null;
         double lineHeight = hologram.getLineHeight();
-        float width = 2.0f * scaleX;
-        float height = (float) (group.lines.size() * lineHeight * scaleY);
-        double interactionY = firstLine.getY() - height;
+        float width = 1.0f * scaleX;
+        float height = (float) (group.lines.size() * lineHeight * scaleY * INTERACTION_HEIGHT_RATIO);
+        double interactionY = firstLine.getY() + INTERACTION_VERTICAL_SHIFT;
         return new InteractionBounds(firstLine.getX(), interactionY, firstLine.getZ(), width, height);
     }
 
@@ -110,6 +138,9 @@ public class PageTextRendererImpl {
                 removePackets.withRemoveEntity(group.backEntityId);
                 if (group.interactionEntityId() != -1) {
                     removePackets.withRemoveEntity(group.interactionEntityId());
+                }
+                if (group.debugBoxEntityId != -1) {
+                    removePackets.withRemoveEntity(group.debugBoxEntityId);
                 }
             }
             for (UUID uuid : lastTextPerPlayerGroup.keySet()) {
@@ -181,6 +212,34 @@ public class PageTextRendererImpl {
         if (offsetGroupStarted) {
             textGroups.add(createTextGroup(new ArrayList<>(offsetGroupLines), clickable));
         }
+
+        // 分组重建：输出最终分组结果
+        WooHolograms.getInstance().debug(() -> formatGroupsLog());
+    }
+
+    /**
+     * 格式化分组 debug 日志
+     */
+    private String formatGroupsLog() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("[Debug.group] rebuild, hologram=%s, page=%d, groupCount=%d, clickable=%s",
+                page.getParent() == null ? "null" : page.getParent().getName(),
+                page.getIndex(), textGroups.size(), page.isClickable()));
+        for (int i = 0; i < textGroups.size(); i++) {
+            TextGroup g = textGroups.get(i);
+            sb.append(String.format("%n  group[%d] lines=%d, frontId=%d, interactionId=%d",
+                    i, g.lines.size(), g.frontEntityId, g.interactionEntityId()));
+            for (int j = 0; j < g.lines.size(); j++) {
+                HologramLine line = g.lines.get(j);
+                Location loc = line.getLocation();
+                sb.append(String.format("%n    line[%d] content=%.30s, offset=(%.2f,%.2f,%.2f), loc=%.2f,%.2f,%.2f",
+                        j,
+                        line.getContent() == null ? "" : line.getContent().replace('\n', ' '),
+                        line.getOffsetX(), line.getOffsetY(), line.getOffsetZ(),
+                        loc == null ? 0 : loc.getX(), loc == null ? 0 : loc.getY(), loc == null ? 0 : loc.getZ()));
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -192,7 +251,10 @@ public class PageTextRendererImpl {
         NmsClickableHologramRenderer interactionRenderer = clickable
                 ? WooHolograms.getInstance().getRendererFactory().createClickableRenderer()
                 : null;
-        return new TextGroup(frontId, backId, interactionRenderer, lines);
+        int debugBoxId = (clickable && DEBUG_SHOW_INTERACTION_BOX)
+                ? entityIdGenerator.getFreeEntityId()
+                : -1;
+        return new TextGroup(frontId, backId, interactionRenderer, debugBoxId, lines);
     }
 
     /**
@@ -477,11 +539,13 @@ public class PageTextRendererImpl {
      * 根据实体ID和点击Y坐标查找对应的行（用于点击检测）
      *
      * 支持两种实体：
-     * 1. TextDisplay（frontEntityId/backEntityId）：位置在组顶部，
-     *    hitY 从顶部(0)到底部(负值)，lineIndex = (int)(-hitY / lineHeight)
-     * 2. Interaction（interactionEntityId）：位置在组底部（最后一行位置），
+     * 1. TextDisplay（frontEntityId/backEntityId）：位置在组顶部（首行），
+     *    hitY 从顶部(0)到底部(负值)，effectiveLineHeight = lineHeight × scaleY，
+     *    lineIndex = (int)(-hitY / effectiveLineHeight)
+     * 2. Interaction（interactionEntityId）：位置 = 首行位置 + 垂直偏移，
      *    AABB 向上延伸 height，hitY 从底部(0)到顶部(height)，
-     *    lineIndex = size - 1 - (int)(hitY / lineHeight)
+     *    effectiveLineHeight = lineHeight × scaleY × INTERACTION_HEIGHT_RATIO（与 height 计算一致），
+     *    lineIndex = size - 1 - (int)(hitY / effectiveLineHeight)
      *
      * @param entityId 实体 ID
      * @param hitY     点击位置相对于实体位置的 Y 偏移，null 表示无法确定（退回到第一行）
@@ -501,16 +565,25 @@ public class PageTextRendererImpl {
                 if (group.lines.size() == 1 || hitY == null) {
                     return group.lines.get(0);
                 }
-                double lineHeight = page.getParent() != null ? page.getParent().getLineHeight() : 0.25;
+                Hologram hologram = page.getParent();
+                double lineHeight = hologram != null ? hologram.getLineHeight() : 0.25;
+                float scaleY = hologram != null ? hologram.getScaleY() : 1.0f;
                 int lineIndex;
                 if (isInteraction) {
-                    // Interaction 位置在组底部（最后一行），AABB 向上延伸
+                    // Interaction: 每行判定高度 = lineHeight × scaleY × INTERACTION_HEIGHT_RATIO（与 height 计算一致）
+                    double effectiveLineHeight = lineHeight * scaleY * INTERACTION_HEIGHT_RATIO;
+                    if (effectiveLineHeight <= 0) {
+                        return group.lines.get(0); // 退化保护
+                    }
                     // hitY=0 在底部（最后一行），hitY=height 在顶部（第一行）
-                    // 从底部往上数：lineIndex = size - 1 - (int)(hitY / lineHeight)
-                    lineIndex = group.lines.size() - 1 - (int) (hitY / lineHeight);
+                    lineIndex = group.lines.size() - 1 - (int) (hitY / effectiveLineHeight);
                 } else {
-                    // TextDisplay：hitY 从顶部(0)到底部(负值)
-                    lineIndex = (int) (-hitY / lineHeight);
+                    // TextDisplay: 每行占用高度 = lineHeight × scaleY，hitY 从顶部(0)到底部(负值)
+                    double effectiveLineHeight = lineHeight * scaleY;
+                    if (effectiveLineHeight <= 0) {
+                        return group.lines.get(0); // 退化保护
+                    }
+                    lineIndex = (int) (-hitY / effectiveLineHeight);
                 }
                 // 边界保护
                 lineIndex = Math.max(0, Math.min(lineIndex, group.lines.size() - 1));
@@ -528,7 +601,7 @@ public class PageTextRendererImpl {
      * 用玩家视线计算点击 Interaction 实体的 hitY
      * 用于左键（ATTACK）时 Minecraft 不发送 INTERACT_AT 包、hitY=null 的情况
      *
-     * Interaction 位置在组底部（最后一行位置），AABB 向上延伸 height，
+     * Interaction 位置 = 首行位置（文本底部），AABB 向上延伸 height，
      * 返回值与 INTERACT_AT 的 hitY 语义一致：相对于实体底部的 Y 偏移
      *
      * @param player   玩家
@@ -539,29 +612,37 @@ public class PageTextRendererImpl {
         for (TextGroup group : textGroups) {
             int interactionId = group.interactionEntityId();
             if (interactionId == -1 || interactionId != entityId) continue;
-            if (group.lines.isEmpty()) return null;
-            Location groupLocation = group.lines.get(group.lines.size() - 1).getLocation();
-            if (groupLocation == null) return null;
-            double lineHeight = page.getParent() != null ? page.getParent().getLineHeight() : 0.25;
-            double height = group.lines.size() * lineHeight;
-            return rayTraceHitY(player, groupLocation, height);
+            InteractionBounds bounds = computeInteractionBounds(group);
+            if (bounds == null) return null;
+            Location entityLoc = new Location(
+                    player.getWorld(),
+                    bounds.x(),
+                    bounds.y(),
+                    bounds.z());
+            return rayTraceHitY(player, entityLoc, bounds.width(), bounds.height());
         }
         return null;
     }
 
     /**
      * 射线-AABB 相交（slab 法），计算击中点相对于 AABB 底部的 Y 偏移
-     * Interaction 实体 width=1.0，AABB 从 entityLoc 向上延伸 height
+     * AABB 中心在 (entityLoc.x, entityLoc.z)，X/Z 范围 ±(width/2)，Y 从 entityLoc.y 向上延伸 height
+     *
+     * @param player    玩家
+     * @param entityLoc AABB 底部中心位置
+     * @param width     AABB 宽度（X/Z 方向）
+     * @param height    AABB 高度（Y 方向）
+     * @return 相对于 entityLoc.y 的 Y 偏移，null 表示射线未击中 AABB
      */
-    private Float rayTraceHitY(Player player, Location entityLoc, double height) {
+    private Float rayTraceHitY(Player player, Location entityLoc, float width, double height) {
         org.bukkit.Location eye = player.getEyeLocation();
         org.bukkit.util.Vector dir = eye.getDirection();
         org.bukkit.util.Vector origin = eye.toVector();
-        // Interaction width=1.0，AABB 中心在 entityLoc.x/z，范围 ±0.5
+        double halfWidth = width / 2.0;
         org.bukkit.util.Vector min = new org.bukkit.util.Vector(
-                entityLoc.getX() - 0.5, entityLoc.getY(), entityLoc.getZ() - 0.5);
+                entityLoc.getX() - halfWidth, entityLoc.getY(), entityLoc.getZ() - halfWidth);
         org.bukkit.util.Vector max = new org.bukkit.util.Vector(
-                entityLoc.getX() + 0.5, entityLoc.getY() + height, entityLoc.getZ() + 0.5);
+                entityLoc.getX() + halfWidth, entityLoc.getY() + height, entityLoc.getZ() + halfWidth);
 
         double tmin = Double.NEGATIVE_INFINITY;
         double tmax = Double.POSITIVE_INFINITY;
@@ -603,49 +684,101 @@ public class PageTextRendererImpl {
      * 显示所有 TextGroup 的 Interaction 实体给指定玩家
      * 仅对有 interactionRenderer 的组生效（即 page.isClickable() 为 true 时创建的组）
      *
-     * Interaction 位置使用组内最后一行位置（底部），AABB 向上延伸覆盖所有行：
-     *   - hitY=0 对应最后一行（底部）
-     *   - hitY=height 对应第一行（顶部）
+     * Interaction 位置 = 首行位置 + 垂直偏移，AABB 向上延伸 height
+     *   - hitY=0 对应底部（最后一行）
+     *   - hitY=height 对应顶部（第一行）
+     * width = 1.0 × scaleX，height = N × lineHeight × scaleY × INTERACTION_HEIGHT_RATIO
+     *
+     * 当 DEBUG_SHOW_INTERACTION_BOX 为 true 时，同时显示半透明玻璃框标记判定区域
      */
     public void showClickableEntities(Player player) {
         if (destroyed) return;
-        for (TextGroup group : textGroups) {
+        final String playerName = player.getName();
+        for (int gi = 0; gi < textGroups.size(); gi++) {
+            TextGroup group = textGroups.get(gi);
             if (group.interactionRenderer == null) continue;
-            if (group.lines.isEmpty()) continue;
-            // 使用最后一行位置作为 Interaction 位置（AABB 底部）
-            Location groupLocation = group.lines.get(group.lines.size() - 1).getLocation();
-            if (groupLocation == null) continue;
-            double lineHeight = page.getParent() != null ? page.getParent().getLineHeight() : 0.25;
-            float height = (float) (group.lines.size() * lineHeight);
+            InteractionBounds bounds = computeInteractionBounds(group);
+            if (bounds == null) continue;
             group.interactionRenderer.display(player,
-                    new HologramPosition(groupLocation.getX(), groupLocation.getY(), groupLocation.getZ()),
-                    1.0f, height);
+                    new HologramPosition(bounds.x(), bounds.y(), bounds.z()),
+                    bounds.width(), bounds.height());
+
+            // Interaction 显示：输出位置和尺寸
+            final int gIdx = gi;
+            final int lineCount = group.lines.size();
+            WooHolograms.getInstance().debug(() -> String.format(
+                    "[Debug.interaction] spawn, player=%s, group=%d, lines=%d, entityId=%d, pos=(%.2f,%.2f,%.2f), w=%.2f, h=%.2f",
+                    playerName, gIdx, lineCount, group.interactionEntityId(),
+                    bounds.x(), bounds.y(), bounds.z(), bounds.width(), bounds.height()));
+
+            if (group.debugBoxEntityId != -1) {
+                spawnDebugBox(player, group, bounds);
+            }
         }
     }
 
     /**
-     * 传送所有 TextGroup 的 Interaction 实体
-     * 位置使用组内最后一行位置（与 showClickableEntities 保持一致）
+     * 生成调试用半透明玻璃框，标记 Interaction 判定区域
+     * 使用 BlockDisplay 实体，白色彩色玻璃，缩放至 Interaction 尺寸
+     *
+     * BlockDisplay 方块以实体位置为角点（不是中心），方块占据 [x, x+scale] 范围
+     * Interaction AABB 以实体位置为中心，占据 [x-width/2, x+width/2] 范围
+     * 因此需要 translation：
+     *   - X/Z 方向平移 -width/2，让方块从 [x, x+width] 变为 [x-width/2, x+width/2]
+     *   - Y 方向不平移（方块默认从 y 向上渲染到 y+height，与 Interaction AABB [y, y+height] 一致）
+     */
+    private void spawnDebugBox(Player player, TextGroup group, InteractionBounds bounds) {
+        float w = bounds.width();
+        float h = bounds.height();
+        EntityPacketsBuilder.create()
+                .withSpawnEntity(group.debugBoxEntityId, org.bukkit.entity.EntityType.BLOCK_DISPLAY,
+                        new HologramPosition(bounds.x(), bounds.y(), bounds.z()),
+                        0f, 0f)
+                .withEntityMetadata(group.debugBoxEntityId, EntityMetadataBuilder.create()
+                        .withInvisible()
+                        .withNoGravity()
+                        .withBlockState(org.bukkit.Material.WHITE_STAINED_GLASS)
+                        .withScale(w, h, w)
+                        .withTranslation(-w / 2.0, 0, -w / 2.0)
+                        .withBillboard(Billboard.FIXED_ANGLE)
+                        .toWatchableObjects())
+                .sendTo(player);
+    }
+
+    /**
+     * 传送所有 TextGroup 的 Interaction 实体（及调试框）
+     * 位置与 showClickableEntities 保持一致
      */
     public void teleportClickableEntities(Player player) {
         if (destroyed) return;
         for (TextGroup group : textGroups) {
             if (group.interactionRenderer == null) continue;
-            if (group.lines.isEmpty()) continue;
-            Location groupLocation = group.lines.get(group.lines.size() - 1).getLocation();
-            if (groupLocation == null) continue;
+            InteractionBounds bounds = computeInteractionBounds(group);
+            if (bounds == null) continue;
             group.interactionRenderer.move(player,
-                    new HologramPosition(groupLocation.getX(), groupLocation.getY(), groupLocation.getZ()));
+                    new HologramPosition(bounds.x(), bounds.y(), bounds.z()));
+
+            if (group.debugBoxEntityId != -1) {
+                EntityPacketsBuilder.create()
+                        .withTeleportEntity(group.debugBoxEntityId,
+                                new HologramPosition(bounds.x(), bounds.y(), bounds.z()))
+                        .sendTo(player);
+            }
         }
     }
 
     /**
-     * 隐藏所有 TextGroup 的 Interaction 实体（指定玩家）
+     * 隐藏所有 TextGroup 的 Interaction 实体及调试框（指定玩家）
      */
     public void hideClickableEntities(Player player) {
         for (TextGroup group : textGroups) {
             if (group.interactionRenderer == null) continue;
             group.interactionRenderer.destroy(player);
+            if (group.debugBoxEntityId != -1) {
+                EntityPacketsBuilder.create()
+                        .withRemoveEntity(group.debugBoxEntityId)
+                        .sendTo(player);
+            }
         }
     }
 

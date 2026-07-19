@@ -25,13 +25,16 @@ public class ClickableHologramRendererImpl implements NmsClickableHologramRender
     }
 
     @Override
-    public void display(Player player, HologramPosition position) {
+    public void display(Player player, HologramPosition position, float width, float height) {
         EntityPacketsBuilder.create()
-                .withSpawnEntity(entityId, EntityType.ARMOR_STAND, position)
+                .withSpawnEntity(entityId, EntityType.INTERACTION, position)
                 .withEntityMetadata(entityId, EntityMetadataBuilder.create()
                         .withInvisible()
                         .withNoGravity()
-                        .withArmorStandProperties(false, false)
+                        .withSilent()
+                        .withInteractionWidth(width)
+                        .withInteractionHeight(height)
+                        .withInteractionResponse(false)
                         .toWatchableObjects())
                 .sendTo(player);
     }

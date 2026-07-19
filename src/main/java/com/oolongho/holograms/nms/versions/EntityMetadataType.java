@@ -10,6 +10,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Interaction;
 import org.joml.Vector3fc;
 
 import java.lang.reflect.Field;
@@ -101,6 +102,15 @@ class EntityMetadataType<T> {
     // BlockDisplay Entity - 方块状态
     private static final EntityDataAccessor<BlockState> BLOCK_DISPLAY_BLOCK_STATE_OBJECT = getAccessor(Display.BlockDisplay.class, "DATA_BLOCK_STATE_ID");
 
+    // Interaction Entity - 宽度
+    private static final EntityDataAccessor<Float> INTERACTION_WIDTH_OBJECT = getAccessor(Interaction.class, "DATA_WIDTH_ID");
+
+    // Interaction Entity - 高度
+    private static final EntityDataAccessor<Float> INTERACTION_HEIGHT_OBJECT = getAccessor(Interaction.class, "DATA_HEIGHT_ID");
+
+    // Interaction Entity - 响应（是否触发手臂挥动动画）
+    private static final EntityDataAccessor<Boolean> INTERACTION_RESPONSE_OBJECT = getAccessor(Interaction.class, "DATA_RESPONSE_ID");
+
     /**
      * 通过反射获取 EntityDataAccessor 字段
      * 26.1+ 中这些字段变为 private/protected，无法直接访问
@@ -150,6 +160,11 @@ class EntityMetadataType<T> {
 
     // BlockDisplay Entity 静态实例
     static final EntityMetadataType<BlockState> BLOCK_DISPLAY_BLOCK_STATE = new EntityMetadataType<>(BLOCK_DISPLAY_BLOCK_STATE_OBJECT);
+
+    // Interaction Entity 静态实例
+    static final EntityMetadataType<Float> INTERACTION_WIDTH = new EntityMetadataType<>(INTERACTION_WIDTH_OBJECT);
+    static final EntityMetadataType<Float> INTERACTION_HEIGHT = new EntityMetadataType<>(INTERACTION_HEIGHT_OBJECT);
+    static final EntityMetadataType<Boolean> INTERACTION_RESPONSE = new EntityMetadataType<>(INTERACTION_RESPONSE_OBJECT);
 
     private final EntityDataAccessor<T> entityDataAccessor;
 

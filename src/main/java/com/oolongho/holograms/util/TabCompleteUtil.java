@@ -23,9 +23,7 @@ public class TabCompleteUtil {
             "#ICON:",
             "#HEAD:",
             "#SMALLHEAD:",
-            "#ENTITY:",
-            "#NEXT",
-            "#PREV"
+            "#ENTITY:"
     );
 
     // 常用变量（从 PlaceholderUtil 派生）
@@ -490,8 +488,6 @@ public class TabCompleteUtil {
         messages.add("&f#HEAD:<类型> &7- 显示大头颅");
         messages.add("&f#SMALLHEAD:<类型> &7- 显示小头颅");
         messages.add("&f#ENTITY:<类型> &7- 显示实体");
-        messages.add("&f#NEXT &7- 下一页按钮");
-        messages.add("&f#PREV &7- 上一页按钮");
         messages.add("");
         messages.add("&7头颅类型:");
         messages.add("&fPLAYER_HEAD (玩家名) &7- 玩家头颅");

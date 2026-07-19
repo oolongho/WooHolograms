@@ -6,7 +6,7 @@
 
 ## Features
 
-- **Multiple display types**: Text, item, block, player head, custom entity, page buttons
+- **Multiple display types**: Text, item, block, player head, custom entity
 - **Visual effects**: Brightness, alignment, background opacity/color, billboard, chroma
 - **Animation system**: Wave, typewriter, blink, scroll, gradient, custom animations
 - **Interaction**: Click actions, per-line/page actions, cooldown

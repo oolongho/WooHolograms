@@ -74,19 +74,15 @@ public class HelpGui extends GuiScreen {
                 .build());
         
         setButton(11, GuiButton.builder(Material.ZOMBIE_HEAD)
-                .name("&e实体和翻页")
+                .name("&e实体显示")
                 .lore(Arrays.asList(
                         "&f#ENTITY:<类型>",
                         "&7显示实体模型",
                         "&7例: #ENTITY:ZOMBIE",
                         "",
-                        "&f#NEXT",
-                        "&7下一页按钮",
-                        "&7点击自动翻到下一页",
-                        "",
-                        "&f#PREV",
-                        "&7上一页按钮",
-                        "&7点击自动翻到上一页"
+                        "&7翻页按钮请创建 TEXT 行",
+                        "&7并在动作管理中添加",
+                        "&7NEXT_PAGE / PREV_PAGE 动作"
                 ))
                 .build());
         
@@ -218,9 +214,7 @@ public class HelpGui extends GuiScreen {
                         "",
                         "&fPAGE:<页码>",
                         "&7跳转到指定页",
-                        "&7例: PAGE:3",
-                        "",
-                        "&7或直接使用 #NEXT / #PREV"
+                        "&7例: PAGE:3"
                 ))
                 .build());
         

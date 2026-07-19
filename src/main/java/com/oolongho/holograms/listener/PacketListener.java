@@ -92,12 +92,11 @@ public class PacketListener {
 
     /**
      * 在管道中注入处理器，成功后记录到 playerChannels
-     * 幂等：若处理器已存在则跳过
+     * 幂等：若处理器已存在则直接返回，不修改 playerChannels
      */
     private void injectHandler(Player player, Channel channel, ChannelDuplexHandler handler) {
         try {
             if (channel.pipeline().get(HANDLER_NAME) != null) {
-                playerChannels.putIfAbsent(player, channel);
                 return;
             }
             channel.pipeline().addBefore("packet_handler", HANDLER_NAME, handler);
@@ -205,11 +204,11 @@ public class PacketListener {
                 buf.readFloat(); // targetZ - 暂不使用
             }
 
-            // 节点 2: debug 日志 - 方法入口
+            // 点击数据包入口
             final int actionOrdinalFinal = actionOrdinal;
             final Float hitYFinal = hitY;
             plugin.debug(() -> String.format(
-                    "[Node2 handleInteractPacket] player=%s, entityId=%d, actionOrdinal=%d, hitY=%s",
+                    "[Debug.click] packet-received, player=%s, entityId=%d, actionOrdinal=%d, hitY=%s",
                     player.getName(), entityId, actionOrdinalFinal,
                     hitYFinal == null ? "null" : String.format("%.3f", hitYFinal)));
 
@@ -261,9 +260,9 @@ public class PacketListener {
 
         Hologram hologram = findHologramByEntityId(player, entityId);
         if (hologram == null) {
-            // 节点 3: debug 日志 - hologram 未找到
+            // 点击路由：hologram 未找到
             plugin.debug(() -> String.format(
-                    "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=false",
+                    "[Debug.click] hologram-not-found, player=%s, entityId=%d, clickType=%s",
                     player.getName(), entityId, clickType));
             return;
         }
@@ -287,39 +286,51 @@ public class PacketListener {
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
-            // 节点 3: debug 日志 - 事件被取消
+            // 点击路由：事件被取消
             final boolean pageFound = page != null;
             plugin.debug(() -> String.format(
-                    "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=true, pageFound=%s, eventCancelled=true",
+                    "[Debug.click] event-cancelled, player=%s, entityId=%d, clickType=%s, pageFound=%s",
                     player.getName(), entityId, clickType, pageFound));
             return;
         }
 
         if (page != null) {
-            // 优先使用 Y 坐标路由（合并 TextDisplay 组的场景）
+            // 左键（ATTACK）时 Minecraft 不发送 INTERACT_AT 包，hitY=null
+            // 此时无法从数据包获取精确点击坐标，用玩家视线（射线-AABB 相交）估算 hitY
+            if (hitY == null) {
+                Float rayHitY = page.calculateHitYFromRay(player, entityId);
+                if (rayHitY != null) {
+                    hitY = rayHitY;
+                }
+            }
+            // 用 entityId + hitY 路由到具体行
+            // pageTextRenderer.getLineByEntityId 现已支持 Interaction entityId（含 hitY 组内路由）
             HologramLine line = page.getLineByEntityId(entityId, hitY);
+
             boolean lineFound = line != null && line.hasActions();
             int actionCount = lineFound
                     ? countActions(line, clickType)
                     : countActions(page, clickType);
-            // 节点 3: debug 日志 - 页面内路由结果
+            // 点击路由：页面内行路由结果
+            final Float hitYLog = hitY;
+            final double pageHeightLog = page.getHeight();
             plugin.debug(() -> String.format(
-                    "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=true, pageFound=true, lineFound=%s, actionCount=%d",
-                    player.getName(), entityId, clickType, lineFound, actionCount));
+                    "[Debug.click] line-route, player=%s, entityId=%d, clickType=%s, lineFound=%s, actionCount=%d, hitY=%s, pageHeight=%.3f",
+                    player.getName(), entityId, clickType, lineFound, actionCount, hitYLog, pageHeightLog));
             if (line != null && line.hasActions()) {
                 line.executeActions(player, clickType);
                 return;
             }
-            // ClickableHologramRenderer 无法映射到具体行，执行页面级动作
+            // 行无动作时回退到页面级动作
             page.executeActions(player, clickType);
             return;
         }
 
-        // 节点 3: debug 日志 - 全息图级动作
+        // 点击路由：回退到全息图级动作
         HologramPage playerPage = hologram.getPage(player);
         int holoActionCount = playerPage != null ? countActions(playerPage, clickType) : 0;
         plugin.debug(() -> String.format(
-                "[Node3 handleClick] player=%s, entityId=%d, clickType=%s, hologramFound=true, pageFound=false, lineFound=false, actionCount=%d",
+                "[Debug.click] holo-fallback, player=%s, entityId=%d, clickType=%s, actionCount=%d",
                 player.getName(), entityId, clickType, holoActionCount));
         hologram.executeActions(player, clickType);
     }

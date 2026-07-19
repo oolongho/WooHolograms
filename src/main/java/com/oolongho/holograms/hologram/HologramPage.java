@@ -230,6 +230,8 @@ public class HologramPage {
                 for (Player player : parent.getViewerPlayers(this.index)) {
                     if (player != null && player.isOnline()) {
                         pageTextRenderer.render(player, parent.getLocation());
+                        // rebuildPageTextRenderer 销毁了旧 Interaction，需重新显示
+                        showClickableEntities(player);
                     }
                 }
             }
@@ -238,7 +240,7 @@ public class HologramPage {
         realignLines();
         return true;
     }
-    
+
     /**
      * 在指定位置插入新行
      * 
@@ -276,6 +278,8 @@ public class HologramPage {
                     if (player != null && player.isOnline()) {
                         hideFromPlayer(player);
                         showTo(player);
+                        // rebuildPageTextRenderer 销毁了旧 Interaction，需重新显示
+                        showClickableEntities(player);
                     }
                 }
             }
@@ -315,6 +319,8 @@ public class HologramPage {
                 for (Player player : parent.getViewerPlayers(this.index)) {
                     if (player != null && player.isOnline()) {
                         pageTextRenderer.render(player, parent.getLocation());
+                        // rebuildPageTextRenderer 销毁了旧 Interaction，需重新显示
+                        showClickableEntities(player);
                     }
                 }
             }
@@ -345,6 +351,8 @@ public class HologramPage {
             for (Player player : parent.getViewerPlayers(this.index)) {
                 if (player != null && player.isOnline()) {
                     pageTextRenderer.render(player, parent.getLocation());
+                    // rebuildPageTextRenderer 销毁了旧 Interaction，需重新显示
+                    showClickableEntities(player);
                 }
             }
         }
@@ -384,6 +392,11 @@ public class HologramPage {
 
     /**
      * 重新对齐所有行
+     *
+     * 分裂规则（与 PageTextRendererImpl.rebuildGroups 一致）：
+     * - X/Z 偏移为零的行合并到主组，占据 Y 空间（连续排列）
+     * - X/Z 偏移非零的行分裂为独立偏移组，不占据 Y 空间（悬浮在主组之上/之下）
+     * - 非 TEXT 行打断主组连续性
      */
     public void realignLines() {
         if (parent == null) {
@@ -391,38 +404,25 @@ public class HologramPage {
         }
 
         Location currentLocation = parent.getLocation().clone();
+        double lineHeight = parent.getLineHeight();
+        Location baseLocation = currentLocation.clone();
 
-        // 遍历行，连续的TEXT行分为一组，共享位置
-        int i = 0;
-        while (i < lines.size()) {
-            HologramLine line = lines.get(i);
+        for (HologramLine line : lines) {
             if (line.getType() == HologramType.TEXT) {
-                // 找到连续TEXT组的结束位置
-                int groupStart = i;
-                while (i < lines.size() && lines.get(i).getType() == HologramType.TEXT) {
-                    i++;
+                Location lineLocation = line.getLocation();
+                if (lineLocation != null) {
+                    lineLocation.setX(currentLocation.getX() + line.getOffsetX());
+                    lineLocation.setY(currentLocation.getY() + line.getOffsetY());
+                    lineLocation.setZ(currentLocation.getZ() + line.getOffsetZ());
+                    line.setLocation(lineLocation);
                 }
-                int groupEnd = i;
-
-                // 组内所有TEXT行共享第一行的位置
-                Location groupLocation = currentLocation.clone();
-                for (int j = groupStart; j < groupEnd; j++) {
-                    HologramLine textLine = lines.get(j);
-                    Location lineLoc = textLine.getLocation();
-                    if (lineLoc != null) {
-                        lineLoc.setX(groupLocation.getX() + textLine.getOffsetX());
-                        lineLoc.setY(groupLocation.getY() + textLine.getOffsetY());
-                        lineLoc.setZ(groupLocation.getZ() + textLine.getOffsetZ());
-                        textLine.setLocation(lineLoc);
-                    }
+                // X/Z 偏移为零的行占据 Y 空间，偏移行不占据（悬浮）
+                boolean hasXZOffset = line.getOffsetX() != 0.0 || line.getOffsetZ() != 0.0;
+                if (!hasXZOffset) {
+                    currentLocation.subtract(0, lineHeight, 0);
                 }
-
-                // TEXT组占据 lineHeight * 行数 的垂直空间
-                double lineHeight = parent.getLineHeight();
-                int lineCount = groupEnd - groupStart;
-                currentLocation.subtract(0, lineHeight * lineCount, 0);
             } else {
-                // 非TEXT行：使用各自的偏移和高度
+                // 非 TEXT 行：使用各自的偏移和高度，占据 Y 空间
                 Location lineLocation = line.getLocation();
                 if (lineLocation != null) {
                     lineLocation.setX(currentLocation.getX() + line.getOffsetX());
@@ -432,17 +432,43 @@ public class HologramPage {
                     line.updateLocation(true);
                 }
                 currentLocation.subtract(0, line.getHeight(), 0);
-                i++;
             }
         }
 
-        // 更新 PageTextRendererImpl 的实体位置
+        // 行对齐：输出基准位置和每行最终位置
+        final String holoName = parent.getName();
+        final int pageIdx = getIndex();
+        final double baseY = baseLocation.getY();
+        WooHolograms.getInstance().debug(() -> formatAlignLog(holoName, pageIdx, baseY, lineHeight));
+
+        // 更新 PageTextRendererImpl 的实体位置（TextDisplay + Interaction）
         if (pageTextRenderer != null) {
             for (UUID uuid : getViewers()) {
                 Player p = Bukkit.getPlayer(uuid);
-                if (p != null) pageTextRenderer.teleport(p);
+                if (p == null) continue;
+                pageTextRenderer.teleport(p);
+                // 行位置变化后，Interaction 也需同步传送
+                teleportClickableEntities(p);
             }
         }
+    }
+
+    /**
+     * 格式化行对齐 debug 日志
+     */
+    private String formatAlignLog(String holoName, int pageIdx, double baseY, double lineHeight) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("[Debug.align] realign, hologram=%s, page=%d, baseY=%.3f, lineHeight=%.3f, lineCount=%d",
+                holoName, pageIdx, baseY, lineHeight, lines.size()));
+        for (int i = 0; i < lines.size(); i++) {
+            HologramLine line = lines.get(i);
+            Location loc = line.getLocation();
+            sb.append(String.format("%n  line[%d] type=%s, offset=(%.2f,%.2f,%.2f), locY=%.3f",
+                    i, line.getType(),
+                    line.getOffsetX(), line.getOffsetY(), line.getOffsetZ(),
+                    loc == null ? 0 : loc.getY()));
+        }
+        return sb.toString();
     }
 
     /*
@@ -699,8 +725,8 @@ public class HologramPage {
     }
 
     /**
-     * 检查是否有动作
-     * 
+     * 检查是否有动作（页面级或任意行级）
+     *
      * @return 是否有动作
      */
     public boolean hasActions() {
@@ -709,17 +735,52 @@ public class HologramPage {
                 return true;
             }
         }
+        for (HologramLine line : lines) {
+            if (line.hasActions()) {
+                return true;
+            }
+        }
         return false;
     }
 
     /**
+     * 行级动作变化时调用，检测 isClickable 状态变化并重建分组
+     * 仅在状态变化时重建 TextGroup（创建/移除 Interaction 渲染器）
+     *
+     * @param wasClickable 修改前的 isClickable 状态
+     */
+    public void onLineActionsChanged(boolean wasClickable) {
+        boolean nowClickable = isClickable();
+        if (wasClickable != nowClickable) {
+            rebuildGroupsAndRerender();
+        }
+        if (parent != null) {
+            parent.onActionsChanged();
+        }
+    }
+
+    /**
+     * 行偏移变化时调用（由 HologramLine.setOffset 触发）
+     * 重新对齐所有行位置（偏移行不占 Y 空间），然后重建 TextGroup 并重新渲染
+     * X/Z 偏移变化会触发 TextGroup 分裂/合并，需要 rebuildGroups
+     */
+    public void onLineOffsetChanged() {
+        realignLines();
+        rebuildGroupsAndRerender();
+    }
+
+    /**
      * 添加动作
-     * 
+     *
      * @param clickType 点击类型
      * @param action 动作
      */
     public void addAction(ClickType clickType, Action action) {
+        boolean wasClickable = isClickable();
         actions.computeIfAbsent(clickType, k -> new ArrayList<>()).add(action);
+        if (wasClickable != isClickable()) {
+            rebuildGroupsAndRerender();
+        }
         if (parent != null) {
             parent.onActionsChanged();
         }
@@ -727,7 +788,7 @@ public class HologramPage {
 
     /**
      * 获取指定点击类型的动作列表
-     * 
+     *
      * @param clickType 点击类型
      * @return 动作列表
      */
@@ -738,7 +799,7 @@ public class HologramPage {
 
     /**
      * 获取所有动作
-     * 
+     *
      * @return 动作映射
      */
     public Map<ClickType, List<Action>> getActions() {
@@ -747,11 +808,15 @@ public class HologramPage {
 
     /**
      * 清除指定点击类型的动作
-     * 
+     *
      * @param clickType 点击类型
      */
     public void clearActions(ClickType clickType) {
+        boolean wasClickable = isClickable();
         actions.remove(clickType);
+        if (wasClickable != isClickable()) {
+            rebuildGroupsAndRerender();
+        }
         if (parent != null) {
             parent.onActionsChanged();
         }
@@ -759,18 +824,51 @@ public class HologramPage {
 
     /**
      * 移除指定动作
-     * 
+     *
      * @param clickType 点击类型
      * @param index 动作索引
      */
     public void removeAction(ClickType clickType, int index) {
         List<Action> actionList = actions.get(clickType);
         if (actionList != null && index >= 0 && index < actionList.size()) {
+            boolean wasClickable = isClickable();
             actionList.remove(index);
+            if (wasClickable != isClickable()) {
+                rebuildGroupsAndRerender();
+            }
             if (parent != null) {
                 parent.onActionsChanged();
             }
         }
+    }
+
+    /**
+     * 重建 PageTextRendererImpl 分组并重新渲染所有观看者的 TextDisplay
+     * 在 isClickable() 状态变化时调用，确保 Interaction 渲染器被正确创建或移除
+     */
+    private void rebuildGroupsAndRerender() {
+        rebuildPageTextRenderer();
+        if (pageTextRenderer != null && parent != null) {
+            for (Player player : parent.getViewerPlayers(this.index)) {
+                if (player != null && player.isOnline()) {
+                    pageTextRenderer.render(player, parent.getLocation());
+                    // rebuildPageTextRenderer 销毁了旧 Interaction，需重新显示
+                    showClickableEntities(player);
+                }
+            }
+        }
+    }
+
+    /**
+     * 加载完成时调用，重建 TextGroup 分组
+     *
+     * 加载时 addLine 触发 rebuildPageTextRenderer（此时偏移=0，行进主组），
+     * 之后 setOffsetX/Y/Z 是裸 setter 不触发 rebuildGroups。
+     * 所以加载完所有行后需要统一重建分组，确保偏移行正确分裂。
+     */
+    public void onLoadComplete() {
+        realignLines();
+        rebuildGroupsAndRerender();
     }
 
     /**
@@ -810,10 +908,10 @@ public class HologramPage {
             }
         }
 
-        // 节点 4: debug 日志 - 待执行动作列表
+        // 动作执行：页面级
         final List<Action> finalActions = new ArrayList<>(actionsToExecute);
         WooHolograms.getInstance().debug(() -> formatActionsLog(
-                "Node4 HologramPage.executeActions", player, clickType, finalActions));
+                "click", "page-execute", player, clickType, finalActions));
 
         for (Action action : actionsToExecute) {
             if (!action.execute(player)) {
@@ -823,12 +921,12 @@ public class HologramPage {
     }
 
     /**
-     * 格式化动作列表 debug 日志（节点 4 共用）
+     * 格式化动作列表 debug 日志（统一格式：[Debug.module] action, key=val...）
      */
-    private static String formatActionsLog(String tag, Player player, ClickType clickType, List<Action> actions) {
+    private static String formatActionsLog(String module, String action, Player player, ClickType clickType, List<Action> actions) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("[%s] player=%s, clickType=%s, actionCount=%d",
-                tag, player.getName(), clickType, actions.size()));
+        sb.append(String.format("[Debug.%s] %s, player=%s, clickType=%s, actionCount=%d",
+                module, action, player.getName(), clickType, actions.size()));
         for (int i = 0; i < actions.size(); i++) {
             Action a = actions.get(i);
             sb.append(String.format("%n  [%d] type=%s, data=%s",
@@ -882,6 +980,21 @@ public class HologramPage {
     }
 
     /**
+     * 用玩家视线计算点击 Interaction 实体的 hitY
+     * 用于左键（ATTACK）时 Minecraft 不发送精确坐标的情况
+     *
+     * @param player   玩家
+     * @param entityId Interaction 实体 ID
+     * @return 相对于实体底部的 Y 偏移，null 表示无法计算
+     */
+    public Float calculateHitYFromRay(Player player, int entityId) {
+        if (pageTextRenderer != null) {
+            return pageTextRenderer.calculateHitYFromRay(player, entityId);
+        }
+        return null;
+    }
+
+    /**
      * 根据实体 ID 和点击 Y 坐标获取行
      * 对于合并的 TextDisplay 实体，使用 Y 坐标路由到具体行
      *
@@ -912,34 +1025,33 @@ public class HologramPage {
     }
 
     /**
-     * 显示可点击实体
-     * 
+     * 显示可点击实体（委托给 pageTextRenderer）
+     *
      * @param player 玩家
      */
     public void showClickableEntities(Player player) {
-        if (parent == null || !isClickable()) {
-            return;
-        }
-        parent.showClickableEntities(player);
+        if (pageTextRenderer == null || !isClickable()) return;
+        pageTextRenderer.showClickableEntities(player);
     }
 
     /**
-     * 隐藏可点击实体
-     * 
+     * 隐藏可点击实体（委托给 pageTextRenderer）
+     *
      * @param player 玩家
      */
     public void hideClickableEntities(Player player) {
-        if (parent == null) {
-            return;
-        }
-        parent.hideClickableEntities(player);
+        if (pageTextRenderer == null) return;
+        pageTextRenderer.hideClickableEntities(player);
     }
 
+    /**
+     * 传送可点击实体（委托给 pageTextRenderer）
+     *
+     * @param player 玩家
+     */
     public void teleportClickableEntities(Player player) {
-        if (parent == null || !isClickable()) {
-            return;
-        }
-        parent.teleportClickableEntities(player);
+        if (pageTextRenderer == null || !isClickable()) return;
+        pageTextRenderer.teleportClickableEntities(player);
     }
 
     /*

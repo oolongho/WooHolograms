@@ -1,8 +1,12 @@
 package com.oolongho.holograms.command.subcommand;
 
 import com.oolongho.holograms.WooHolograms;
+import com.oolongho.holograms.action.Action;
+import com.oolongho.holograms.action.ActionType;
+import com.oolongho.holograms.action.ClickType;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
+import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
 import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Bukkit;
@@ -301,17 +305,23 @@ public class ConvertCommand extends Subcommand {
                 }
             }
 
-            // 多页时在每页末尾添加翻页行（WooHolograms 原生翻页方式）
+            // 多页时在每页末尾添加翻页行（TEXT + 翻页动作）
             if (hasMultiplePages) {
                 for (int i = 0; i < hologram.getPageCount(); i++) {
                     HologramPage page = hologram.getPage(i);
                     if (page == null) continue;
 
                     if (i > 0) {
-                        page.addLine("#PREV &c< 上一页");
+                        HologramLine prevLine = page.addLine("&c< 上一页");
+                        if (prevLine != null) {
+                            prevLine.addAction(ClickType.ANY, new Action(ActionType.PREV_PAGE, hologram.getName()));
+                        }
                     }
                     if (i < hologram.getPageCount() - 1) {
-                        page.addLine("#NEXT &a下一页 >");
+                        HologramLine nextLine = page.addLine("&a下一页 >");
+                        if (nextLine != null) {
+                            nextLine.addAction(ClickType.ANY, new Action(ActionType.NEXT_PAGE, hologram.getName()));
+                        }
                     }
                 }
             }

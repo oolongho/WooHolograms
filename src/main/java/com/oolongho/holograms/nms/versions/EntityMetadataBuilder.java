@@ -102,6 +102,39 @@ public class EntityMetadataBuilder {
     }
 
     /**
+     * 设置 Interaction 实体的宽度
+     *
+     * @param width 宽度（最大 10.0）
+     * @return this
+     */
+    public EntityMetadataBuilder withInteractionWidth(float width) {
+        watchableObjects.add(EntityMetadataType.INTERACTION_WIDTH.construct(width));
+        return this;
+    }
+
+    /**
+     * 设置 Interaction 实体的高度
+     *
+     * @param height 高度（最大 10.0）
+     * @return this
+     */
+    public EntityMetadataBuilder withInteractionHeight(float height) {
+        watchableObjects.add(EntityMetadataType.INTERACTION_HEIGHT.construct(height));
+        return this;
+    }
+
+    /**
+     * 设置 Interaction 实体是否响应（触发玩家手臂挥动动画）
+     *
+     * @param response 是否响应
+     * @return this
+     */
+    public EntityMetadataBuilder withInteractionResponse(boolean response) {
+        watchableObjects.add(EntityMetadataType.INTERACTION_RESPONSE.construct(response));
+        return this;
+    }
+
+    /**
      * 设置物品
      *
      * @param itemStack 物品

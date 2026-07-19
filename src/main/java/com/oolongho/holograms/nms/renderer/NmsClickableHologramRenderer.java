@@ -18,12 +18,25 @@ import java.util.List;
 public interface NmsClickableHologramRenderer extends NmsHologramRenderer {
 
     /**
-     * 生成可点击实体
+     * 生成可点击实体（带自定义尺寸，用于 Interaction 实体）
+     *
+     * @param player   为其生成实体的玩家
+     * @param position 生成实体的位置
+     * @param width    实体宽度
+     * @param height   实体高度
+     */
+    void display(Player player, HologramPosition position, float width, float height);
+
+    /**
+     * 生成可点击实体（使用默认尺寸 1.0 x 1.0）
+     * 保留为 default 方法以保持向后兼容
      *
      * @param player   为其生成实体的玩家
      * @param position 生成实体的位置
      */
-    void display(Player player, HologramPosition position);
+    default void display(Player player, HologramPosition position) {
+        display(player, position, 1.0f, 1.0f);
+    }
 
     /**
      * 移动可点击实体

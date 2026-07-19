@@ -322,17 +322,20 @@ public class HologramManager {
     }
 
     /**
-     * 立即同步保存所有 dirty 全息图（停服/reload 用）
+     * 立即同步保存所有全息图（停服/reload 用）
+     *
+     * 注意：不检查 isDirty，直接同步保存所有 hologram。
+     * 原因：flushDirty 中 clearDirty 在 saveAsync 之前调用，saveAsync 是异步的，
+     * 可能还没完成写入 yml。如果 reload 时 isDirty=false（已被 flushDirty clear），
+     * loadAll 会读取到旧 yml。同步保存所有 hologram 确保 yml 是最新的。
      */
     public void flushAllSync() {
         stopFlushTask();
         int count = 0;
         for (Hologram hologram : holograms.values()) {
-            if (hologram.isDirty()) {
-                hologram.clearDirty();
-                if (storage.save(hologram)) {
-                    count++;
-                }
+            hologram.clearDirty();
+            if (storage.save(hologram)) {
+                count++;
             }
         }
         int finalCount = count;

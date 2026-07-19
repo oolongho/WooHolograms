@@ -16,7 +16,7 @@ public enum HologramType {
 	public static HologramType fromWoo(com.oolongho.holograms.hologram.HologramType wooType) {
 		if (wooType == null) return TEXT;
 		return switch (wooType) {
-			case TEXT, NEXT, PREV, UNKNOWN -> TEXT;
+			case TEXT, UNKNOWN -> TEXT;
 			case ICON -> ICON;
 			case HEAD -> HEAD;
 			case SMALLHEAD -> SMALLHEAD;
