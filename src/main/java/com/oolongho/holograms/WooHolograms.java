@@ -162,7 +162,7 @@ public class WooHolograms extends JavaPlugin {
         }
 
         // bStats 统计
-        Metrics metrics = new Metrics(this, 31848);
+        Metrics metrics = new Metrics(this, 32772);
         metrics.addCustomChart(new Metrics.SimplePie("hologram_count", () -> String.valueOf(hologramManager.getHologramCount())));
 
         pluginEnabled = true;
