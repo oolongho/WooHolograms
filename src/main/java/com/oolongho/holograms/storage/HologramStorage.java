@@ -40,10 +40,11 @@ public interface HologramStorage {
     /**
      * 异步保存单个全息图
      * 使用 Bukkit 调度器在异步线程中保存
-     * 
+     *
      * @param hologram 要保存的全息图
+     * @return true 表示快照构建成功并已提交异步写入；false 表示快照构建失败（调用者不应清除 dirty 标记）
      */
-    void saveAsync(Hologram hologram);
+    boolean saveAsync(Hologram hologram);
 
     /**
      * 保存所有全息图

@@ -348,7 +348,7 @@ public class YamlHologramStorage implements HologramStorage {
     }
 
     @Override
-    public void saveAsync(Hologram hologram) {
+    public boolean saveAsync(Hologram hologram) {
         String id = hologram.getId();
         File file = getHologramFile(id);
 
@@ -358,7 +358,7 @@ public class YamlHologramStorage implements HologramStorage {
             yaml = buildYamlSnapshot(hologram);
         }
         if (yaml == null) {
-            return;
+            return false;
         }
 
         // 仅将文件写入操作提交到异步线程，saveLock 串行化文件写入避免交叉
@@ -372,6 +372,7 @@ public class YamlHologramStorage implements HologramStorage {
                 saveLock.unlock();
             }
         });
+        return true;
     }
 
     @Override

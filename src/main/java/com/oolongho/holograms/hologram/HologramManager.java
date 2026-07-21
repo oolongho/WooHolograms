@@ -315,25 +315,19 @@ public class HologramManager {
     }
 
     /**
-     * 保存所有全息图（同步 flush 所有 dirty）
-     */
-    public void saveAll() {
-        flushAllSync();
-    }
-
-    /**
      * 立即同步保存所有 dirty 全息图（停服用）
      *
      * 注意：只保存 isDirty==true 的 hologram，避免对未变更的 hologram 进行无差别覆盖，
      * 保留用户在停服期间对 yml 的手动编辑。
+     * clearDirty 在 save 成功后执行，避免保存失败导致修改永久丢失。
      */
     public void flushAllSync() {
         stopFlushTask();
         int count = 0;
         for (Hologram hologram : holograms.values()) {
             if (!hologram.isDirty()) continue;
-            hologram.clearDirty();
             if (storage.save(hologram)) {
+                hologram.clearDirty();
                 count++;
             }
         }
@@ -363,12 +357,12 @@ public class HologramManager {
 
     /**
      * 异步批量保存所有 dirty 全息图
+     * clearDirty 在 saveAsync 快照构建成功后执行，避免快照失败导致修改永久丢失。
      */
     private void flushDirty() {
         for (Hologram hologram : holograms.values()) {
-            if (hologram.isDirty()) {
+            if (hologram.isDirty() && storage.saveAsync(hologram)) {
                 hologram.clearDirty();
-                storage.saveAsync(hologram);
             }
         }
     }
