@@ -6,7 +6,8 @@ plugins {
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
 
 group = 'com.oolongho'
-version = '1.0.5'
+
+version = '1.0.6'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -26,6 +27,7 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.11.6'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
+
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
