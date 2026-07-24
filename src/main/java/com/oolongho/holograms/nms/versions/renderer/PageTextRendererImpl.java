@@ -73,13 +73,6 @@ public class PageTextRendererImpl {
      */
     private static final double INTERACTION_VERTICAL_SHIFT = 0.0;
 
-    /**
-     * 是否显示 Interaction 调试可视化（半透明玻璃框标记判定区域）
-     * 仅在 plugin config 的 debug 为 true 时生效
-     * 方便直观对比判定区域与文字的位置关系
-     */
-    private static final boolean DEBUG_SHOW_INTERACTION_BOX = true;
-
     private final HologramPage page;
     private final EntityIdGenerator entityIdGenerator;
     private List<TextGroup> textGroups = new ArrayList<>();
@@ -244,6 +237,8 @@ public class PageTextRendererImpl {
 
     /**
      * 创建一个 TextGroup，根据 clickable 参数决定是否创建 Interaction 渲染器
+     * 调试框（半透明玻璃标记判定区域）仅在 config.yml 的 debug=true 时创建，
+     * /wh reload 后通过 rebuildGroups 重建生效。
      */
     private TextGroup createTextGroup(List<HologramLine> lines, boolean clickable) {
         int frontId = entityIdGenerator.getFreeEntityId();
@@ -251,7 +246,7 @@ public class PageTextRendererImpl {
         NmsClickableHologramRenderer interactionRenderer = clickable
                 ? WooHolograms.getInstance().getRendererFactory().createClickableRenderer()
                 : null;
-        int debugBoxId = (clickable && DEBUG_SHOW_INTERACTION_BOX)
+        int debugBoxId = (clickable && WooHolograms.getInstance().getConfigManager().isDebug())
                 ? entityIdGenerator.getFreeEntityId()
                 : -1;
         return new TextGroup(frontId, backId, interactionRenderer, debugBoxId, lines);
@@ -689,7 +684,7 @@ public class PageTextRendererImpl {
      *   - hitY=height 对应顶部（第一行）
      * width = 1.0 × scaleX，height = N × lineHeight × scaleY × INTERACTION_HEIGHT_RATIO
      *
-     * 当 DEBUG_SHOW_INTERACTION_BOX 为 true 时，同时显示半透明玻璃框标记判定区域
+     * 当 config.yml 的 debug 为 true 时，同时显示半透明玻璃框标记判定区域
      */
     public void showClickableEntities(Player player) {
         if (destroyed) return;
