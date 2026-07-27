@@ -597,59 +597,101 @@ public class HologramManager {
     
     private void updateVisibilityForAllPlayers() {
         for (Map.Entry<String, List<Hologram>> entry : hologramsByWorld.entrySet()) {
-            org.bukkit.World world = Bukkit.getWorld(entry.getKey());
-            if (world == null) {
+            updateVisibilityForWorld(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void updateVisibilityForWorld(String worldName, List<Hologram> worldHolograms) {
+        org.bukkit.World world = Bukkit.getWorld(worldName);
+        if (world == null || worldHolograms.isEmpty()) {
+            return;
+        }
+
+        List<Player> players = new ArrayList<>(world.getPlayers());
+        if (players.isEmpty()) {
+            return;
+        }
+
+        PlayerPositions playerPositions = cachePlayerPositions(players);
+        updateHologramsVisibility(players, playerPositions, worldHolograms);
+    }
+
+    private PlayerPositions cachePlayerPositions(List<Player> players) {
+        double[] playerX = new double[players.size()];
+        double[] playerY = new double[players.size()];
+        double[] playerZ = new double[players.size()];
+
+        for (int i = 0; i < players.size(); i++) {
+            Location pLoc = players.get(i).getLocation();
+            playerX[i] = pLoc.getX();
+            playerY[i] = pLoc.getY();
+            playerZ[i] = pLoc.getZ();
+        }
+
+        return new PlayerPositions(playerX, playerY, playerZ);
+    }
+
+    private void updateHologramsVisibility(List<Player> players, PlayerPositions playerPositions, List<Hologram> worldHolograms) {
+        for (Hologram hologram : worldHolograms) {
+            if (!hologram.isEnabled()) {
                 continue;
             }
 
-            List<Player> players = new ArrayList<>(world.getPlayers());
-            if (players.isEmpty()) {
+            Location holoLoc = hologram.getLocation();
+            if (holoLoc == null) {
                 continue;
             }
 
-            double[] playerX = new double[players.size()];
-            double[] playerY = new double[players.size()];
-            double[] playerZ = new double[players.size()];
-            for (int i = 0; i < players.size(); i++) {
-                Location pLoc = players.get(i).getLocation();
-                playerX[i] = pLoc.getX();
-                playerY[i] = pLoc.getY();
-                playerZ[i] = pLoc.getZ();
+            updateSingleHologramVisibility(players, playerPositions, hologram, holoLoc);
+        }
+    }
+
+    private void updateSingleHologramVisibility(List<Player> players, PlayerPositions playerPositions, Hologram hologram, Location holoLoc) {
+        double hx = holoLoc.getX();
+        double hy = holoLoc.getY();
+        double hz = holoLoc.getZ();
+        double displayRangeSq = hologram.getDisplayRange() * hologram.getDisplayRange();
+
+        for (int i = 0; i < players.size(); i++) {
+            Player player = players.get(i);
+            if (!player.isOnline()) {
+                continue;
             }
 
-            for (Hologram hologram : entry.getValue()) {
-                if (!hologram.isEnabled()) {
-                    continue;
-                }
+            boolean inRange = isInRange(playerPositions, i, hx, hy, hz, displayRangeSq);
+            updatePlayerVisibility(player, hologram, inRange);
+        }
+    }
 
-                Location holoLoc = hologram.getLocation();
-                if (holoLoc == null) {
-                    continue;
-                }
+    private boolean isInRange(PlayerPositions playerPositions, int playerIndex, double hx, double hy, double hz, double displayRangeSq) {
+        double dx = playerPositions.x[playerIndex] - hx;
+        double dy = playerPositions.y[playerIndex] - hy;
+        double dz = playerPositions.z[playerIndex] - hz;
+        return dx * dx + dy * dy + dz * dz <= displayRangeSq;
+    }
 
-                double hx = holoLoc.getX(), hy = holoLoc.getY(), hz = holoLoc.getZ();
-                double displayRangeSq = hologram.getDisplayRange();
-                displayRangeSq *= displayRangeSq;
+    private void updatePlayerVisibility(Player player, Hologram hologram, boolean inRange) {
+        boolean isVisible = hologram.isVisible(player);
 
-                for (int i = 0; i < players.size(); i++) {
-                    Player player = players.get(i);
-                    if (!player.isOnline()) {
-                        continue;
-                    }
+        if (inRange && !isVisible) {
+            SchedulerUtil.runTask(player, () -> hologram.show(player, 0));
+        } else if (!inRange && isVisible) {
+            SchedulerUtil.runTask(player, () -> hologram.hide(player));
+        }
+    }
 
-                    double dx = playerX[i] - hx;
-                    double dy = playerY[i] - hy;
-                    double dz = playerZ[i] - hz;
-                    boolean inRange = dx * dx + dy * dy + dz * dz <= displayRangeSq;
-                    boolean isVisible = hologram.isVisible(player);
+    /**
+     * 玩家位置缓存，避免在距离计算中重复调用 Location 方法
+     */
+    private static class PlayerPositions {
+        final double[] x;
+        final double[] y;
+        final double[] z;
 
-                    if (inRange && !isVisible) {
-                        SchedulerUtil.runTask(player, () -> hologram.show(player, 0));
-                    } else if (!inRange && isVisible) {
-                        SchedulerUtil.runTask(player, () -> hologram.hide(player));
-                    }
-                }
-            }
+        PlayerPositions(double[] x, double[] y, double[] z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
     }
 
