@@ -465,7 +465,7 @@ public class YamlHologramStorage implements HologramStorage {
         hologram.setLineHeight(getCompatDouble(section, "line-height", "lineHeight", 0.25));
         hologram.setBillboard(Billboard.fromId(section.getString("billboard")));
         hologram.setFacing((float) section.getDouble("facing", 0));
-        if (section.contains("pitch")) {
+        if (section.get("pitch") != null) {
             hologram.setPitch((float) section.getDouble("pitch", 0));
         }
         hologram.setDoubleSided(getCompatBoolean(section, "double-sided", "doubleSided", false));
