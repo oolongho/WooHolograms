@@ -69,7 +69,11 @@ public class BillboardSelectGui extends GuiScreen {
 
         String currentDisplay = currentBillboard.getDisplayName();
         if (currentBillboard == Billboard.FIXED_ANGLE) {
-            currentDisplay += " (" + hologram.getFacing() + "度)";
+            currentDisplay += " (yaw=" + hologram.getFacing() + "度";
+            if (hologram.getPitch() != null) {
+                currentDisplay += ", pitch=" + hologram.getPitch() + "度";
+            }
+            currentDisplay += ")";
         }
         setButton(4, GuiButton.builder(Material.COMPASS)
                 .name("&f当前朝向模式")
@@ -91,14 +95,24 @@ public class BillboardSelectGui extends GuiScreen {
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
-                    
-                    chatInputManager.requestInput(player, "&a请输入固定角度 (0-360度):", 
+
+                    chatInputManager.requestInput(player, "&a请输入固定角度 (yaw 0-360 [pitch -90~90])，用空格分隔:",
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                         try {
-                            float angle = Float.parseFloat(input);
-                            setBillboard(player, Billboard.FIXED_ANGLE, angle);
+                            String[] parts = input.trim().split("\\s+");
+                            float yaw = Float.parseFloat(parts[0]);
+                            Float pitch = null;
+                            if (parts.length >= 2) {
+                                pitch = Float.parseFloat(parts[1]);
+                                if (pitch < -90 || pitch > 90) {
+                                    player.sendMessage(ColorUtil.colorize("&c垂直角度必须在 -90 到 90 之间！"));
+                                    guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
+                                    return;
+                                }
+                            }
+                            setBillboard(player, Billboard.FIXED_ANGLE, yaw, pitch);
                         } catch (NumberFormatException e) {
-                            player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                            player.sendMessage(ColorUtil.colorize("&c角度必须是数字！"));
                             guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
                         }
                     });
@@ -115,7 +129,7 @@ public class BillboardSelectGui extends GuiScreen {
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.VERTICAL, 0);
+                    setBillboard(player, Billboard.VERTICAL, 0, null);
                 })
                 .build());
 
@@ -129,7 +143,7 @@ public class BillboardSelectGui extends GuiScreen {
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.HORIZONTAL, 0);
+                    setBillboard(player, Billboard.HORIZONTAL, 0, null);
                 })
                 .build());
 
@@ -143,26 +157,36 @@ public class BillboardSelectGui extends GuiScreen {
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    setBillboard(player, Billboard.CENTER, 0);
+                    setBillboard(player, Billboard.CENTER, 0, null);
                 })
                 .build());
 
         fillBackground();
     }
 
-    private void setBillboard(Player player, Billboard billboard, float facing) {
+    private void setBillboard(Player player, Billboard billboard, float facing, Float pitch) {
         Hologram h = plugin.getHologramManager().getHologram(hologramName);
         if (h != null) {
             h.setBillboard(billboard);
             if (billboard == Billboard.FIXED_ANGLE) {
                 h.setFacing(facing);
+                if (pitch != null) {
+                    h.setPitch(pitch);
+                }
+                // pitch == null 时保留原值（不调用 setPitch）
             }
             h.save();
             h.showToNearby();
-            
+
             String modeDisplay = billboard.getDisplayName();
             if (billboard == Billboard.FIXED_ANGLE) {
-                modeDisplay += " (" + facing + "度)";
+                modeDisplay += " (yaw=" + facing + "度";
+                if (pitch != null) {
+                    modeDisplay += ", pitch=" + pitch + "度";
+                } else if (h.getPitch() != null) {
+                    modeDisplay += ", pitch=" + h.getPitch() + "度";
+                }
+                modeDisplay += ")";
             }
             player.sendMessage(ColorUtil.colorize("&a已设置朝向模式为 " + modeDisplay + "！"));
         }

@@ -17,7 +17,7 @@ public class SetFacingCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetFacingCommand(WooHolograms plugin) {
-        super("setfacing", "设置全息图朝向", "/wh setfacing <名称> <模式> [角度]", "wooholograms.edit");
+        super("setfacing", "设置全息图朝向", "/wh setfacing <名称> <模式> <yaw> [pitch]", "wooholograms.edit");
         this.plugin = plugin;
     }
 
@@ -26,7 +26,8 @@ public class SetFacingCommand extends Subcommand {
         if (args.length < 2) {
             sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
             sender.sendMessage(ColorUtil.colorize("&7模式: fixed_angle(固定角度), horizontal(水平跟随), vertical(垂直跟随), all(完全跟随)"));
-            sender.sendMessage(ColorUtil.colorize("&7角度: 仅 fixed_angle 模式需要，0-360度"));
+            sender.sendMessage(ColorUtil.colorize("&7yaw: 仅 fixed_angle 模式需要，0-360度"));
+            sender.sendMessage(ColorUtil.colorize("&7pitch: 可选，垂直角度 -90~90度"));
             return true;
         }
 
@@ -42,12 +43,27 @@ public class SetFacingCommand extends Subcommand {
 
         if (billboard == Billboard.FIXED_ANGLE && args.length > 2) {
             try {
-                float facing = Float.parseFloat(args[2]);
-                hologram.setFacing(facing);
+                float yaw = Float.parseFloat(args[2]);
+                hologram.setFacing(yaw);
             } catch (NumberFormatException e) {
-                sender.sendMessage(ColorUtil.colorize("&c角度必须是数字！"));
+                sender.sendMessage(ColorUtil.colorize("&c水平角度必须是数字！"));
                 return true;
             }
+            // 可选 pitch 参数
+            if (args.length > 3) {
+                try {
+                    float pitch = Float.parseFloat(args[3]);
+                    if (pitch < -90 || pitch > 90) {
+                        sender.sendMessage(ColorUtil.colorize("&c垂直角度必须在 -90 到 90 之间！"));
+                        return true;
+                    }
+                    hologram.setPitch(pitch);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ColorUtil.colorize("&c垂直角度必须是数字！"));
+                    return true;
+                }
+            }
+            // args.length == 3 时保留原 pitch（不调用 setPitch）
         }
 
         hologram.setBillboard(billboard);
@@ -55,7 +71,11 @@ public class SetFacingCommand extends Subcommand {
 
         String modeDisplay = billboard.getDisplayName();
         if (billboard == Billboard.FIXED_ANGLE) {
-            modeDisplay += " (" + hologram.getFacing() + "度)";
+            modeDisplay += " (yaw=" + hologram.getFacing() + "度";
+            if (hologram.getPitch() != null) {
+                modeDisplay += ", pitch=" + hologram.getPitch() + "度";
+            }
+            modeDisplay += ")";
         }
         sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的朝向设置为 " + modeDisplay + "！"));
 
@@ -75,6 +95,10 @@ public class SetFacingCommand extends Subcommand {
         } else if (args.length == 3 && args[1].equalsIgnoreCase("fixed_angle")) {
             return Arrays.asList("0", "45", "90", "180", "270", "360").stream()
                     .filter(a -> a.startsWith(args[2]))
+                    .collect(Collectors.toList());
+        } else if (args.length == 4 && args[1].equalsIgnoreCase("fixed_angle")) {
+            return Arrays.asList("-90", "-45", "0", "45", "90").stream()
+                    .filter(a -> a.startsWith(args[3]))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();

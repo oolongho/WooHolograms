@@ -107,6 +107,11 @@ public class YamlHologramStorage implements HologramStorage {
         yaml.set("line-height", hologram.getLineHeight());
         yaml.set("billboard", hologram.getBillboard().getId());
         yaml.set("facing", hologram.getFacing());
+        if (hologram.getPitch() != null) {
+            yaml.set("pitch", hologram.getPitch());
+        } else {
+            yaml.set("pitch", null);
+        }
         yaml.set("double-sided", hologram.isDoubleSided());
         yaml.set("display-range", hologram.getDisplayRange());
         yaml.set("update-range", hologram.getUpdateRange());
@@ -460,6 +465,9 @@ public class YamlHologramStorage implements HologramStorage {
         hologram.setLineHeight(getCompatDouble(section, "line-height", "lineHeight", 0.25));
         hologram.setBillboard(Billboard.fromId(section.getString("billboard")));
         hologram.setFacing((float) section.getDouble("facing", 0));
+        if (section.contains("pitch")) {
+            hologram.setPitch((float) section.getDouble("pitch", 0));
+        }
         hologram.setDoubleSided(getCompatBoolean(section, "double-sided", "doubleSided", false));
         hologram.setDisplayRange(getCompatDouble(section, "display-range", "displayRange", 48.0));
         hologram.setUpdateRange(getCompatDouble(section, "update-range", "updateRange", 48.0));

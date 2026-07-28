@@ -593,7 +593,11 @@ public class HologramDetailGui extends GuiScreen {
         Billboard billboard = hologram.getBillboard();
         String facingDisplay = billboard.getDisplayName();
         if (billboard == Billboard.FIXED_ANGLE) {
-            facingDisplay += " (" + hologram.getFacing() + "度)";
+            facingDisplay += " (yaw=" + hologram.getFacing() + "度";
+            if (hologram.getPitch() != null) {
+                facingDisplay += ", pitch=" + hologram.getPitch() + "度";
+            }
+            facingDisplay += ")";
         }
         setButton(48, GuiButton.builder(Material.SPYGLASS)
                 .name("&f朝向设置")

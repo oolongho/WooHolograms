@@ -78,11 +78,12 @@ public class HeadHologramRendererImpl implements NmsHeadHologramRenderer {
         
         Float customYaw = line.getCustomYaw();
         Float customPitch = line.getCustomPitch();
-        
+        Float holoPitch = hologram != null ? hologram.getPitch() : null;
+
         switch (billboard) {
             case FIXED_ANGLE:
                 yaw = customYaw != null ? customYaw : hologramFacing;
-                pitch = customPitch != null ? customPitch : 0;
+                pitch = customPitch != null ? customPitch : (holoPitch != null ? holoPitch : 0f);
                 break;
             case HORIZONTAL:
                 yaw = customYaw != null ? customYaw : calculateYawToPlayer(location, player);

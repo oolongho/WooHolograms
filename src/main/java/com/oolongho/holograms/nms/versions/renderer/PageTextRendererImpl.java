@@ -275,7 +275,7 @@ public class PageTextRendererImpl {
         float yaw, pitch;
         if (billboard == Billboard.FIXED_ANGLE) {
             yaw = hologramFacing;
-            pitch = 0;
+            pitch = hologram.getPitch() != null ? hologram.getPitch() : 0f;
         } else {
             yaw = baseLocation.getYaw();
             pitch = baseLocation.getPitch();

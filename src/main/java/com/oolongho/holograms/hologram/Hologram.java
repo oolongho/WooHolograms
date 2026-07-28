@@ -40,6 +40,7 @@ public class Hologram {
     private int updateInterval;
     private Billboard billboard = Billboard.CENTER;
     private float facing;
+    private Float pitch = null; // null 表示不覆盖（pitch 硬编码为 0）
     private boolean doubleSided = false;
     private TextAlignment alignment = TextAlignment.CENTER;
     private int backgroundAlpha;
@@ -334,12 +335,35 @@ public class Hologram {
 
     /**
      * 设置朝向
-     * 
+     *
      * @param facing 朝向
      */
     public void setFacing(float facing) {
         synchronized (visibilityMutex) {
             this.facing = facing;
+            refreshAllViewers();
+        }
+    }
+
+    /**
+     * 获取垂直倾斜角度（pitch）
+     * null 表示不覆盖（沿用渲染器默认值 0）
+     *
+     * @return 垂直倾斜角度，或 null
+     */
+    public Float getPitch() {
+        return pitch;
+    }
+
+    /**
+     * 设置垂直倾斜角度（pitch）
+     * 传入 null 表示清除覆盖，恢复默认值 0
+     *
+     * @param pitch 垂直倾斜角度（-90~90），或 null
+     */
+    public void setPitch(Float pitch) {
+        synchronized (visibilityMutex) {
+            this.pitch = pitch;
             refreshAllViewers();
         }
     }
@@ -2287,6 +2311,7 @@ public class Hologram {
         hologram.setLineWidth(this.lineWidth);
         hologram.setPermission(this.permission);
         hologram.setFacing(this.facing);
+        hologram.pitch = this.pitch; // 直接字段复制，避免在无观看者的新克隆上触发 refreshAllViewers
         hologram.setDisplayRange(this.displayRange);
         hologram.setUpdateRange(this.updateRange);
         hologram.setUpdateInterval(this.updateInterval);

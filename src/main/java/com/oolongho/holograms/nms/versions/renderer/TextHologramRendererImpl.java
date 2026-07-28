@@ -80,7 +80,8 @@ public class TextHologramRendererImpl implements NmsTextHologramRenderer {
             Float customYaw = line.getCustomYaw();
             Float customPitch = line.getCustomPitch();
             yaw = customYaw != null ? customYaw : hologramFacing;
-            pitch = customPitch != null ? customPitch : 0;
+            Float holoPitch = hologram != null ? hologram.getPitch() : null;
+            pitch = customPitch != null ? customPitch : (holoPitch != null ? holoPitch : 0);
         } else {
             Float customYaw = line.getCustomYaw();
             Float customPitch = line.getCustomPitch();

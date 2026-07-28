@@ -52,8 +52,9 @@ public class EntityHologramRendererImpl implements NmsEntityHologramRenderer {
 
         Float customYaw = line != null ? line.getCustomYaw() : null;
         Float customPitch = line != null ? line.getCustomPitch() : null;
+        Float holoPitch = hologram != null ? hologram.getPitch() : null;
         float yaw = customYaw != null ? customYaw : hologramFacing;
-        float pitch = customPitch != null ? customPitch : 0;
+        float pitch = customPitch != null ? customPitch : (holoPitch != null ? holoPitch : 0f);
 
         EntityMetadataBuilder metadataBuilder = EntityMetadataBuilder.create()
                 .withNoGravity()

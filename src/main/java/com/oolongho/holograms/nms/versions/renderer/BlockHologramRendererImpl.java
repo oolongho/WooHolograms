@@ -75,8 +75,9 @@ public class BlockHologramRendererImpl implements NmsBlockHologramRenderer {
         if (billboard == Billboard.FIXED_ANGLE) {
             Float customYaw = line != null ? line.getCustomYaw() : null;
             Float customPitch = line != null ? line.getCustomPitch() : null;
+            Float holoPitch = hologram != null ? hologram.getPitch() : null;
             yaw = customYaw != null ? customYaw : hologramFacing;
-            pitch = customPitch != null ? customPitch : 0;
+            pitch = customPitch != null ? customPitch : (holoPitch != null ? holoPitch : 0f);
         } else {
             Float customYaw = line != null ? line.getCustomYaw() : null;
             Float customPitch = line != null ? line.getCustomPitch() : null;
