@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -15,14 +14,14 @@ public class EnableCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public EnableCommand(WooHolograms plugin) {
-        super("enable", "启用一个全息图", "/wh enable <名称>", "wooholograms.admin");
+        super("enable", "cmd.desc-enable", "cmd.usage-enable", "wooholograms.admin");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.enable-usage");
             return true;
         }
 
@@ -30,12 +29,12 @@ public class EnableCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         if (hologram.isEnabled()) {
-            sender.sendMessage(ColorUtil.colorize("&e全息图 " + name + " 已经是启用状态！"));
+            plugin.getMessages().send(sender, "cmd.enable-already", "name", name);
             return true;
         }
 
@@ -43,7 +42,7 @@ public class EnableCommand extends Subcommand {
         hologram.save();
         hologram.showToNearby();
 
-        sender.sendMessage(ColorUtil.colorize("&a已启用全息图 " + name + "！"));
+        plugin.getMessages().send(sender, "cmd.enable-success", "name", name);
         return true;
     }
 

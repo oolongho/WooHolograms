@@ -1,7 +1,6 @@
 package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +19,7 @@ public class ConvertGui extends GuiScreen {
     private final ChatInputManager chatInputManager;
 
     public ConvertGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager) {
-        super("convert", ColorUtil.colorize("&8数据导入"), 27);
+        super("convert", plugin.getMessages().get("gui.title-convert"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -33,8 +32,12 @@ public class ConvertGui extends GuiScreen {
 
         // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
-                .lore(Arrays.asList("&7返回全息图列表", "", "&e点击返回"))
+                .name(plugin.getMessages().getString("gui.btn-back"))
+                .lore(Arrays.asList(
+                        plugin.getMessages().getString("gui.lore-back-list"),
+                        "",
+                        plugin.getMessages().getString("gui.lore-click-back")
+                ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                 })
@@ -42,11 +45,11 @@ public class ConvertGui extends GuiScreen {
 
         // HolographicDisplays 导入
         setButton(11, GuiButton.builder(Material.OAK_SIGN)
-                .name("&fHolographicDisplays")
+                .name("<white>HolographicDisplays")
                 .lore(Arrays.asList(
-                        "&7从 HolographicDisplays 导入数据",
+                        plugin.getMessages().getString("gui.convert.hd-lore"),
                         "",
-                        "&e点击导入"
+                        plugin.getMessages().getString("gui.lore-click-import")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -57,11 +60,11 @@ public class ConvertGui extends GuiScreen {
 
         // CMI 导入
         setButton(13, GuiButton.builder(Material.OAK_SIGN)
-                .name("&fCMI")
+                .name("<white>CMI")
                 .lore(Arrays.asList(
-                        "&7从 CMI 导入数据",
+                        plugin.getMessages().getString("gui.convert.cmi-lore"),
                         "",
-                        "&e点击导入"
+                        plugin.getMessages().getString("gui.lore-click-import")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -75,12 +78,14 @@ public class ConvertGui extends GuiScreen {
         boolean dhExists = dhDir.exists() && dhDir.isDirectory();
 
         setButton(15, GuiButton.builder(Material.OAK_SIGN)
-                .name("&fDecentHolograms")
+                .name("<white>DecentHolograms")
                 .lore(Arrays.asList(
-                        "&7DecentHolograms 数据会自动导入",
-                        "&7状态: " + (dhExists ? "&a检测到数据目录" : "&c未检测到数据目录"),
+                        plugin.getMessages().getString("gui.convert.dh-auto"),
+                        dhExists ? plugin.getMessages().getString("gui.convert.dh-status-found")
+                                 : plugin.getMessages().getString("gui.convert.dh-status-not-found"),
                         "",
-                        dhExists ? "&a插件启动时已自动导入" : "&7请确保 DecentHolograms 数据目录存在"
+                        dhExists ? plugin.getMessages().getString("gui.convert.dh-imported")
+                                 : plugin.getMessages().getString("gui.convert.dh-not-found-hint")
                 ))
                 .build());
 

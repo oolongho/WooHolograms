@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -20,14 +19,14 @@ public class RemovePageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public RemovePageCommand(WooHolograms plugin) {
-        super("removepage", "删除全息图的一页", "/wh removepage <名称> <页码>", "wooholograms.edit");
+        super("removepage", "cmd.desc-removepage", "cmd.usage-removepage", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.removepage-usage");
             return true;
         }
 
@@ -35,7 +34,7 @@ public class RemovePageCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.hologram-not-found", "name", name)));
+            plugin.getMessages().send(sender, "general.hologram-not-found", "name", name);
             return true;
         }
 
@@ -43,24 +42,27 @@ public class RemovePageCommand extends Subcommand {
         try {
             pageNumber = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.invalid-number")));
+            plugin.getMessages().send(sender, "general.invalid-number");
             return true;
         }
 
         if (pageNumber < 1 || pageNumber > hologram.getPageCount()) {
-            sender.sendMessage(ColorUtil.colorize("&c页码必须在 1 到 " + hologram.getPageCount() + " 之间！"));
+            plugin.getMessages().send(sender, "general.page-out-of-range", "max", String.valueOf(hologram.getPageCount()));
             return true;
         }
 
         if (hologram.getPageCount() <= 1) {
-            sender.sendMessage(ColorUtil.colorize("&c无法删除最后一页！"));
+            plugin.getMessages().send(sender, "page.remove-failed");
             return true;
         }
 
         hologram.removePage(pageNumber - 1);
         hologram.save();
 
-        sender.sendMessage(ColorUtil.colorize("&a已删除全息图 " + name + " 的第 " + pageNumber + " 页！当前共 " + hologram.getPageCount() + " 页。"));
+        plugin.getMessages().send(sender, "page.removed",
+                "name", name,
+                "page", String.valueOf(pageNumber),
+                "count", String.valueOf(hologram.getPageCount()));
         return true;
     }
 

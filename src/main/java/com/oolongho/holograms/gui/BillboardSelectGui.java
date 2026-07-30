@@ -3,7 +3,6 @@ package com.oolongho.holograms.gui;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -24,7 +23,7 @@ public class BillboardSelectGui extends GuiScreen {
 
     public BillboardSelectGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                               String hologramName) {
-        super("billboard_select", ColorUtil.colorize("&8朝向设置"), 27);
+        super("billboard_select", plugin.getMessages().get("gui.title-billboard-select"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -39,12 +38,12 @@ public class BillboardSelectGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该全息图已被删除",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
                             "",
-                            "&e点击返回列表"
+                            plugin.getMessages().getString("gui.lore-click-back-list")
                     ))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
@@ -56,47 +55,52 @@ public class BillboardSelectGui extends GuiScreen {
         Billboard currentBillboard = hologram.getBillboard();
 
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
+                .name(plugin.getMessages().getString("gui.btn-back"))
                 .lore(Arrays.asList(
-                        "&7返回全息图详情",
+                        plugin.getMessages().getString("gui.lore-back-detail"),
                         "",
-                        "&e点击返回"
+                        plugin.getMessages().getString("gui.lore-click-back")
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                 })
                 .build());
 
-        String currentDisplay = currentBillboard.getDisplayName();
+        String currentDisplay = plugin.getMessages().getRaw(currentBillboard.getDisplayNameKey());
         if (currentBillboard == Billboard.FIXED_ANGLE) {
-            currentDisplay += " (yaw=" + hologram.getFacing() + "度";
             if (hologram.getPitch() != null) {
-                currentDisplay += ", pitch=" + hologram.getPitch() + "度";
+                currentDisplay += plugin.getMessages().getString("gui.billboard.angle-yaw-pitch",
+                        "yaw", String.valueOf(hologram.getFacing()),
+                        "pitch", String.valueOf(hologram.getPitch()));
+            } else {
+                currentDisplay += plugin.getMessages().getString("gui.billboard.angle-yaw",
+                        "yaw", String.valueOf(hologram.getFacing()));
             }
-            currentDisplay += ")";
         }
         setButton(4, GuiButton.builder(Material.COMPASS)
-                .name("&f当前朝向模式")
+                .name(plugin.getMessages().getString("gui.billboard.current"))
                 .lore(Arrays.asList(
                         "",
-                        "&7" + currentDisplay,
+                        plugin.getMessages().getString("gui.billboard.current-value", "value", currentDisplay),
                         ""
                 ))
                 .build());
 
         setButton(10, GuiButton.builder(Material.STONE_BUTTON)
-                .name("&f固定角度")
+                .name(plugin.getMessages().getString("gui.billboard.fixed"))
                 .lore(Arrays.asList(
-                        "&7使用固定角度朝向",
-                        "&7需要设置具体角度值",
+                        plugin.getMessages().getString("gui.billboard.fixed-lore"),
+                        plugin.getMessages().getString("gui.billboard.fixed-require"),
                         "",
-                        currentBillboard == Billboard.FIXED_ANGLE ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.FIXED_ANGLE
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入固定角度 (yaw 0-360 [pitch -90~90])，用空格分隔:",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.billboard-angle"),
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                         try {
                             String[] parts = input.trim().split("\\s+");
@@ -105,14 +109,14 @@ public class BillboardSelectGui extends GuiScreen {
                             if (parts.length >= 2) {
                                 pitch = Float.parseFloat(parts[1]);
                                 if (pitch < -90 || pitch > 90) {
-                                    player.sendMessage(ColorUtil.colorize("&c垂直角度必须在 -90 到 90 之间！"));
+                                    plugin.getMessages().send(player, "gui.msg-pitch-range");
                                     guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
                                     return;
                                 }
                             }
                             setBillboard(player, Billboard.FIXED_ANGLE, yaw, pitch);
                         } catch (NumberFormatException e) {
-                            player.sendMessage(ColorUtil.colorize("&c角度必须是数字！"));
+                            plugin.getMessages().send(player, "gui.msg-angle-must-be-number");
                             guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
                         }
                     });
@@ -120,12 +124,14 @@ public class BillboardSelectGui extends GuiScreen {
                 .build());
 
         setButton(12, GuiButton.builder(Material.END_ROD)
-                .name("&f垂直跟随")
+                .name(plugin.getMessages().getString("gui.billboard.vertical"))
                 .lore(Arrays.asList(
-                        "&7垂直方向跟随玩家视角",
-                        "&7水平方向固定",
+                        plugin.getMessages().getString("gui.billboard.vertical-lore"),
+                        plugin.getMessages().getString("gui.billboard.vertical-fixed"),
                         "",
-                        currentBillboard == Billboard.VERTICAL ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.VERTICAL
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -134,12 +140,14 @@ public class BillboardSelectGui extends GuiScreen {
                 .build());
 
         setButton(14, GuiButton.builder(Material.RAIL)
-                .name("&f水平跟随")
+                .name(plugin.getMessages().getString("gui.billboard.horizontal"))
                 .lore(Arrays.asList(
-                        "&7水平方向跟随玩家视角",
-                        "&7垂直方向固定",
+                        plugin.getMessages().getString("gui.billboard.horizontal-lore"),
+                        plugin.getMessages().getString("gui.billboard.horizontal-fixed"),
                         "",
-                        currentBillboard == Billboard.HORIZONTAL ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.HORIZONTAL
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -148,12 +156,14 @@ public class BillboardSelectGui extends GuiScreen {
                 .build());
 
         setButton(16, GuiButton.builder(Material.END_CRYSTAL)
-                .name("&f完全跟随")
+                .name(plugin.getMessages().getString("gui.billboard.center"))
                 .lore(Arrays.asList(
-                        "&7完全跟随玩家视角",
-                        "&7默认模式",
+                        plugin.getMessages().getString("gui.billboard.center-lore"),
+                        plugin.getMessages().getString("gui.billboard.center-default"),
                         "",
-                        currentBillboard == Billboard.CENTER ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.CENTER
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -178,17 +188,19 @@ public class BillboardSelectGui extends GuiScreen {
             h.save();
             h.showToNearby();
 
-            String modeDisplay = billboard.getDisplayName();
+            String modeDisplay = plugin.getMessages().getRaw(billboard.getDisplayNameKey());
             if (billboard == Billboard.FIXED_ANGLE) {
-                modeDisplay += " (yaw=" + facing + "度";
-                if (pitch != null) {
-                    modeDisplay += ", pitch=" + pitch + "度";
-                } else if (h.getPitch() != null) {
-                    modeDisplay += ", pitch=" + h.getPitch() + "度";
+                Float effectivePitch = pitch != null ? pitch : h.getPitch();
+                if (effectivePitch != null) {
+                    modeDisplay += plugin.getMessages().getString("gui.billboard.angle-yaw-pitch",
+                            "yaw", String.valueOf(facing),
+                            "pitch", String.valueOf(effectivePitch));
+                } else {
+                    modeDisplay += plugin.getMessages().getString("gui.billboard.angle-yaw",
+                            "yaw", String.valueOf(facing));
                 }
-                modeDisplay += ")";
             }
-            player.sendMessage(ColorUtil.colorize("&a已设置朝向模式为 " + modeDisplay + "！"));
+            plugin.getMessages().send(player, "gui.msg-billboard-set", "mode", modeDisplay);
         }
         guiManager.openGui(player, new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
     }

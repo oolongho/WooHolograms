@@ -1,7 +1,6 @@
 package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 
 import java.util.Arrays;
@@ -13,7 +12,7 @@ public class HelpGui extends GuiScreen {
     private final ChatInputManager chatInputManager;
 
     public HelpGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager) {
-        super("help", ColorUtil.colorize("&8帮助手册"), 54);
+        super("help", plugin.getMessages().get("gui.title-help"), 54);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -25,368 +24,118 @@ public class HelpGui extends GuiScreen {
         clearButtons();
         
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
-                .lore(Arrays.asList("&7返回上一页", "", "&e点击返回"))
+                .name(plugin.getMessages().getString("gui.help.back.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.back.lore"))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                 })
                 .build());
-        
+
         fillFirstRow();
-        
+
         setButton(9, GuiButton.builder(Material.PAPER)
-                .name("&e行类型格式")
-                .lore(Arrays.asList(
-                        "&7在行内容中使用以下格式：",
-                        "",
-                        "&f#ICON:<材质>",
-                        "&7显示物品图标",
-                        "&7例: #ICON:DIAMOND_SWORD",
-                        "",
-                        "&f#HEAD:<玩家名>",
-                        "&7显示大头颅（0.6格高）",
-                        "&7例: #HEAD:oolongho",
-                        "",
-                        "&f#SMALLHEAD:<玩家名>",
-                        "&7显示小头颅（0.4格高）",
-                        "&7例: #SMALLHEAD:oolongho"
-                ))
+                .name(plugin.getMessages().getString("gui.help.line-format.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.line-format.lore"))
                 .build());
-        
+
         setButton(10, GuiButton.builder(Material.PLAYER_HEAD)
-                .name("&e头颅类型")
-                .lore(Arrays.asList(
-                        "&7头颅支持以下格式：",
-                        "",
-                        "&f#HEAD:PLAYER_HEAD (玩家名)",
-                        "&7显示玩家头颅",
-                        "&7例: #HEAD:oolongho",
-                        "",
-                        "&f#HEAD:PLAYER_HEAD ({player})",
-                        "&7显示查看者的头颅",
-                        "",
-                        "&f#HEAD:URL (Base64)",
-                        "&7使用 URL 材质",
-                        "",
-                        "&f#HEAD:HDB (ID)",
-                        "&7使用 HeadDatabase"
-                ))
+                .name(plugin.getMessages().getString("gui.help.head-type.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.head-type.lore"))
                 .build());
-        
+
         setButton(11, GuiButton.builder(Material.ZOMBIE_HEAD)
-                .name("&e实体显示")
-                .lore(Arrays.asList(
-                        "&f#ENTITY:<类型>",
-                        "&7显示实体模型",
-                        "&7例: #ENTITY:ZOMBIE",
-                        "",
-                        "&7翻页按钮请创建 TEXT 行",
-                        "&7并在动作管理中添加",
-                        "&7NEXT_PAGE / PREV_PAGE 动作"
-                ))
+                .name(plugin.getMessages().getString("gui.help.entity-display.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.entity-display.lore"))
                 .build());
-        
+
         setButton(12, GuiButton.builder(Material.OAK_SIGN)
-                .name("&e普通文本")
-                .lore(Arrays.asList(
-                        "&7不以 # 开头的内容",
-                        "&7将显示为普通文本",
-                        "",
-                        "&7支持颜色代码和变量",
-                        "",
-                        "&7多行文本：",
-                        "&f/n &7或 &f\\n &7换行",
-                        "&7例: &a第一行/n&b第二行"
-                ))
+                .name(plugin.getMessages().getString("gui.help.text.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.text.lore"))
                 .build());
-        
+
         setButton(13, GuiButton.builder(Material.NAME_TAG)
-                .name("&e内置变量")
-                .lore(Arrays.asList(
-                        "&7在内容中使用变量：",
-                        "",
-                        "&f{player} &7- 玩家名称",
-                        "&f{player_uuid} &7- 玩家 UUID",
-                        "&f{player_displayname} &7- 显示名称",
-                        "&f{player_x} &7- X 坐标",
-                        "&f{player_y} &7- Y 坐标",
-                        "&f{player_z} &7- Z 坐标",
-                        "&f{player_world} &7- 所在世界",
-                        "&f{player_health} &7- 生命值",
-                        "&f{player_level} &7- 等级"
-                ))
+                .name(plugin.getMessages().getString("gui.help.variables.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.variables.lore"))
                 .build());
-        
+
         setButton(14, GuiButton.builder(Material.COMMAND_BLOCK)
-                .name("&e物品参数")
-                .lore(Arrays.asList(
-                        "&7在 #ICON 后添加参数：",
-                        "",
-                        "&fcustom-model-data:<值>",
-                        "&7自定义模型数据",
-                        "&7例: #ICON:DIAMOND_SWORD",
-                        "&7    custom-model-data:10000",
-                        "",
-                        "&fcolor:<RGB>",
-                        "&7皮革颜色",
-                        "&7例: color:FF0000",
-                        "",
-                        "&fname:<名称>",
-                        "&7自定义名称",
-                        "&7例: name:&6传说之剑"
-                ))
+                .name(plugin.getMessages().getString("gui.help.item-params.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.item-params.lore"))
                 .build());
-        
+
         setButton(15, GuiButton.builder(Material.ENCHANTED_BOOK)
-                .name("&e更多物品参数")
-                .lore(Arrays.asList(
-                        "&flore:<描述>",
-                        "&7物品描述",
-                        "",
-                        "&fglow",
-                        "&7发光效果（无附魔光效）",
-                        "",
-                        "&funbreakable",
-                        "&7无法破坏",
-                        "",
-                        "&7简写格式：",
-                        "&fcmd:<值> &7= custom-model-data"
-                ))
+                .name(plugin.getMessages().getString("gui.help.item-params-more.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.item-params-more.lore"))
                 .build());
-        
+
         setButton(16, GuiButton.builder(Material.KNOWLEDGE_BOOK)
-                .name("&eNBT 格式")
-                .lore(Arrays.asList(
-                        "&7也支持原生 NBT 格式：",
-                        "",
-                        "&f{CustomModelData:10000}",
-                        "&f{display:{color:3847130}}",
-                        "&f{Enchantments:[{id:\"sharpness\",lvl:5}]}",
-                        "",
-                        "&7两种格式可混用：",
-                        "#ICON:DIAMOND_SWORD",
-                        "custom-model-data:10000",
-                        "{Enchantments:[{id:\"sharpness\",lvl:5}]}"
-                ))
+                .name(plugin.getMessages().getString("gui.help.nbt.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.nbt.lore"))
                 .build());
-        
+
         setButton(18, GuiButton.builder(Material.COMMAND_BLOCK)
-                .name("&e动作类型")
-                .lore(Arrays.asList(
-                        "&7为行添加点击动作：",
-                        "",
-                        "&fCOMMAND:<命令>",
-                        "&7以玩家身份执行命令",
-                        "&7例: COMMAND:spawn",
-                        "",
-                        "&fCONSOLE:<命令>",
-                        "&7以控制台身份执行命令",
-                        "",
-                        "&fMESSAGE:<消息>",
-                        "&7发送消息给玩家"
-                ))
+                .name(plugin.getMessages().getString("gui.help.action-types.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.action-types.lore"))
                 .build());
-        
+
         setButton(19, GuiButton.builder(Material.NOTE_BLOCK)
-                .name("&e更多动作")
-                .lore(Arrays.asList(
-                        "&fSOUND:<音效>",
-                        "&7播放音效",
-                        "&7例: SOUND:ENTITY_PLAYER_LEVELUP",
-                        "",
-                        "&fTELEPORT:<坐标>",
-                        "&7传送玩家",
-                        "&7例: TELEPORT:world,100,64,200",
-                        "",
-                        "&fSERVER:<服务器>",
-                        "&7连接到其他服务器 (BungeeCord)"
-                ))
+                .name(plugin.getMessages().getString("gui.help.actions-more.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.actions-more.lore"))
                 .build());
-        
+
         setButton(20, GuiButton.builder(Material.ARROW)
-                .name("&e翻页动作")
-                .lore(Arrays.asList(
-                        "&fNEXT_PAGE",
-                        "&7翻到下一页",
-                        "",
-                        "&fPREV_PAGE",
-                        "&7翻到上一页",
-                        "",
-                        "&fPAGE:<页码>",
-                        "&7跳转到指定页",
-                        "&7例: PAGE:3"
-                ))
+                .name(plugin.getMessages().getString("gui.help.page-actions.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.page-actions.lore"))
                 .build());
-        
+
         setButton(21, GuiButton.builder(Material.STONE_BUTTON)
-                .name("&e点击类型")
-                .lore(Arrays.asList(
-                        "&7可为不同点击设置不同动作：",
-                        "",
-                        "&fANY &7- 任意点击",
-                        "&fLEFT &7- 左键点击",
-                        "&fRIGHT &7- 右键点击",
-                        "&fSHIFT_LEFT &7- Shift+左键",
-                        "&fSHIFT_RIGHT &7- Shift+右键",
-                        "",
-                        "&7在动作管理 GUI 中切换类型"
-                ))
+                .name(plugin.getMessages().getString("gui.help.click-types.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.click-types.lore"))
                 .build());
-        
+
         setButton(22, GuiButton.builder(Material.REDSTONE_TORCH)
-                .name("&e变量支持")
-                .lore(Arrays.asList(
-                        "&7动作中支持变量：",
-                        "",
-                        "&f{player} &7- 玩家名称",
-                        "",
-                        "&7例: MESSAGE:&a你好, {player}!",
-                        "&7例: COMMAND:tp {player} 100 64 100"
-                ))
+                .name(plugin.getMessages().getString("gui.help.action-variables.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.action-variables.lore"))
                 .build());
-        
+
         setButton(23, GuiButton.builder(Material.BLAZE_POWDER)
-                .name("&e动画效果")
-                .lore(Arrays.asList(
-                        "&7使用动画让文本动起来：",
-                        "",
-                        "&7颜色设置方法：",
-                        "&f&a<#ANIM:xxx>文本</#ANIM>",
-                        "&7在标签外加颜色代码",
-                        "",
-                        "&f<#ANIM:wave>文本</#ANIM>",
-                        "&7波浪动画（默认黄白）",
-                        "",
-                        "&f<#ANIM:typewriter>文本</#ANIM>",
-                        "&7打字机效果",
-                        "",
-                        "&f<#ANIM:blink>文本</#ANIM>",
-                        "&7闪烁效果",
-                        "",
-                        "&f<#ANIM:scroll>文本</#ANIM>",
-                        "&7滚动效果",
-                        "",
-                        "&f<#ANIM:gradient:red,blue>文本</#ANIM>",
-                        "&7渐变色效果"
-                ))
+                .name(plugin.getMessages().getString("gui.help.animation.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.animation.lore"))
                 .build());
-        
+
         setButton(24, GuiButton.builder(Material.GLOW_INK_SAC)
-                .name("&e全息图属性")
-                .lore(Arrays.asList(
-                        "&7在详情 GUI 中可设置：",
-                        "",
-                        "&f朝向模式:",
-                        "&7- 固定角度 (自定义朝向)",
-                        "&7- 水平/垂直跟随",
-                        "&7- 完全跟随玩家",
-                        "",
-                        "&f其他属性:",
-                        "&7- 显示范围、更新间隔",
-                        "&7- 双面显示、权限控制"
-                ))
+                .name(plugin.getMessages().getString("gui.help.properties.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.properties.lore"))
                 .build());
-        
+
         setButton(25, GuiButton.builder(Material.EMERALD)
-                .name("&e快捷命令")
-                .lore(Arrays.asList(
-                        "&7常用命令：",
-                        "",
-                        "&f/wh create <名称>",
-                        "&7创建全息图",
-                        "",
-                        "&f/wh edit <名称>",
-                        "&7打开编辑 GUI",
-                        "",
-                        "&f/wh delete <名称>",
-                        "&7删除全息图",
-                        "",
-                        "&f/wh reload",
-                        "&7重载配置"
-                ))
+                .name(plugin.getMessages().getString("gui.help.quick-commands.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.quick-commands.lore"))
                 .build());
-        
+
         setButton(26, GuiButton.builder(Material.BOOKSHELF)
-                .name("&ePlaceholderAPI")
-                .lore(Arrays.asList(
-                        "&7支持 PAPI 占位符：",
-                        "",
-                        "&f%player_name%",
-                        "&f%player_health%",
-                        "&f%server_online%",
-                        "",
-                        "&7需安装 PlaceholderAPI"
-                ))
+                .name(plugin.getMessages().getString("gui.help.papi.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.papi.lore"))
                 .build());
 
         setButton(27, GuiButton.builder(Material.ENDER_EYE)
-                .name("&eDisplay 属性")
-                .lore(Arrays.asList(
-                        "&7Display Entity 高级属性：",
-                        "",
-                        "&f缩放 (Scale)",
-                        "&7调整行的大小比例",
-                        "&7例: /wh display scale <名称> <x> <y> <z>",
-                        "",
-                        "&f平移 (Translation)",
-                        "&7调整行的位置偏移",
-                        "",
-                        "&f阴影 (Shadow)",
-                        "&7设置阴影半径和强度",
-                        "",
-                        "&f发光颜色 (Glow Color)",
-                        "&7设置发光轮廓颜色",
-                        "&7例: /wh display glow <名称> #FF0000"
-                ))
+                .name(plugin.getMessages().getString("gui.help.display-props.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.display-props.lore"))
                 .build());
 
         setButton(28, GuiButton.builder(Material.CYAN_DYE)
-                .name("&e彩虹渐变")
-                .lore(Arrays.asList(
-                        "&7使用彩虹渐变效果：",
-                        "",
-                        "&f彩虹渐变背景",
-                        "&7设置文本的彩虹背景色",
-                        "&7例: /wh display chroma-bg <名称> true",
-                        "",
-                        "&f彩虹渐变发光",
-                        "&7设置发光的彩虹色效果",
-                        "&7例: /wh display chroma-glow <名称> true",
-                        "",
-                        "&7彩虹渐变效果会让颜色",
-                        "&7随时间自动变化"
-                ))
+                .name(plugin.getMessages().getString("gui.help.rainbow.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.rainbow.lore"))
                 .build());
 
         setButton(30, GuiButton.builder(Material.GRASS_BLOCK)
-                .name("&e#BLOCK 行类型")
-                .lore(Arrays.asList(
-                        "&7使用 #BLOCK 显示方块：",
-                        "",
-                        "&f#BLOCK:<材质>",
-                        "&7显示方块模型",
-                        "&7例: #BLOCK:DIAMOND_BLOCK",
-                        "",
-                        "&7支持所有 Minecraft 方块材质",
-                        "&7方块将以 3D 形式展示"
-                ))
+                .name(plugin.getMessages().getString("gui.help.block-type.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.block-type.lore"))
                 .build());
 
         setButton(31, GuiButton.builder(Material.HOPPER)
-                .name("&e数据导入")
-                .lore(Arrays.asList(
-                        "&7从其他插件导入数据：",
-                        "",
-                        "&fHolographicDisplays",
-                        "&7导入 HD 的全息图数据",
-                        "&7命令: /wh convert hd",
-                        "",
-                        "&fCMI",
-                        "&7导入 CMI 的全息图数据",
-                        "&7命令: /wh convert cmi",
-                        "",
-                        "&7也可在 GUI 中点击导入"
-                ))
+                .name(plugin.getMessages().getString("gui.help.data-import.name"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.help.data-import.lore"))
                 .build());
         
         fillLastRow();

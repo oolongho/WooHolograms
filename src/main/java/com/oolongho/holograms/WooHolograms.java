@@ -133,7 +133,7 @@ public class WooHolograms extends JavaPlugin {
         getCommand("hologram").setExecutor(hologramCommand);
         getCommand("wh").setAliases(Arrays.asList("holo", "wh"));
         getCommand("wooholograms").setExecutor(hologramCommand);
-        getCommand("wooholograms").setDescription("全息图管理命令");
+        getCommand("wooholograms").setDescription("Hologram management command");
         
         // 初始化 API
         WooHologramsAPI.initialize(this);

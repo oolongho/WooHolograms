@@ -12,32 +12,30 @@ public enum EnumFlag {
      * 禁用占位符解析
      * 设置后不会解析 PlaceholderAPI 占位符
      */
-    DISABLE_PLACEHOLDERS("disable_placeholders", "禁用占位符"),
+    DISABLE_PLACEHOLDERS("disable_placeholders"),
 
     /**
      * 禁用更新
      * 设置后不会自动更新内容
      */
-    DISABLE_UPDATING("disable_updating", "禁用更新"),
+    DISABLE_UPDATING("disable_updating"),
 
     /**
      * 禁用动画
      * 设置后不会播放动画效果
      */
-    DISABLE_ANIMATIONS("disable_animations", "禁用动画"),
+    DISABLE_ANIMATIONS("disable_animations"),
 
     /**
      * 禁用动作
      * 设置后点击不会触发任何动作
      */
-    DISABLE_ACTIONS("disable_actions", "禁用动作");
+    DISABLE_ACTIONS("disable_actions");
 
     private final String id;
-    private final String description;
 
-    EnumFlag(String id, String description) {
+    EnumFlag(String id) {
         this.id = id;
-        this.description = description;
     }
 
     /**
@@ -46,14 +44,6 @@ public enum EnumFlag {
      */
     public String getId() {
         return id;
-    }
-
-    /**
-     * 获取描述
-     * @return 描述
-     */
-    public String getDescription() {
-        return description;
     }
 
     /**

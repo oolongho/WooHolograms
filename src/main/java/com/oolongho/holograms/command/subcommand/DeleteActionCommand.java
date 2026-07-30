@@ -6,7 +6,6 @@ import com.oolongho.holograms.action.ClickType;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -19,14 +18,14 @@ public class DeleteActionCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public DeleteActionCommand(WooHolograms plugin) {
-        super("deleteaction", "删除点击动作", "/wh deleteaction <名称> <页码> <点击类型> <索引>", "wooholograms.edit");
+        super("deleteaction", "cmd.desc-deleteaction", "cmd.usage-deleteaction", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 4) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "action.usage-delete");
             return true;
         }
 
@@ -34,14 +33,14 @@ public class DeleteActionCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         try {
             int pageIndex = Integer.parseInt(args[1]) - 1;
             if (pageIndex < 0 || pageIndex >= hologram.getPageCount()) {
-                sender.sendMessage(ColorUtil.colorize("&c无效的页码！"));
+                plugin.getMessages().send(sender, "general.invalid-page");
                 return true;
             }
 
@@ -52,16 +51,16 @@ public class DeleteActionCommand extends Subcommand {
             if (page != null) {
                 List<Action> actions = page.getActions(clickType);
                 if (actionIndex < 0 || actionIndex >= actions.size()) {
-                    sender.sendMessage(ColorUtil.colorize("&c无效的动作索引！"));
+                    plugin.getMessages().send(sender, "action.invalid-action-index");
                     return true;
                 }
 
                 page.removeAction(clickType, actionIndex);
                 hologram.save();
-                sender.sendMessage(ColorUtil.colorize("&a已删除第 " + (actionIndex + 1) + " 个动作！"));
+                plugin.getMessages().send(sender, "action.delete-success", "index", String.valueOf(actionIndex + 1));
             }
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize("&c页码和索引必须是数字！"));
+            plugin.getMessages().send(sender, "action.index-must-be-number");
         }
 
         return true;

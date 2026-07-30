@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -15,14 +14,14 @@ public class SwapPageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SwapPageCommand(WooHolograms plugin) {
-        super("swappage", "交换两个页面的位置", "/wh swappage <名称> <页码1> <页码2>", "wooholograms.edit");
+        super("swappage", "cmd.desc-swappage", "cmd.usage-swappage", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.swappage-usage");
             return true;
         }
 
@@ -30,7 +29,7 @@ public class SwapPageCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -40,26 +39,27 @@ public class SwapPageCommand extends Subcommand {
             int pageCount = hologram.getPageCount();
 
             if (page1 < 1 || page1 > pageCount) {
-                sender.sendMessage(ColorUtil.colorize("&c页码1必须在 1 到 " + pageCount + " 之间！"));
+                plugin.getMessages().send(sender, "cmd.swappage-range1", "max", String.valueOf(pageCount));
                 return true;
             }
             if (page2 < 1 || page2 > pageCount) {
-                sender.sendMessage(ColorUtil.colorize("&c页码2必须在 1 到 " + pageCount + " 之间！"));
+                plugin.getMessages().send(sender, "cmd.swappage-range2", "max", String.valueOf(pageCount));
                 return true;
             }
             if (page1 == page2) {
-                sender.sendMessage(ColorUtil.colorize("&c两个页码不能相同！"));
+                plugin.getMessages().send(sender, "cmd.swappage-same");
                 return true;
             }
 
             if (hologram.swapPages(page1 - 1, page2 - 1)) {
                 hologram.save();
-                sender.sendMessage(ColorUtil.colorize("&a已交换全息图 " + name + " 的第 " + page1 + " 页和第 " + page2 + " 页！"));
+                plugin.getMessages().send(sender, "cmd.swappage-success",
+                        "name", name, "p1", String.valueOf(page1), "p2", String.valueOf(page2));
             } else {
-                sender.sendMessage(ColorUtil.colorize("&c交换页面失败！"));
+                plugin.getMessages().send(sender, "cmd.swappage-failed");
             }
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize("&c页码必须是数字！"));
+            plugin.getMessages().send(sender, "cmd.swappage-number");
         }
 
         return true;

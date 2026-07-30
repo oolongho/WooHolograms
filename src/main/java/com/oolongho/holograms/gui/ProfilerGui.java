@@ -1,7 +1,6 @@
 package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.Profiler;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,7 +18,7 @@ public class ProfilerGui extends GuiScreen {
     private final ChatInputManager chatInputManager;
 
     public ProfilerGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager) {
-        super("profiler", ColorUtil.colorize("&8性能分析"), 27);
+        super("profiler", plugin.getMessages().get("gui.title-profiler"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -35,8 +34,8 @@ public class ProfilerGui extends GuiScreen {
 
         // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
-                .lore(Arrays.asList("&7返回全息图列表", "", "&e点击返回"))
+                .name(plugin.getMessages().getString("gui.btn-back"))
+                .lore(Arrays.asList(plugin.getMessages().getString("gui.lore-back-list"), "", plugin.getMessages().getString("gui.lore-click-back")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                 })
@@ -44,50 +43,51 @@ public class ProfilerGui extends GuiScreen {
 
         // 启用/禁用切换
         setButton(11, GuiButton.builder(isEnabled ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name("&f" + (isEnabled ? "禁用" : "启用"))
+                .name(plugin.getMessages().getString(isEnabled ? "gui.profiler.disable" : "gui.profiler.enable"))
                 .lore(Arrays.asList(
-                        "&7当前状态: " + (isEnabled ? "&a启用" : "&c禁用"),
+                        plugin.getMessages().getString("gui.profiler.current-state",
+                                "state", plugin.getMessages().getString(isEnabled ? "gui.profiler.state-enabled" : "gui.profiler.state-disabled")),
                         "",
-                        "&e点击切换"
+                        plugin.getMessages().getString("gui.lore-click-toggle")
                 ))
                 .onClick(context -> {
                     Profiler p = Profiler.getInstance();
                     p.setEnabled(!p.isEnabled());
                     Player player = context.getPlayer();
-                    player.sendMessage(ColorUtil.colorize("&a性能分析器已" + (p.isEnabled() ? "启用" : "禁用") + "！"));
+                    plugin.getMessages().send(player, p.isEnabled() ? "gui.msg-profiler-enabled" : "gui.msg-profiler-disabled");
                     guiManager.openGui(player, new ProfilerGui(plugin, guiManager, chatInputManager));
                 })
                 .build());
 
         // 查看报告
         setButton(13, GuiButton.builder(Material.PAPER)
-                .name("&f查看报告")
+                .name(plugin.getMessages().getString("gui.profiler.view-report"))
                 .lore(Arrays.asList(
-                        "&7在聊天中显示性能报告",
+                        plugin.getMessages().getString("gui.profiler.view-report-desc"),
                         "",
-                        "&e点击查看"
+                        plugin.getMessages().getString("gui.lore-click-view")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    String report = Profiler.getInstance().getReport();
-                    player.sendMessage(ColorUtil.colorize(report));
+                    String report = Profiler.getInstance().getReport(plugin.getMessages());
+                    player.sendMessage(plugin.getMessages().parse(report));
                 })
                 .build());
 
         // 重置数据
         setButton(15, GuiButton.builder(Material.BARRIER)
-                .name("&f重置数据")
+                .name(plugin.getMessages().getString("gui.profiler.reset-data"))
                 .lore(Arrays.asList(
-                        "&7重置所有性能数据",
+                        plugin.getMessages().getString("gui.profiler.reset-data-desc"),
                         "",
-                        "&e点击重置"
+                        plugin.getMessages().getString("gui.lore-click-reset")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
-                    guiManager.openGui(player, ConfirmGui.create("&c确认重置所有性能数据?", confirmed -> {
+                    guiManager.openGui(player, ConfirmGui.create(plugin, plugin.getMessages().getString("gui.profiler.confirm-reset"), confirmed -> {
                         if (confirmed) {
                             Profiler.getInstance().reset();
-                            player.sendMessage(ColorUtil.colorize("&a性能数据已重置！"));
+                            plugin.getMessages().send(player, "profiler.reset");
                         }
                         guiManager.openGui(player, new ProfilerGui(plugin, guiManager, chatInputManager));
                     }));

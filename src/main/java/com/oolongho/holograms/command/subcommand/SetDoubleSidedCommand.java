@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -16,14 +15,14 @@ public class SetDoubleSidedCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetDoubleSidedCommand(WooHolograms plugin) {
-        super("setdoublesided", "设置双面显示", "/wh setdoublesided <名称> <true|false>", "wooholograms.edit");
+        super("setdoublesided", "cmd.desc-setdoublesided", "cmd.usage-setdoublesided", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.setdoublesided-usage");
             return true;
         }
 
@@ -31,7 +30,7 @@ public class SetDoubleSidedCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -39,7 +38,7 @@ public class SetDoubleSidedCommand extends Subcommand {
         hologram.setDoubleSided(doubleSided);
         hologram.save();
 
-        sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的双面显示设置为 " + doubleSided + "！"));
+        plugin.getMessages().send(sender, "cmd.setdoublesided-success", "name", name, "value", String.valueOf(doubleSided));
         return true;
     }
 

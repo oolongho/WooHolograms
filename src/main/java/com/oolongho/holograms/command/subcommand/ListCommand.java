@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class ListCommand extends Subcommand {
     private static final int ITEMS_PER_PAGE = 10;
 
     public ListCommand(WooHolograms plugin) {
-        super("list", "列出所有全息图", "/wh list [页码]", "wooholograms.list");
+        super("list", "cmd.desc-list", "cmd.usage-list", "wooholograms.list");
         this.plugin = plugin;
     }
 
@@ -32,7 +31,7 @@ public class ListCommand extends Subcommand {
                 page = Integer.parseInt(args[0]);
                 if (page < 1) page = 1;
             } catch (NumberFormatException e) {
-                sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.invalid-number")));
+                plugin.getMessages().send(sender, "general.invalid-number");
                 return true;
             }
         }
@@ -43,10 +42,10 @@ public class ListCommand extends Subcommand {
 
         if (page > maxPage) page = maxPage;
 
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().get("list.header")));
+        plugin.getMessages().send(sender, "list.header");
 
         if (holograms.isEmpty()) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().get("list.empty")));
+            plugin.getMessages().send(sender, "list.empty");
         } else {
             int startIndex = (page - 1) * ITEMS_PER_PAGE;
             int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, total);
@@ -56,14 +55,19 @@ public class ListCommand extends Subcommand {
                 String worldName = hologram.getLocation() != null && hologram.getLocation().getWorld() != null
                         ? hologram.getLocation().getWorld().getName() : "Unknown";
 
-                sender.sendMessage(ColorUtil.colorize("&e" + hologram.getName() + " &7- 世界: " + worldName + 
-                        ", 位置: " + String.format("%.1f, %.1f, %.1f", 
-                        hologram.getLocation().getX(), hologram.getLocation().getY(), hologram.getLocation().getZ())));
+                plugin.getMessages().send(sender, "list.line",
+                        "name", hologram.getName(),
+                        "world", worldName,
+                        "x", String.format("%.1f", hologram.getLocation().getX()),
+                        "y", String.format("%.1f", hologram.getLocation().getY()),
+                        "z", String.format("%.1f", hologram.getLocation().getZ()));
             }
 
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().get("list.footer", "count", String.valueOf(total))));
+            plugin.getMessages().send(sender, "list.footer", "count", String.valueOf(total));
             if (maxPage > 1) {
-                sender.sendMessage(ColorUtil.colorize("&e第 " + page + " 页 / 共 " + maxPage + " 页"));
+                plugin.getMessages().send(sender, "list.page-info",
+                        "page", String.valueOf(page),
+                        "total", String.valueOf(maxPage));
             }
         }
         return true;

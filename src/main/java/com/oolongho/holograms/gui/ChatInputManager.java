@@ -1,9 +1,9 @@
 package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.SchedulerUtil;
 import com.oolongho.holograms.util.SchedulerUtil.TaskHandle;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,7 +19,9 @@ import java.util.function.Consumer;
 /**
  * 聊天框输入管理器
  * 用于处理玩家在聊天框中的输入
- * 
+ *
+ * 提示语由调用方通过 {@code plugin.getMessages().get("gui.prompt.xxx")} 传入 Component
+ * 验证错误消息统一使用 input.* 语言键（带 {prefix}）
  */
 public class ChatInputManager implements Listener {
 
@@ -33,7 +35,7 @@ public class ChatInputManager implements Listener {
         this.pendingInputs = new ConcurrentHashMap<>();
         this.timeoutTasks = new ConcurrentHashMap<>();
     }
-    
+
     /**
      * 注册事件监听器
      */
@@ -44,59 +46,59 @@ public class ChatInputManager implements Listener {
     /**
      * 请求玩家输入
      * @param player 玩家
-     * @param prompt 提示语
+     * @param prompt 提示语（Component，由 messages.get() 构造）
      * @param callback 输入完成回调
      */
-    public void requestInput(Player player, String prompt, Consumer<String> callback) {
+    public void requestInput(Player player, Component prompt, Consumer<String> callback) {
         requestInput(player, prompt, InputType.GENERIC, callback);
     }
 
     /**
      * 请求玩家输入
      * @param player 玩家
-     * @param prompt 提示语
+     * @param prompt 提示语（Component）
      * @param type 输入类型
      * @param callback 输入完成回调
      */
-    public void requestInput(Player player, String prompt, InputType type, Consumer<String> callback) {
+    public void requestInput(Player player, Component prompt, InputType type, Consumer<String> callback) {
         requestInputInternal(player, prompt, new InputContext(type, callback));
     }
 
     /**
      * 请求玩家输入（带上下文）
      * @param player 玩家
-     * @param prompt 提示语
+     * @param prompt 提示语（Component）
      * @param type 输入类型
      * @param hologramName 全息图名称
      * @param callback 输入完成回调
      */
-    public void requestInput(Player player, String prompt, InputType type, String hologramName, Consumer<String> callback) {
+    public void requestInput(Player player, Component prompt, InputType type, String hologramName, Consumer<String> callback) {
         requestInputInternal(player, prompt, new InputContext(type, hologramName, callback));
     }
 
     /**
      * 请求玩家输入（带完整上下文）
      * @param player 玩家
-     * @param prompt 提示语
+     * @param prompt 提示语（Component）
      * @param type 输入类型
      * @param hologramName 全息图名称
      * @param lineNumber 行号
      * @param pageIndex 页码
      * @param callback 输入完成回调
      */
-    public void requestInput(Player player, String prompt, InputType type, String hologramName, int lineNumber, int pageIndex, Consumer<String> callback) {
+    public void requestInput(Player player, Component prompt, InputType type, String hologramName, int lineNumber, int pageIndex, Consumer<String> callback) {
         requestInputInternal(player, prompt, new InputContext(type, hologramName, lineNumber, pageIndex, callback));
     }
 
-    private void requestInputInternal(Player player, String prompt, InputContext context) {
+    private void requestInputInternal(Player player, Component prompt, InputContext context) {
         UUID playerId = player.getUniqueId();
 
         cancelTimeoutTask(playerId);
 
         pendingInputs.put(playerId, context);
 
-        player.sendMessage(ColorUtil.colorize(prompt));
-        player.sendMessage(ColorUtil.colorize("&7输入 &ecancel &7或 &e取消 &7来取消输入"));
+        player.sendMessage(prompt);
+        plugin.getMessages().send(player, "input.cancel-hint");
 
         timeoutTasks.put(playerId, createTimeoutTask(player, playerId, context));
     }
@@ -106,11 +108,11 @@ public class ChatInputManager implements Listener {
             if (pendingInputs.containsKey(playerId) && pendingInputs.get(playerId) == context) {
                 pendingInputs.remove(playerId);
                 timeoutTasks.remove(playerId);
-                player.sendMessage(ColorUtil.colorize("&c输入已超时取消！"));
+                plugin.getMessages().send(player, "input.timeout");
             }
         }, INPUT_TIMEOUT);
     }
-    
+
     /**
      * 取消超时任务
      * @param playerId 玩家ID
@@ -129,97 +131,97 @@ public class ChatInputManager implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
-        
+
         if (!pendingInputs.containsKey(playerId)) {
             return;
         }
-        
+
         event.setCancelled(true);
         String input = event.getMessage();
-        
+
         SchedulerUtil.runTask(player, () -> {
             InputContext context = pendingInputs.remove(playerId);
             if (context == null) {
                 return;
             }
-            
+
             cancelTimeoutTask(playerId);
-            
+
             if (input.equalsIgnoreCase("cancel") || input.equalsIgnoreCase("取消")) {
-                player.sendMessage(ColorUtil.colorize("&c输入已取消！"));
+                plugin.getMessages().send(player, "input.cancelled");
                 return;
             }
-            
-            String validationError = validateInput(input, context.getType());
+
+            Component validationError = validateInput(input, context.getType());
             if (validationError != null) {
-                player.sendMessage(ColorUtil.colorize(validationError));
+                player.sendMessage(validationError);
                 pendingInputs.put(playerId, context);
                 timeoutTasks.put(playerId, createTimeoutTask(player, playerId, context));
                 return;
             }
-            
+
             context.callback.accept(input);
         });
     }
-    
+
     /**
      * 验证输入
      * @param input 输入内容
      * @param type 输入类型
-     * @return 错误消息，null表示验证通过
+     * @return 错误消息 Component，null表示验证通过
      */
-    private String validateInput(String input, InputType type) {
+    private Component validateInput(String input, InputType type) {
         int maxLength = plugin.getConfigManager().getMaxInputLength();
-        
+
         if (input == null || input.isEmpty()) {
-            return "&c输入不能为空！";
+            return plugin.getMessages().get("input.empty");
         }
-        
+
         if (input.length() > maxLength) {
-            return "&c输入长度超过限制（最大 " + maxLength + " 字符）！";
+            return plugin.getMessages().get("input.too-long", "max", String.valueOf(maxLength));
         }
-        
+
         // 根据类型进行特定验证
         switch (type) {
             case HOLOGRAM_NAME -> {
                 if (!input.matches("^[\\w\\-\\p{L}]+$")) {
-                    return "&c名称只能包含字母、数字、下划线、连字符和Unicode字符！";
+                    return plugin.getMessages().get("input.invalid-name");
                 }
             }
             case DISPLAY_RANGE, UPDATE_INTERVAL -> {
                 try {
                     int value = Integer.parseInt(input);
                     if (value <= 0) {
-                        return "&c数值必须大于0！";
+                        return plugin.getMessages().get("input.must-be-positive");
                     }
                 } catch (NumberFormatException e) {
-                    return "&c请输入有效的数字！";
+                    return plugin.getMessages().get("input.invalid-number");
                 }
             }
             case LINE_HEIGHT -> {
                 try {
                     double value = Double.parseDouble(input);
                     if (value <= 0) {
-                        return "&c数值必须大于0！";
+                        return plugin.getMessages().get("input.must-be-positive");
                     }
                 } catch (NumberFormatException e) {
-                    return "&c请输入有效的数字！";
+                    return plugin.getMessages().get("input.invalid-number");
                 }
             }
             case LINE_OFFSET -> {
                 if (!input.matches("^[\\d.\\- ]+$")) {
-                    return "&c偏移值只能包含数字、小数点和负号！";
+                    return plugin.getMessages().get("input.invalid-offset");
                 }
             }
             case COORDINATES -> {
                 if (!input.matches("^[\\d.\\- ]+$")) {
-                    return "&c坐标只能包含数字、小数点和负号！";
+                    return plugin.getMessages().get("input.invalid-coords");
                 }
             }
             default -> {
             }
         }
-        
+
         return null;
     }
 

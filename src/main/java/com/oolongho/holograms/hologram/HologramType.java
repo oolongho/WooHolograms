@@ -12,44 +12,44 @@ public enum HologramType {
      * 文本类型
      * 普通文本显示，支持颜色代码和占位符
      */
-    TEXT("TEXT", "文本", 0.25, -0.5),
+    TEXT("TEXT", "gui.line-type.text", 0.25, -0.5),
 
     /**
      * 物品图标类型
      * 显示为掉落物形式的物品图标
      */
-    ICON("ICON", "物品图标", 0.5, -0.55),
+    ICON("ICON", "gui.line-type.icon", 0.5, -0.55),
 
     /**
      * 头颅类型
      * 显示为正常大小的玩家头颅
      */
-    HEAD("HEAD", "头颅", 0.6, -2.0),
+    HEAD("HEAD", "gui.line-type.head", 0.6, -2.0),
 
     /**
      * 小头颅类型
      * 显示为小号玩家头颅
      */
-    SMALLHEAD("SMALLHEAD", "小头颅", 0.4, -1.1875),
+    SMALLHEAD("SMALLHEAD", "gui.line-type.smallhead", 0.4, -1.1875),
 
     /**
      * 方块类型
      * 使用 BlockDisplay 实体展示方块
      */
-    BLOCK("BLOCK", "方块", 0.5, -0.5),
+    BLOCK("BLOCK", "gui.line-type.block", 0.5, -0.5),
 
-    ENTITY("ENTITY", "实体", 0.7, 0),
+    ENTITY("ENTITY", "gui.line-type.entity", 0.7, 0),
 
-    UNKNOWN("UNKNOWN", "未知", 0.25, 0);
+    UNKNOWN("UNKNOWN", "gui.line-type.unknown", 0.25, 0);
 
     private final String id;
-    private final String displayName;
+    private final String displayNameKey;
     private final double defaultHeight;
     private final double offsetY;
 
-    HologramType(String id, String displayName, double defaultHeight, double offsetY) {
+    HologramType(String id, String displayNameKey, double defaultHeight, double offsetY) {
         this.id = id;
-        this.displayName = displayName;
+        this.displayNameKey = displayNameKey;
         this.defaultHeight = defaultHeight;
         this.offsetY = offsetY;
     }
@@ -63,11 +63,10 @@ public enum HologramType {
     }
 
     /**
-     * 获取显示名称
-     * @return 显示名称
+     * 获取显示名称的语言键（调用方通过 {@code plugin.getMessages().getRaw(key)} 解析）
      */
-    public String getDisplayName() {
-        return displayName;
+    public String getDisplayNameKey() {
+        return displayNameKey;
     }
 
     /**

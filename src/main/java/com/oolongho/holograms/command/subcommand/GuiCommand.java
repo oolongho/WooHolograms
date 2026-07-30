@@ -8,7 +8,6 @@ import com.oolongho.holograms.gui.HologramDetailGui;
 import com.oolongho.holograms.gui.HologramListGui;
 import com.oolongho.holograms.gui.HologramListGui.SortType;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -21,7 +20,7 @@ public class GuiCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public GuiCommand(WooHolograms plugin) {
-        super("gui", "打开GUI管理界面", "/wh gui [名称]", "wooholograms.admin");
+        super("gui", "cmd.desc-gui", "cmd.usage-gui", "wooholograms.admin");
         this.plugin = plugin;
         setPlayerOnly(true);
     }
@@ -37,7 +36,7 @@ public class GuiCommand extends Subcommand {
             Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
 
             if (hologram == null) {
-                player.sendMessage(ColorUtil.colorize("&c全息图 " + hologramName + " 不存在！"));
+                plugin.getMessages().send(player, "general.hologram-not-exists", "name", hologramName);
                 return true;
             }
 

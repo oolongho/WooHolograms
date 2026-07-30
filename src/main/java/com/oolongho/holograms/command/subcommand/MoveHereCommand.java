@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -21,7 +20,7 @@ public class MoveHereCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public MoveHereCommand(WooHolograms plugin) {
-        super("movehere", "将全息图移动到你的位置", "/wh movehere <名称>", "wooholograms.move");
+        super("movehere", "cmd.desc-movehere", "cmd.usage-movehere", "wooholograms.move");
         this.plugin = plugin;
         setPlayerOnly(true);
     }
@@ -31,7 +30,7 @@ public class MoveHereCommand extends Subcommand {
         Player player = (Player) sender;
 
         if (args.length < 1) {
-            player.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(player, "move.usage");
             return true;
         }
 
@@ -39,14 +38,14 @@ public class MoveHereCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.hologram-not-found", "name", name)));
+            plugin.getMessages().send(player, "general.hologram-not-found", "name", name);
             return true;
         }
 
         hologram.teleport(player.getLocation());
         hologram.save();
-        
-        player.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("move.success", "name", name)));
+
+        plugin.getMessages().send(player, "move.success", "name", name);
         return true;
     }
 

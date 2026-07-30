@@ -196,18 +196,4 @@ public class ItemNbtUtil {
         // 字符串
         tag.putString(key, value);
     }
-    
-    /**
-     * 获取键值对格式的示例（用于 TAB 补全）
-     */
-    public static Map<String, String> getKeyValueExamples() {
-        Map<String, String> examples = new HashMap<>();
-        examples.put("custom-model-data:<值>", "自定义模型数据 (或 cmd:<值>)");
-        examples.put("color:<RGB>", "皮革颜色 (如 color:FF0000 或 color:16711680)");
-        examples.put("name:<名称>", "自定义名称 (支持颜色代码)");
-        examples.put("lore:<描述>", "物品描述");
-        examples.put("glow", "发光效果");
-        examples.put("unbreakable", "无法破坏");
-        return examples;
-    }
 }

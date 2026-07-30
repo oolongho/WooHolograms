@@ -5,9 +5,7 @@ import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
-import org.bukkit.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,22 +23,22 @@ public class SetGlowColorCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetGlowColorCommand(WooHolograms plugin) {
-        super("setglowcolor", "设置发光颜色", "/wh setglowcolor <名称> [行号] <颜色|#RRGGBB|reset>", "wooholograms.edit");
+        super("setglowcolor", "cmd.desc-setglowcolor", "cmd.usage-setglowcolor", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
-            sender.sendMessage(ColorUtil.colorize("&7颜色格式: #RRGGBB 或 reset(重置) 或颜色名称(red, green, blue, yellow, white, black, aqua, purple, gold)"));
+            plugin.getMessages().send(sender, "cmd.setglowcolor-usage");
+            plugin.getMessages().send(sender, "cmd.setglowcolor-help");
             return true;
         }
 
         String name = args[0];
         Hologram hologram = plugin.getHologramManager().getHologram(name);
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -52,7 +50,7 @@ public class SetGlowColorCommand extends Subcommand {
                     // 行级别设置
                     HologramPage page = hologram.getPage(0);
                     if (page == null || lineNumber < 1 || lineNumber > page.size()) {
-                        sender.sendMessage(ColorUtil.colorize("&c无效的行号！"));
+                        plugin.getMessages().send(sender, "general.line-invalid");
                         return true;
                     }
 
@@ -63,9 +61,11 @@ public class SetGlowColorCommand extends Subcommand {
                         hologram.save();
                         hologram.refreshAllViewers();
                         if (color != null) {
-                            sender.sendMessage(ColorUtil.colorize("&a已设置第 " + lineNumber + " 行的发光颜色为 " + args[2] + "！"));
+                            plugin.getMessages().send(sender, "cmd.setglowcolor-set-line",
+                                    "line", String.valueOf(lineNumber), "color", args[2]);
                         } else {
-                            sender.sendMessage(ColorUtil.colorize("&a已重置第 " + lineNumber + " 行的发光颜色！"));
+                            plugin.getMessages().send(sender, "cmd.setglowcolor-reset-line",
+                                    "line", String.valueOf(lineNumber));
                         }
                     }
                 } else {
@@ -74,9 +74,9 @@ public class SetGlowColorCommand extends Subcommand {
                     hologram.setGlowColor(color != null ? color : -1);
                     hologram.save();
                     if (color != null) {
-                        sender.sendMessage(ColorUtil.colorize("&a已设置全息图 " + name + " 的发光颜色为 " + args[1] + "！"));
+                        plugin.getMessages().send(sender, "cmd.setglowcolor-set", "name", name, "color", args[1]);
                     } else {
-                        sender.sendMessage(ColorUtil.colorize("&a已重置全息图 " + name + " 的发光颜色！"));
+                        plugin.getMessages().send(sender, "cmd.setglowcolor-reset", "name", name);
                     }
                 }
             } else {
@@ -85,13 +85,13 @@ public class SetGlowColorCommand extends Subcommand {
                 hologram.setGlowColor(color != null ? color : -1);
                 hologram.save();
                 if (color != null) {
-                    sender.sendMessage(ColorUtil.colorize("&a已设置全息图 " + name + " 的发光颜色为 " + args[1] + "！"));
+                    plugin.getMessages().send(sender, "cmd.setglowcolor-set", "name", name, "color", args[1]);
                 } else {
-                    sender.sendMessage(ColorUtil.colorize("&a已重置全息图 " + name + " 的发光颜色！"));
+                    plugin.getMessages().send(sender, "cmd.setglowcolor-reset", "name", name);
                 }
             }
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(ColorUtil.colorize("&c无效的颜色格式！使用 #RRGGBB 或颜色名称(red, green, blue 等)"));
+            plugin.getMessages().send(sender, "display.invalid-color");
         }
 
         return true;

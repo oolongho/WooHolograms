@@ -1,5 +1,6 @@
 package com.oolongho.holograms.gui;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -11,17 +12,20 @@ import java.util.Map;
 /**
  * GUI 界面基类
  * 提供基本的 GUI 功能
- * 
+ *
+ * 标题统一使用 Adventure Component，由 MiniMessage 解析而来
+ * （调用方通过 {@code plugin.getMessages().get("gui.title.xxx")} 传入，不带 {prefix}）
+ *
  */
 public class GuiScreen implements InventoryHolder {
 
     private final String id;
-    private final String title;
+    private final Component title;
     private final int size;
     private final Inventory inventory;
     private final Map<Integer, GuiButton> buttons;
 
-    public GuiScreen(String id, String title, int size) {
+    public GuiScreen(String id, Component title, int size) {
         this.id = id;
         this.title = title;
         this.size = size;
@@ -41,7 +45,7 @@ public class GuiScreen implements InventoryHolder {
      * 获取标题
      * @return 标题
      */
-    public String getTitle() {
+    public Component getTitle() {
         return title;
     }
 

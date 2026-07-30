@@ -259,7 +259,7 @@ public class PageTextRendererImpl {
         if (destroyed) return;
 
         Profiler profiler = Profiler.getInstance();
-        if (profiler.isEnabled()) profiler.start("渲染");
+        if (profiler.isEnabled()) profiler.start("render");
         try {
 
         Hologram hologram = page.getParent();
@@ -332,7 +332,7 @@ public class PageTextRendererImpl {
         lastTextPerPlayerGroup.put(player.getUniqueId(), playerGroupTexts);
 
         } finally {
-            if (profiler.isEnabled()) profiler.stop("渲染");
+            if (profiler.isEnabled()) profiler.stop("render");
         }
     }
 

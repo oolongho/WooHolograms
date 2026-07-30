@@ -3,7 +3,6 @@ package com.oolongho.holograms.gui;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.TextAlignment;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -19,7 +18,7 @@ public class AlignmentSelectGui extends GuiScreen {
 
     public AlignmentSelectGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                               String hologramName, int currentPageIndex) {
-        super("alignment_select", ColorUtil.colorize("&8对齐设置"), 27);
+        super("alignment_select", plugin.getMessages().get("gui.title-alignment-select"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -35,12 +34,12 @@ public class AlignmentSelectGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该全息图已被删除",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
                             "",
-                            "&e点击返回列表"
+                            plugin.getMessages().getString("gui.lore-click-back-list")
                     ))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
@@ -52,11 +51,11 @@ public class AlignmentSelectGui extends GuiScreen {
         TextAlignment currentAlignment = hologram.getAlignment();
 
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
+                .name(plugin.getMessages().getString("gui.btn-back"))
                 .lore(Arrays.asList(
-                        "&7返回全息图详情",
+                        plugin.getMessages().getString("gui.lore-back-detail"),
                         "",
-                        "&e点击返回"
+                        plugin.getMessages().getString("gui.lore-click-back")
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -64,20 +63,22 @@ public class AlignmentSelectGui extends GuiScreen {
                 .build());
 
         setButton(4, GuiButton.builder(Material.REPEATER)
-                .name("&f当前对齐方式")
+                .name(plugin.getMessages().getString("gui.alignment.current"))
                 .lore(Arrays.asList(
                         "",
-                        "&7" + currentAlignment.getDisplayName(),
+                        plugin.getMessages().getString("gui.alignment.current-value", "value", plugin.getMessages().getRaw(currentAlignment.getDisplayNameKey())),
                         ""
                 ))
                 .build());
 
         setButton(11, GuiButton.builder(Material.ARROW)
-                .name("&f左对齐")
+                .name(plugin.getMessages().getString("gui.alignment.left"))
                 .lore(Arrays.asList(
-                        "&7文本靠左显示",
+                        plugin.getMessages().getString("gui.alignment.left-lore"),
                         "",
-                        currentAlignment == TextAlignment.LEFT ? "&a当前选择" : "&e点击选择"
+                        currentAlignment == TextAlignment.LEFT
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -86,11 +87,13 @@ public class AlignmentSelectGui extends GuiScreen {
                 .build());
 
         setButton(13, GuiButton.builder(Material.END_CRYSTAL)
-                .name("&f居中")
+                .name(plugin.getMessages().getString("gui.alignment.center"))
                 .lore(Arrays.asList(
-                        "&7文本居中显示",
+                        plugin.getMessages().getString("gui.alignment.center-lore"),
                         "",
-                        currentAlignment == TextAlignment.CENTER ? "&a当前选择" : "&e点击选择"
+                        currentAlignment == TextAlignment.CENTER
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -99,11 +102,13 @@ public class AlignmentSelectGui extends GuiScreen {
                 .build());
 
         setButton(15, GuiButton.builder(Material.ARROW)
-                .name("&f右对齐")
+                .name(plugin.getMessages().getString("gui.alignment.right"))
                 .lore(Arrays.asList(
-                        "&7文本靠右显示",
+                        plugin.getMessages().getString("gui.alignment.right-lore"),
                         "",
-                        currentAlignment == TextAlignment.RIGHT ? "&a当前选择" : "&e点击选择"
+                        currentAlignment == TextAlignment.RIGHT
+                                ? plugin.getMessages().getString("gui.lore-current-selected")
+                                : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -120,7 +125,7 @@ public class AlignmentSelectGui extends GuiScreen {
             h.setAlignment(alignment);
             h.save();
             h.refreshAllViewers();
-            player.sendMessage(ColorUtil.colorize("&a已设置对齐方式为 " + alignment.getDisplayName() + "！"));
+            plugin.getMessages().send(player, "gui.msg-alignment-set", "alignment", plugin.getMessages().getRaw(alignment.getDisplayNameKey()));
         }
         guiManager.openGui(player, new AlignmentSelectGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
     }

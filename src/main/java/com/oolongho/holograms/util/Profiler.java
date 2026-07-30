@@ -1,5 +1,7 @@
 package com.oolongho.holograms.util;
 
+import com.oolongho.holograms.config.Messages;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -59,13 +61,14 @@ public class Profiler {
     }
 
     /**
-     * 生成性能报告
+     * 生成性能报告（使用 MiniMessage 标签，由调用方通过 Messages.parse 解析为 Component）
      *
-     * @return 格式化的报告文本
+     * @param messages Messages 实例，用于解析语言键
+     * @return 格式化的报告文本（MiniMessage 格式）
      */
-    public String getReport() {
+    public String getReport(Messages messages) {
         if (totalTime.isEmpty()) {
-            return "§e========== 性能分析 ==========\n§7暂无数据";
+            return messages.getRaw("gui.profiler.report-empty");
         }
 
         // 按总耗时降序排列
@@ -73,7 +76,7 @@ public class Profiler {
         sorted.sort(Map.Entry.<String, Long>comparingByValue().reversed());
 
         StringBuilder sb = new StringBuilder();
-        sb.append("§e========== 性能分析 ==========\n");
+        sb.append(messages.getRaw("gui.profiler.report-header")).append("\n");
 
         for (Map.Entry<String, Long> entry : sorted) {
             String section = entry.getKey();
@@ -81,9 +84,9 @@ public class Profiler {
             long cnt = count.getOrDefault(section, 1L);
             double avgMs = (total / (double) cnt) / 1_000_000.0;
 
-            sb.append("§7").append(section).append(": ")
-              .append("§f").append(String.format("%.2f", avgMs)).append("ms")
-              .append(" §8(平均, ").append(cnt).append("次)")
+            sb.append("<color:#9CA3AF>").append(section).append(": ")
+              .append("<white>").append(String.format("%.2f", avgMs)).append("ms")
+              .append(messages.getString("gui.profiler.report-avg", "count", String.valueOf(cnt)))
               .append("\n");
         }
 

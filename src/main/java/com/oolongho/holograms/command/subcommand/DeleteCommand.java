@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -20,14 +19,14 @@ public class DeleteCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public DeleteCommand(WooHolograms plugin) {
-        super("delete", "删除一个全息图", "/wh delete <名称>", "wooholograms.delete");
+        super("delete", "cmd.desc-delete", "cmd.usage-delete", "wooholograms.delete");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("delete.usage")));
+            plugin.getMessages().send(sender, "delete.usage");
             return true;
         }
 
@@ -35,12 +34,12 @@ public class DeleteCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.hologram-not-found", "name", name)));
+            plugin.getMessages().send(sender, "general.hologram-not-found", "name", name);
             return true;
         }
 
         plugin.getHologramManager().deleteHologram(name);
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("delete.success", "name", name)));
+        plugin.getMessages().send(sender, "delete.success", "name", name);
         return true;
     }
 

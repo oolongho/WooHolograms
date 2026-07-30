@@ -4,7 +4,6 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.TabCompleteUtil;
 import org.bukkit.command.CommandSender;
 
@@ -23,14 +22,14 @@ public class SetLineCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetLineCommand(WooHolograms plugin) {
-        super("setline", "设置全息图的一行文本", "/wh setline <名称> <行号> <内容>", "wooholograms.edit");
+        super("setline", "cmd.desc-setline", "cmd.usage-setline", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.setline-usage");
             return true;
         }
 
@@ -38,7 +37,7 @@ public class SetLineCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.hologram-not-found", "name", name)));
+            plugin.getMessages().send(sender, "general.hologram-not-found", "name", name);
             return true;
         }
 
@@ -46,18 +45,18 @@ public class SetLineCommand extends Subcommand {
         try {
             lineNumber = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.invalid-number")));
+            plugin.getMessages().send(sender, "general.invalid-number");
             return true;
         }
 
         HologramPage page = hologram.getPage(0);
         if (page == null || page.size() == 0) {
-            sender.sendMessage(ColorUtil.colorize("&c此全息图没有内容！"));
+            plugin.getMessages().send(sender, "general.no-content");
             return true;
         }
 
         if (lineNumber < 1 || lineNumber > page.size()) {
-            sender.sendMessage(ColorUtil.colorize("&c行号必须在 1 到 " + page.size() + " 之间！"));
+            plugin.getMessages().send(sender, "general.line-out-of-range", "max", String.valueOf(page.size()));
             return true;
         }
 
@@ -65,7 +64,7 @@ public class SetLineCommand extends Subcommand {
         page.setLine(lineNumber - 1, content);
         hologram.save();
 
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("edit.line-set", "line", String.valueOf(lineNumber))));
+        plugin.getMessages().send(sender, "edit.line-set", "line", String.valueOf(lineNumber));
         return true;
     }
 

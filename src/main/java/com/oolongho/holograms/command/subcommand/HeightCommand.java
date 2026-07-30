@@ -5,7 +5,6 @@ import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -18,14 +17,14 @@ public class HeightCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public HeightCommand(WooHolograms plugin) {
-        super("height", "设置行高度", "/wh height <名称> <行号> <高度>", "wooholograms.edit");
+        super("height", "cmd.desc-height", "cmd.usage-height", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.height-usage");
             return true;
         }
 
@@ -33,7 +32,7 @@ public class HeightCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -43,7 +42,7 @@ public class HeightCommand extends Subcommand {
 
             HologramPage page = hologram.getPage(0);
             if (page == null || lineNumber < 1 || lineNumber > page.size()) {
-                sender.sendMessage(ColorUtil.colorize("&c无效的行号！"));
+                plugin.getMessages().send(sender, "general.line-invalid");
                 return true;
             }
 
@@ -53,10 +52,12 @@ public class HeightCommand extends Subcommand {
                 hologram.save();
                 hologram.realignLines();
 
-                sender.sendMessage(ColorUtil.colorize("&a已设置第 " + lineNumber + " 行的高度为 " + height + "！"));
+                plugin.getMessages().send(sender, "cmd.height-success",
+                        "line", String.valueOf(lineNumber),
+                        "height", String.valueOf(height));
             }
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize("&c行号和高度必须是数字！"));
+            plugin.getMessages().send(sender, "cmd.height-must-be-number");
         }
 
         return true;

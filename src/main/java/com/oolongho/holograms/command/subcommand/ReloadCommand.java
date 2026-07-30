@@ -2,7 +2,6 @@ package com.oolongho.holograms.command.subcommand;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ public class ReloadCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ReloadCommand(WooHolograms plugin) {
-        super("reload", "重新加载插件配置", "/wh reload", "wooholograms.admin");
+        super("reload", "cmd.desc-reload", "cmd.usage-reload", "wooholograms.admin");
         this.plugin = plugin;
     }
 
@@ -24,7 +23,7 @@ public class ReloadCommand extends Subcommand {
         plugin.getStorage().reload();
         plugin.getHologramManager().reload();
 
-        sender.sendMessage(ColorUtil.colorize("&a配置已重新加载！"));
+        plugin.getMessages().send(sender, "cmd.reload-success");
         return true;
     }
 

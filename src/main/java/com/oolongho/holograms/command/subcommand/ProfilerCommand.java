@@ -2,7 +2,6 @@ package com.oolongho.holograms.command.subcommand;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.Profiler;
 import org.bukkit.command.CommandSender;
 
@@ -22,7 +21,7 @@ public class ProfilerCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ProfilerCommand(WooHolograms plugin) {
-        super("profiler", "性能分析器", "/wh profiler [on|off|reset]", "wooholograms.command.profiler");
+        super("profiler", "cmd.desc-profiler", "cmd.usage-profiler", "wooholograms.command.profiler");
         this.plugin = plugin;
     }
 
@@ -33,10 +32,10 @@ public class ProfilerCommand extends Subcommand {
         if (args.length == 0) {
             // 显示报告
             if (!profiler.isEnabled()) {
-                sender.sendMessage(ColorUtil.colorize("&e性能分析器未启用，使用 /wh profiler on 启用"));
+                plugin.getMessages().send(sender, "profiler.not-enabled");
                 return true;
             }
-            sender.sendMessage(profiler.getReport());
+            sender.sendMessage(plugin.getMessages().parse(profiler.getReport(plugin.getMessages())));
             return true;
         }
 
@@ -44,17 +43,17 @@ public class ProfilerCommand extends Subcommand {
         switch (action) {
             case "on" -> {
                 profiler.setEnabled(true);
-                sender.sendMessage(ColorUtil.colorize("&a性能分析器已启用"));
+                plugin.getMessages().send(sender, "profiler.enabled");
             }
             case "off" -> {
                 profiler.setEnabled(false);
-                sender.sendMessage(ColorUtil.colorize("&e性能分析器已禁用，统计数据已清除"));
+                plugin.getMessages().send(sender, "profiler.disabled");
             }
             case "reset" -> {
                 profiler.reset();
-                sender.sendMessage(ColorUtil.colorize("&a性能统计数据已重置"));
+                plugin.getMessages().send(sender, "profiler.reset");
             }
-            default -> sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            default -> plugin.getMessages().send(sender, "profiler.usage");
         }
 
         return true;

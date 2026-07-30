@@ -7,7 +7,6 @@ import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
 import com.oolongho.holograms.hologram.HologramType;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.SchedulerUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,7 +32,7 @@ public class HologramDetailGui extends GuiScreen {
     }
 
     public HologramDetailGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName, int pageIndex, int pageGroupIndex) {
-        super("hologram_detail", ColorUtil.colorize("&8全息图: " + hologramName), 54);
+        super("hologram_detail", plugin.getMessages().get("gui.title-detail", "name", hologramName), 54);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -50,50 +49,52 @@ public class HologramDetailGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该全息图已被删除",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
                             "",
-                            "&e点击返回列表"
-                    ))
+                            plugin.getMessages().getString("gui.lore-click-back-list")))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                     })
                     .build());
             return;
         }
-        
+
         if (currentPageIndex >= hologram.getPageCount()) {
             currentPageIndex = Math.max(0, hologram.getPageCount() - 1);
         }
-        
+
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回列表")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-back-list"))
                 .lore(Arrays.asList(
-                        "&7返回全息图列表",
+                        plugin.getMessages().getString("gui.lore-back-list"),
                         "",
-                        "&e点击返回"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-back")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                 })
                 .build());
-        
+
         renderPageButtons(hologram);
-        
+
         setButton(8, GuiButton.builder(Material.NAME_TAG)
-                .name("&f页面管理")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-page-manage"))
                 .lore(Arrays.asList(
                         "",
-                        "&7状态: " + (hologram.isEnabled() ? "&a启用" : "&c禁用"),
-                        "&7总页面: &f" + hologram.getPageCount(),
-                        "&7当前页: &f" + (currentPageIndex + 1),
-                        "&7显示范围: &f" + hologram.getDisplayRange() + " 格",
-                        "&7权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-state",
+                                "state", plugin.getMessages().getRaw(hologram.isEnabled() ? "state-enabled" : "state-disabled")),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-total-pages",
+                                "pages", String.valueOf(hologram.getPageCount())),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-current-page",
+                                "page", String.valueOf(currentPageIndex + 1)),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-display-range",
+                                "range", String.valueOf(hologram.getDisplayRange())),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-permission",
+                                "permission", hologram.getPermission() != null ? hologram.getPermission() : plugin.getMessages().getString("gui.hologram-detail.none")),
                         "",
-                        "&e点击管理页面"
-                ))
+                        plugin.getMessages().getString("gui.hologram-detail.lore-click-manage-page")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
                 })
@@ -134,31 +135,31 @@ public class HologramDetailGui extends GuiScreen {
         // 渲染上一组按钮（槽位1）
         if (pageGroupIndex > 0) {
             setButton(1, GuiButton.builder(Material.SPECTRAL_ARROW)
-                    .name("&f上一组页面")
+                    .name(plugin.getMessages().getString("gui.hologram-detail.btn-prev-group"))
                     .lore(Arrays.asList(
                             "",
-                            "&7切换到第 " + ((pageGroupIndex) * PAGES_PER_GROUP + 1) + " - " + 
-                                    Math.min((pageGroupIndex) * PAGES_PER_GROUP + PAGES_PER_GROUP, pageCount) + " 页",
+                            plugin.getMessages().getString("gui.hologram-detail.lore-group-range",
+                                    "start", String.valueOf((pageGroupIndex) * PAGES_PER_GROUP + 1),
+                                    "end", String.valueOf(Math.min((pageGroupIndex) * PAGES_PER_GROUP + PAGES_PER_GROUP, pageCount))),
                             "",
-                            "&e点击切换"
-                    ))
+                            plugin.getMessages().getString("gui.lore-click-switch")))
                     .onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), 
-                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 
+                        guiManager.openGui(context.getPlayer(),
+                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName,
                                         Math.max(0, groupStartPage - PAGES_PER_GROUP), pageGroupIndex - 1));
                     })
                     .build());
         } else {
             setButton(1, GuiButton.builder(Material.GRAY_STAINED_GLASS_PANE)
-                    .name("&7没有更多页面")
+                    .name(plugin.getMessages().getString("gui.hologram-detail.btn-no-more-pages"))
                     .build());
         }
-        
+
         // 渲染页面按钮（槽位2-5，共4个）
         for (int i = 0; i < PAGES_PER_GROUP; i++) {
             int slot = 2 + i;
             int pageIndex = groupStartPage + i;
-            
+
             if (pageIndex < pageCount) {
                 HologramPage page = hologram.getPage(pageIndex);
                 int lineCount = page != null ? page.size() : 0;
@@ -168,118 +169,122 @@ public class HologramDetailGui extends GuiScreen {
                         actionCount += page.getActions(clickType).size();
                     }
                 }
-                
+
                 boolean isCurrentPage = (pageIndex == currentPageIndex);
                 Material material = isCurrentPage ? Material.FILLED_MAP : Material.MAP;
-                
+
                 List<String> lore = new ArrayList<>();
                 lore.add("");
-                lore.add("&7行数: &f" + lineCount);
-                lore.add("&7动作数: &f" + actionCount);
+                lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-page-lines",
+                        "lines", String.valueOf(lineCount)));
+                lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-page-actions",
+                        "actions", String.valueOf(actionCount)));
                 lore.add("");
                 if (isCurrentPage) {
-                    lore.add("&a当前编辑中");
+                    lore.add(plugin.getMessages().getString("gui.lore-current-editing"));
                 } else {
-                    lore.add("&e点击切换到此页");
+                    lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-click-switch-page"));
                 }
-                
+
                 GuiButton.Builder builder = GuiButton.builder(material)
-                        .name((isCurrentPage ? "&a" : "&f") + "页面 " + (pageIndex + 1))
+                        .name(plugin.getMessages().getString(isCurrentPage ? "gui.hologram-detail.btn-page-current" : "gui.hologram-detail.btn-page",
+                                "page", String.valueOf(pageIndex + 1)))
                         .lore(lore);
-                
+
                 if (isCurrentPage) {
                     builder.glow();
                 }
-                
+
                 final int targetPageIndex = pageIndex;
                 if (!isCurrentPage) {
                     builder.onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), 
+                        guiManager.openGui(context.getPlayer(),
                                 new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, targetPageIndex, pageGroupIndex));
                     });
                 }
-                
+
                 setButton(slot, builder.build());
             } else {
                 // 空页面槽位
                 setButton(slot, GuiButton.builder(Material.MAP)
-                        .name("&7空页面 " + (pageIndex + 1))
+                        .name(plugin.getMessages().getString("gui.hologram-detail.btn-empty-page",
+                                "page", String.valueOf(pageIndex + 1)))
                         .lore(Arrays.asList(
                                 "",
-                                "&7尚未创建",
+                                plugin.getMessages().getString("gui.hologram-detail.lore-empty-page"),
                                 "",
-                                "&7点击添加页面按钮创建"
-                        ))
+                                plugin.getMessages().getString("gui.hologram-detail.lore-empty-page-hint")))
                         .build());
             }
         }
-        
+
         // 渲染下一组按钮（槽位6）
         int totalPages = hologram.getPageCount();
         boolean hasNextGroup = (pageGroupIndex + 1) * PAGES_PER_GROUP < totalPages;
-        
+
         if (hasNextGroup) {
             int nextGroupStart = (pageGroupIndex + 1) * PAGES_PER_GROUP + 1;
             int nextGroupEnd = Math.min((pageGroupIndex + 2) * PAGES_PER_GROUP, totalPages);
             setButton(6, GuiButton.builder(Material.SPECTRAL_ARROW)
-                    .name("&f下一组页面")
+                    .name(plugin.getMessages().getString("gui.hologram-detail.btn-next-group"))
                     .lore(Arrays.asList(
                             "",
-                            "&7切换到第 " + nextGroupStart + " - " + nextGroupEnd + " 页",
+                            plugin.getMessages().getString("gui.hologram-detail.lore-group-range",
+                                    "start", String.valueOf(nextGroupStart),
+                                    "end", String.valueOf(nextGroupEnd)),
                             "",
-                            "&e点击切换"
-                    ))
+                            plugin.getMessages().getString("gui.lore-click-switch")))
                     .onClick(context -> {
-                        guiManager.openGui(context.getPlayer(), 
-                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 
+                        guiManager.openGui(context.getPlayer(),
+                                new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName,
                                         (pageGroupIndex + 1) * PAGES_PER_GROUP, pageGroupIndex + 1));
                     })
                     .build());
         } else {
             setButton(6, GuiButton.builder(Material.LIME_DYE)
-                    .name("&a添加页面")
+                    .name(plugin.getMessages().getString("gui.hologram-detail.btn-add-page"))
                     .lore(Arrays.asList(
-                            "&7在末尾添加新页面",
-                            "&7当前: &f" + pageCount + " 页",
+                            plugin.getMessages().getString("gui.hologram-detail.lore-add-page"),
+                            plugin.getMessages().getString("gui.hologram-detail.lore-add-page-current",
+                                    "pages", String.valueOf(pageCount)),
                             "",
-                            "&e点击添加"
-                    ))
+                            plugin.getMessages().getString("gui.lore-click-add")))
                     .onClick(context -> {
                         Player player = context.getPlayer();
                         HologramPage newPage = hologram.addPage();
                         if (newPage != null) {
                             hologram.save();
-                            player.sendMessage(ColorUtil.colorize("&a已添加新页面！当前共 " + hologram.getPageCount() + " 页。"));
+                            plugin.getMessages().send(player, "gui.msg-page-add-success", "count", String.valueOf(hologram.getPageCount()));
                             int newPageIndex = hologram.getPageCount() - 1;
                             int newGroup = newPageIndex / PAGES_PER_GROUP;
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, newPageIndex, newGroup));
                         } else {
-                            player.sendMessage(ColorUtil.colorize("&c添加页面失败！"));
+                            plugin.getMessages().send(player, "gui.msg-page-add-failed");
                         }
                     })
                     .build());
         }
-        
+
         // 删除页面按钮（槽位7）
         if (pageCount > 1) {
             setButton(7, GuiButton.builder(Material.RED_DYE)
-                    .name("&c删除当前页")
+                    .name(plugin.getMessages().getString("gui.hologram-detail.btn-delete-page"))
                     .lore(Arrays.asList(
-                            "&7删除当前页面 (第 " + (currentPageIndex + 1) + " 页)",
+                            plugin.getMessages().getString("gui.hologram-detail.lore-delete-page",
+                                    "page", String.valueOf(currentPageIndex + 1)),
                             "",
-                            "&c此操作不可撤销！",
+                            plugin.getMessages().getString("gui.hologram-detail.lore-irreversible"),
                             "",
-                            "&e点击删除"
-                    ))
+                            plugin.getMessages().getString("gui.lore-click-delete")))
                     .onClick(context -> {
                         Player player = context.getPlayer();
-                        guiManager.openGui(player, ConfirmGui.create("&c确认删除页面?", confirmed -> {
+                        guiManager.openGui(player, ConfirmGui.createDeletePageConfirm(plugin, hologramName, currentPageIndex, confirmed -> {
                             if (confirmed) {
                                 hologram.removePage(currentPageIndex);
                                 hologram.save();
                                 int newPageIndex = Math.min(currentPageIndex, hologram.getPageCount() - 1);
                                 newPageIndex = Math.max(0, newPageIndex);
-                                player.sendMessage(ColorUtil.colorize("&a已删除页面！当前共 " + hologram.getPageCount() + " 页。"));
+                                plugin.getMessages().send(player, "gui.msg-page-remove-success", "count", String.valueOf(hologram.getPageCount()));
                                 guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, newPageIndex));
                             } else {
                                 guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex, pageGroupIndex));
@@ -289,10 +294,9 @@ public class HologramDetailGui extends GuiScreen {
                     .build());
         } else {
             setButton(7, GuiButton.builder(Material.GRAY_DYE)
-                    .name("&7无法删除")
+                    .name(plugin.getMessages().getString("gui.hologram-detail.btn-cannot-delete"))
                     .lore(Arrays.asList(
-                            "&7至少需要保留一个页面"
-                    ))
+                            plugin.getMessages().getString("gui.hologram-detail.lore-keep-one-page")))
                     .build());
         }
     }
@@ -300,17 +304,16 @@ public class HologramDetailGui extends GuiScreen {
     private void renderBottomButtons(Hologram hologram) {
         // === Upper row (36-44): Common operations ===
         setButton(36, GuiButton.builder(Material.PAPER)
-                .name("&f添加行")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-add-line"))
                 .lore(Arrays.asList(
-                        "&7在末尾添加新行",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-add-line"),
                         "",
-                        "&e点击添加"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-add")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入行文本 (支持颜色代码):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-text"),
                             ChatInputManager.InputType.LINE_TEXT, hologramName, input -> {
                         Hologram h = plugin.getHologramManager().getHologram(hologramName);
                         if (h != null) {
@@ -319,7 +322,7 @@ public class HologramDetailGui extends GuiScreen {
                                 p.addLine(input);
                                 h.save();
                                 h.showToNearby();
-                                player.sendMessage(ColorUtil.colorize("&a已添加新行！"));
+                                plugin.getMessages().send(player, "gui.msg-line-add-success");
                             }
                         }
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -328,29 +331,28 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(37, GuiButton.builder(Material.WRITABLE_BOOK)
-                .name("&f插入行")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-insert-line"))
                 .lore(Arrays.asList(
-                        "&7在指定位置插入行",
-                        "&7格式: 行号 内容",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-insert-line"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-insert-line-format"),
                         "",
-                        "&e点击输入"
-                ))
+                        plugin.getMessages().getString("gui.hologram-detail.lore-click-input")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入 (行号 内容):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-insert"),
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                         Hologram h = plugin.getHologramManager().getHologram(hologramName);
                         if (h == null) {
-                            player.sendMessage(ColorUtil.colorize("&c全息图不存在！"));
+                            plugin.getMessages().send(player, "gui.msg-hologram-not-exists");
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                             return;
                         }
 
                         int spaceIndex = input.indexOf(' ');
                         if (spaceIndex <= 0) {
-                            player.sendMessage(ColorUtil.colorize("&c格式错误！请输入: 行号 内容"));
+                            plugin.getMessages().send(player, "gui.msg-format-error-line");
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                             return;
                         }
@@ -361,17 +363,17 @@ public class HologramDetailGui extends GuiScreen {
 
                             HologramPage p = h.getPage(currentPageIndex);
                             if (p == null) {
-                                player.sendMessage(ColorUtil.colorize("&c页面不存在！"));
+                                plugin.getMessages().send(player, "gui.msg-page-not-exists");
                             } else if (lineNum < 1 || lineNum > p.size() + 1) {
-                                player.sendMessage(ColorUtil.colorize("&c行号必须在 1 到 " + (p.size() + 1) + " 之间！"));
+                                plugin.getMessages().send(player, "gui.msg-line-number-range", "max", String.valueOf(p.size() + 1));
                             } else {
                                 p.insertLine(lineNum - 1, content);
                                 h.save();
                                 h.showToNearby();
-                                player.sendMessage(ColorUtil.colorize("&a已在第 " + lineNum + " 行插入内容！"));
+                                plugin.getMessages().send(player, "gui.msg-line-insert-success", "line", String.valueOf(lineNum));
                             }
                         } catch (NumberFormatException e) {
-                            player.sendMessage(ColorUtil.colorize("&c行号必须是数字！"));
+                            plugin.getMessages().send(player, "gui.msg-line-number-must-be-number");
                         }
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     });
@@ -379,12 +381,12 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(38, GuiButton.builder(hologram.isEnabled() ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name("&f" + (hologram.isEnabled() ? "禁用" : "启用"))
+                .name(plugin.getMessages().getString(hologram.isEnabled() ? "gui.hologram-detail.btn-disable" : "gui.hologram-detail.btn-enable"))
                 .lore(Arrays.asList(
-                        "&7当前状态: " + (hologram.isEnabled() ? "&a启用" : "&c禁用"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-current-state",
+                                "state", plugin.getMessages().getRaw(hologram.isEnabled() ? "state-enabled" : "state-disabled")),
                         "",
-                        "&e点击切换"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-toggle")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     boolean newState = !hologram.isEnabled();
@@ -393,10 +395,10 @@ public class HologramDetailGui extends GuiScreen {
 
                     if (newState) {
                         hologram.showToNearby();
-                        player.sendMessage(ColorUtil.colorize("&a已启用全息图！"));
+                        plugin.getMessages().send(player, "gui.msg-enable");
                     } else {
                         hologram.hideFromAll();
-                        player.sendMessage(ColorUtil.colorize("&c已禁用全息图！"));
+                        plugin.getMessages().send(player, "gui.msg-disable");
                     }
 
                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -404,76 +406,72 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(39, GuiButton.builder(Material.ENDER_PEARL)
-                .name("&f传送")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-teleport"))
                 .lore(Arrays.asList(
-                        "&7传送到全息图位置",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-teleport"),
                         "",
-                        "&e点击传送"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-teleport")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     if (!player.hasPermission("wooholograms.command.teleport")) {
-                        player.sendMessage(ColorUtil.colorize("&c你没有权限执行此操作！"));
+                        plugin.getMessages().send(player, "gui.msg-no-permission");
                         return;
                     }
                     Location loc = hologram.getLocation();
                     if (loc != null && loc.getWorld() != null) {
                         SchedulerUtil.teleportAsync(player, loc);
-                        player.sendMessage(ColorUtil.colorize("&a已传送到全息图位置！"));
+                        plugin.getMessages().send(player, "gui.msg-teleport-success");
                     } else {
-                        player.sendMessage(ColorUtil.colorize("&c全息图位置无效！"));
+                        plugin.getMessages().send(player, "gui.msg-teleport-invalid");
                     }
                 })
                 .build());
 
         setButton(40, GuiButton.builder(Material.RECOVERY_COMPASS)
-                .name("&f移动到此处")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-move-here"))
                 .lore(Arrays.asList(
-                        "&7将全息图移动到你的位置",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-move-here"),
                         "",
-                        "&e点击移动"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-move")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     if (!player.hasPermission("wooholograms.command.movehere")) {
-                        player.sendMessage(ColorUtil.colorize("&c你没有权限执行此操作！"));
+                        plugin.getMessages().send(player, "gui.msg-no-permission");
                         return;
                     }
                     hologram.setLocation(player.getLocation());
                     hologram.save();
                     hologram.showToNearby();
-                    player.sendMessage(ColorUtil.colorize("&a已将全息图移动到当前位置！"));
+                    plugin.getMessages().send(player, "gui.msg-move-success");
                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
                 .build());
 
         setButton(41, GuiButton.builder(Material.COMPASS)
-                .name("&f移动全息图")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-move-hologram"))
                 .lore(Arrays.asList(
-                        "&7移动到坐标或按轴微调",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-move-hologram"),
                         "",
-                        "&e点击打开"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-open")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramMoveGui(plugin, guiManager, chatInputManager, hologramName));
                 })
                 .build());
 
         setButton(42, GuiButton.builder(Material.SLIME_BALL)
-                .name("&f克隆")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-clone"))
                 .lore(Arrays.asList(
-                        "&7克隆此全息图",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-clone"),
                         "",
-                        "&e点击克隆"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-clone")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入目标全息图名称:",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.target-name"),
                             ChatInputManager.InputType.TARGET_NAME, hologramName, input -> {
                         if (plugin.getHologramManager().containsHologram(input)) {
-                            player.sendMessage(ColorUtil.colorize("&c全息图 " + input + " 已存在！"));
+                            plugin.getMessages().send(player, "gui.msg-clone-exists", "name", input);
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                             return;
                         }
@@ -482,10 +480,10 @@ public class HologramDetailGui extends GuiScreen {
 
                         if (target != null) {
                             target.save();
-                            player.sendMessage(ColorUtil.colorize("&a成功克隆到 " + input + "！"));
+                            plugin.getMessages().send(player, "gui.msg-clone-success", "name", input);
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, input, 0));
                         } else {
-                            player.sendMessage(ColorUtil.colorize("&c克隆失败！"));
+                            plugin.getMessages().send(player, "gui.msg-clone-failed");
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                         }
                     });
@@ -493,12 +491,11 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(44, GuiButton.builder(Material.COMMAND_BLOCK)
-                .name("&f动作管理")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-action-manage"))
                 .lore(Arrays.asList(
-                        "&7管理点击动作",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-action-manage"),
                         "",
-                        "&e点击管理"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-manage")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new ActionManageGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
@@ -506,52 +503,53 @@ public class HologramDetailGui extends GuiScreen {
 
         // === Lower row (45-53): Display settings ===
         setButton(45, GuiButton.builder(Material.REPEATER)
-                .name("&f对齐设置")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-alignment"))
                 .lore(Arrays.asList(
-                        "&7设置文本的对齐方式",
-                        "&7当前: &f" + hologram.getAlignment().getDisplayName(),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-alignment"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-alignment-current",
+                                "alignment", plugin.getMessages().getRaw(hologram.getAlignment().getDisplayNameKey())),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new AlignmentSelectGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
                 .build());
 
         setButton(46, GuiButton.builder(Material.RAIL)
-                .name("&f行间距 / 行宽度")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-line-spacing"))
                 .lore(Arrays.asList(
-                        "&7行间距: &f" + hologram.getLineHeight(),
-                        "&7行宽度: &f" + hologram.getLineWidth() + "px",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-line-spacing",
+                                "spacing", String.valueOf(hologram.getLineHeight())),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-line-width",
+                                "width", String.valueOf(hologram.getLineWidth())),
                         "",
-                        "&e左键 &7设置行间距",
-                        "&e右键 &7设置行宽度"
-                ))
+                        plugin.getMessages().getString("gui.hologram-detail.lore-left-set-spacing"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-right-set-width")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     if (context.getClickType().isRightClick()) {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, "请输入行宽度（1-999像素）:", input -> {
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-width"), input -> {
                             try {
                                 int width = Integer.parseInt(input.trim());
                                 if (width < 1 || width > 999) {
-                                    player.sendMessage(ColorUtil.colorize("&c行宽度必须在 1-999 之间！"));
+                                    plugin.getMessages().send(player, "gui.msg-width-range");
                                 } else {
                                     Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                     if (h != null) {
                                         h.setLineWidth(width);
                                         h.save();
-                                        player.sendMessage(ColorUtil.colorize("&a已设置行宽度为 " + width + "px！"));
+                                        plugin.getMessages().send(player, "gui.msg-width-set", "width", String.valueOf(width));
                                     }
                                 }
                             } catch (NumberFormatException e) {
-                                player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                             }
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                         });
                     } else {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, "&a请输入行间距:",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-height"),
                                 ChatInputManager.InputType.LINE_HEIGHT, hologramName, input -> {
                                     try {
                                         double height = Double.parseDouble(input);
@@ -561,10 +559,10 @@ public class HologramDetailGui extends GuiScreen {
                                             h.save();
                                             h.realignLines();
                                             h.showToNearby();
-                                            player.sendMessage(ColorUtil.colorize("&a已设置行间距为 " + height + "！"));
+                                            plugin.getMessages().send(player, "gui.msg-height-set", "height", String.valueOf(height));
                                         }
                                     } catch (NumberFormatException e) {
-                                        player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                        plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                                     }
                                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                                 });
@@ -573,72 +571,74 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(47, GuiButton.builder(Material.WHITE_BANNER)
-                .name("&f双面显示")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-double-sided"))
                 .lore(Arrays.asList(
-                        "&7设置全息图是否双面可见",
-                        "&7当前: " + (hologram.isDoubleSided() ? "&a启用" : "&c禁用"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-double-sided"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-double-sided-current",
+                                "state", plugin.getMessages().getRaw(hologram.isDoubleSided() ? "state-enabled" : "state-disabled")),
                         "",
-                        "&e点击切换"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-toggle")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     hologram.setDoubleSided(!hologram.isDoubleSided());
                     hologram.save();
                     hologram.showToNearby();
-                    player.sendMessage(ColorUtil.colorize("&a双面显示已" + (hologram.isDoubleSided() ? "启用" : "禁用") + "！"));
+                    plugin.getMessages().send(player, "gui.msg-double-sided", "state",
+                            plugin.getMessages().getRaw(hologram.isDoubleSided() ? "state-enabled" : "state-disabled"));
                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
                 .build());
 
         Billboard billboard = hologram.getBillboard();
-        String facingDisplay = billboard.getDisplayName();
+        String facingDisplay = plugin.getMessages().getRaw(billboard.getDisplayNameKey());
         if (billboard == Billboard.FIXED_ANGLE) {
-            facingDisplay += " (yaw=" + hologram.getFacing() + "度";
-            if (hologram.getPitch() != null) {
-                facingDisplay += ", pitch=" + hologram.getPitch() + "度";
-            }
-            facingDisplay += ")";
+            String pitchPart = hologram.getPitch() != null
+                    ? plugin.getMessages().getString("gui.hologram-detail.facing-pitch",
+                            "pitch", String.valueOf(hologram.getPitch()))
+                    : "";
+            facingDisplay += plugin.getMessages().getString("gui.hologram-detail.facing-yaw",
+                    "yaw", String.valueOf(hologram.getFacing()), "pitch", pitchPart);
         }
         setButton(48, GuiButton.builder(Material.SPYGLASS)
-                .name("&f朝向设置")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-facing"))
                 .lore(Arrays.asList(
-                        "&7设置全息图的朝向模式",
-                        "&7当前: &f" + facingDisplay,
+                        plugin.getMessages().getString("gui.hologram-detail.lore-facing"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-facing-current",
+                                "facing", facingDisplay),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new BillboardSelectGui(plugin, guiManager, chatInputManager, hologramName));
                 })
                 .build());
 
         setButton(49, GuiButton.builder(Material.ITEM_FRAME)
-                .name("&f缩放")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-scale"))
                 .lore(Arrays.asList(
-                        "&7设置Display实体的缩放比例",
-                        "&7当前: &f" + String.format("%.1f, %.1f, %.1f", hologram.getScaleX(), hologram.getScaleY(), hologram.getScaleZ()),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-scale"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-scale-current",
+                                "scale", String.format("%.1f, %.1f, %.1f", hologram.getScaleX(), hologram.getScaleY(), hologram.getScaleZ())),
                         "",
-                        "&7左键: &e输入缩放值 (x y z)",
-                        "&7右键: &c重置为默认",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-scale-left"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-scale-right"),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     if (context.getClickType().isRightClick()) {
                         hologram.setScale(1.0f, 1.0f, 1.0f);
                         hologram.save();
                         hologram.showToNearby();
-                        player.sendMessage(ColorUtil.colorize("&a已重置缩放为默认值！"));
+                        plugin.getMessages().send(player, "gui.msg-scale-reset");
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     } else {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, "&a请输入缩放值 (x y z):",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.scale"),
                                 ChatInputManager.InputType.GENERIC, hologramName, input -> {
                                     try {
                                         String[] parts = input.trim().split("\\s+");
                                         if (parts.length != 3) {
-                                            player.sendMessage(ColorUtil.colorize("&c格式错误！请输入: x y z"));
+                                            plugin.getMessages().send(player, "gui.msg-format-error-xyz");
                                         } else {
                                             float x = Float.parseFloat(parts[0]);
                                             float y = Float.parseFloat(parts[1]);
@@ -648,11 +648,14 @@ public class HologramDetailGui extends GuiScreen {
                                                 h.setScale(x, y, z);
                                                 h.save();
                                                 h.showToNearby();
-                                                player.sendMessage(ColorUtil.colorize("&a已设置缩放为 " + String.format("%.1f, %.1f, %.1f", x, y, z) + "！"));
+                                                plugin.getMessages().send(player, "gui.msg-scale-set",
+                                                        "x", String.format("%.1f", x),
+                                                        "y", String.format("%.1f", y),
+                                                        "z", String.format("%.1f", z));
                                             }
                                         }
                                     } catch (NumberFormatException e) {
-                                        player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                        plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                                     }
                                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                                 });
@@ -660,21 +663,21 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
 
-        String glowColorDisplay = hologram.getGlowColor() != -1 ? "#" + String.format("%06X", hologram.getGlowColor() & 0xFFFFFF) : "默认";
+        String glowColorDisplay = hologram.getGlowColor() != -1 ? "#" + String.format("%06X", hologram.getGlowColor() & 0xFFFFFF) : plugin.getMessages().getString("gui.hologram-detail.default");
         setButton(50, GuiButton.builder(Material.GLOWSTONE_DUST)
-                .name("&f发光颜色")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-glow-color"))
                 .lore(Arrays.asList(
-                        "&7设置Display实体的发光颜色",
-                        "&7当前: &f" + glowColorDisplay,
+                        plugin.getMessages().getString("gui.hologram-detail.lore-glow-color"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-glow-color-current",
+                                "color", glowColorDisplay),
                         "",
-                        "&7左键: &e输入颜色值",
-                        "&7右键: &c重置为默认",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-glow-color-left"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-glow-color-right"),
                         "",
-                        "&7支持颜色名称、#RRGGBB 格式",
-                        "&7输入 reset 重置为默认",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-glow-color-format"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-glow-color-reset"),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     if (context.getClickType().isRightClick()) {
@@ -682,12 +685,12 @@ public class HologramDetailGui extends GuiScreen {
                         if (h != null) {
                             h.setGlowColor(-1);
                             h.save();
-                            player.sendMessage(ColorUtil.colorize("&a已重置发光颜色为默认！"));
+                            plugin.getMessages().send(player, "gui.msg-glow-reset");
                         }
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     } else {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, "&a请输入发光颜色 (颜色名称/#RRGGBB/reset):",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.glow-color"),
                                 ChatInputManager.InputType.GENERIC, hologramName, input -> {
                                     input = input.trim();
                                     Hologram h = plugin.getHologramManager().getHologram(hologramName);
@@ -695,15 +698,15 @@ public class HologramDetailGui extends GuiScreen {
                                         if (input.equalsIgnoreCase("reset")) {
                                             h.setGlowColor(-1);
                                             h.save();
-                                            player.sendMessage(ColorUtil.colorize("&a已重置发光颜色为默认！"));
+                                            plugin.getMessages().send(player, "gui.msg-glow-reset");
                                         } else {
                                             int color = parseColor(input);
                                             if (color >= 0) {
                                                 h.setGlowColor(color);
                                                 h.save();
-                                                player.sendMessage(ColorUtil.colorize("&a已设置发光颜色为 #" + String.format("%06X", color) + "！"));
+                                                plugin.getMessages().send(player, "gui.msg-glow-set", "color", "#" + String.format("%06X", color));
                                             } else {
-                                                player.sendMessage(ColorUtil.colorize("&c无效的颜色！请使用颜色名称、#RRGGBB 格式或 reset。"));
+                                                plugin.getMessages().send(player, "gui.msg-glow-color-invalid");
                                             }
                                         }
                                     }
@@ -714,47 +717,51 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(51, GuiButton.builder(Material.BLACK_STAINED_GLASS_PANE)
-                .name("&f背景设置")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-background"))
                 .lore(Arrays.asList(
-                        "&7设置背景透明度、颜色和彩虹渐变",
-                        "&7透明度: &f" + hologram.getBackgroundAlpha(),
-                        "&7颜色: &f#" + String.format("%06X", hologram.getBackgroundColor()),
-                        "&7彩虹渐变: " + (hologram.isChromaBackground() ? "&a启用" : "&c禁用"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-background"),
+                        plugin.getMessages().getString("gui.background.lore-alpha",
+                                "alpha", String.valueOf(hologram.getBackgroundAlpha())),
+                        plugin.getMessages().getString("gui.background.lore-color",
+                                "color", String.format("%06X", hologram.getBackgroundColor())),
+                        plugin.getMessages().getString("gui.background.lore-chroma",
+                                "state", plugin.getMessages().getRaw(hologram.isChromaBackground() ? "state-enabled" : "state-disabled")),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new BackgroundSettingsGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
                 .build());
 
         setButton(52, GuiButton.builder(Material.ENDER_EYE)
-                .name("&f范围 / 权限")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-range-permission"))
                 .lore(Arrays.asList(
-                        "&7显示范围: &f" + hologram.getDisplayRange() + " 格",
-                        "&7更新范围: &f" + hologram.getUpdateRange() + " 格",
-                        "&7权限: &f" + (hologram.getPermission() != null ? hologram.getPermission() : "无"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-display-range",
+                                "range", String.valueOf(hologram.getDisplayRange())),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-update-range",
+                                "range", String.valueOf(hologram.getUpdateRange())),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-permission",
+                                "permission", hologram.getPermission() != null ? hologram.getPermission() : plugin.getMessages().getString("gui.hologram-detail.none")),
                         "",
-                        "&e左键 &7设置显示范围",
-                        "&eShift+左键 &7设置更新范围",
-                        "&e右键 &7设置权限"
-                ))
+                        plugin.getMessages().getString("gui.hologram-detail.lore-left-set-display-range"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-shift-set-update-range"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-right-set-permission")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
                     if (context.getClickType().isRightClick()) {
                         // 右键: 设置权限
-                        chatInputManager.requestInput(player, "&a请输入权限节点 (输入 clear 清除):",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.permission"),
                                 ChatInputManager.InputType.PERMISSION, hologramName, input -> {
                             Hologram h = plugin.getHologramManager().getHologram(hologramName);
                             if (h != null) {
                                 if (input.equalsIgnoreCase("clear")) {
                                     h.setPermission(null);
-                                    player.sendMessage(ColorUtil.colorize("&a已清除权限！"));
+                                    plugin.getMessages().send(player, "gui.msg-permission-clear");
                                 } else {
                                     h.setPermission(input);
-                                    player.sendMessage(ColorUtil.colorize("&a已设置权限为 " + input + "！"));
+                                    plugin.getMessages().send(player, "gui.msg-permission-set", "permission", input);
                                 }
                                 h.save();
                             }
@@ -762,7 +769,7 @@ public class HologramDetailGui extends GuiScreen {
                         });
                     } else if (context.getClickType().isShiftClick()) {
                         // Shift+左键: 设置更新范围
-                        chatInputManager.requestInput(player, "&a请输入更新范围 (格，玩家超出此范围将停止更新占位符):",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.update-range"),
                                 ChatInputManager.InputType.GENERIC, hologramName, input -> {
                             try {
                                 int range = Integer.parseInt(input);
@@ -770,16 +777,16 @@ public class HologramDetailGui extends GuiScreen {
                                 if (h != null) {
                                     h.setUpdateRange(range);
                                     h.save();
-                                    player.sendMessage(ColorUtil.colorize("&a已设置更新范围为 " + range + " 格！"));
+                                    plugin.getMessages().send(player, "gui.msg-update-range-set", "range", String.valueOf(range));
                                 }
                             } catch (NumberFormatException e) {
-                                player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                             }
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                         });
                     } else {
                         // 左键: 设置显示范围
-                        chatInputManager.requestInput(player, "&a请输入显示范围 (格，玩家超出此范围将看不到全息图):",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.display-range"),
                                 ChatInputManager.InputType.GENERIC, hologramName, input -> {
                             try {
                                 int range = Integer.parseInt(input);
@@ -787,10 +794,10 @@ public class HologramDetailGui extends GuiScreen {
                                 if (h != null) {
                                     h.setDisplayRange(range);
                                     h.save();
-                                    player.sendMessage(ColorUtil.colorize("&a已设置显示范围为 " + range + " 格！"));
+                                    plugin.getMessages().send(player, "gui.msg-display-range-set", "range", String.valueOf(range));
                                 }
                             } catch (NumberFormatException e) {
-                                player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                             }
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                         });
@@ -799,22 +806,21 @@ public class HologramDetailGui extends GuiScreen {
                 .build());
 
         setButton(53, GuiButton.builder(Material.REDSTONE_BLOCK)
-                .name("&f删除全息图")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-delete-hologram"))
                 .lore(Arrays.asList(
-                        "&7删除此全息图",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-delete-hologram"),
                         "",
-                        "&e点击删除"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-delete")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     if (!player.hasPermission("wooholograms.command.delete")) {
-                        player.sendMessage(ColorUtil.colorize("&c你没有权限执行此操作！"));
+                        plugin.getMessages().send(player, "gui.msg-no-permission");
                         return;
                     }
-                    guiManager.openGui(player, ConfirmGui.createDeleteConfirm(hologramName, confirmed -> {
+                    guiManager.openGui(player, ConfirmGui.createDeleteConfirm(plugin, hologramName, confirmed -> {
                         if (confirmed) {
                             plugin.getHologramManager().deleteHologram(hologramName);
-                            player.sendMessage(ColorUtil.colorize("&a已删除全息图 " + hologramName + "！"));
+                            plugin.getMessages().send(player, "gui.msg-delete-success", "name", hologramName);
                             guiManager.openGui(player, new HologramListGui(plugin, guiManager, chatInputManager, 0));
                         } else {
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -842,47 +848,51 @@ public class HologramDetailGui extends GuiScreen {
         HologramType type = line.getType();
         Material material;
         String typeDisplay;
-        
+
         switch (type) {
             case ICON:
                 material = Material.ITEM_FRAME;
-                typeDisplay = "&b物品图标";
+                typeDisplay = plugin.getMessages().getString("gui.line-type.icon");
                 break;
             case HEAD:
                 material = Material.PLAYER_HEAD;
-                typeDisplay = "&d玩家头颅";
+                typeDisplay = plugin.getMessages().getString("gui.line-type.head");
                 break;
             case SMALLHEAD:
                 material = Material.PLAYER_HEAD;
-                typeDisplay = "&d小型头颅";
+                typeDisplay = plugin.getMessages().getString("gui.line-type.smallhead");
                 break;
             case ENTITY:
                 material = Material.ZOMBIE_HEAD;
-                typeDisplay = "&c实体显示";
+                typeDisplay = plugin.getMessages().getString("gui.line-type.entity");
                 break;
             case BLOCK:
                 material = Material.STONE;
-                typeDisplay = "&6方块显示";
+                typeDisplay = plugin.getMessages().getString("gui.line-type.block");
                 break;
             case TEXT:
             default:
                 material = Material.PAPER;
-                typeDisplay = "&f文本";
+                typeDisplay = plugin.getMessages().getString("gui.line-type.text");
                 break;
         }
-        
+
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add("&7类型: " + typeDisplay);
-        lore.add("&7内容: &r" + (line.getContent().length() > 30 ? line.getContent().substring(0, 30) + "..." : line.getContent()));
-        lore.add("&7偏移: &f" + String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ()));
-        lore.add("&7高度: &f" + line.getHeight());
+        lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-line-type", "type", typeDisplay));
+        lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-line-content",
+                "content", line.getContent().length() > 30 ? line.getContent().substring(0, 30) + "..." : line.getContent()));
+        lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-line-offset",
+                "offset", String.format("%.2f, %.2f, %.2f", line.getOffsetX(), line.getOffsetY(), line.getOffsetZ())));
+        lore.add(plugin.getMessages().getString("gui.hologram-detail.lore-line-height",
+                "height", String.valueOf(line.getHeight())));
         lore.add("");
-        lore.add("&e点击编辑");
+        lore.add(plugin.getMessages().getString("gui.lore-click-edit"));
 
         // X/Z 偏移非零的行会分裂为独立 TextGroup（独立背景与 Interaction），用附魔光效标识
         GuiButton.Builder builder = GuiButton.builder(material)
-                .name("&f第 " + (lineIndex + 1) + " 行")
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-line",
+                        "index", String.valueOf(lineIndex + 1)))
                 .lore(lore)
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new LineEditGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex, lineIndex));

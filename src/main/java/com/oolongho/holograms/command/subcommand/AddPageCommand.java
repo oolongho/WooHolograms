@@ -4,7 +4,6 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -17,14 +16,14 @@ public class AddPageCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public AddPageCommand(WooHolograms plugin) {
-        super("addpage", "添加一个新页面", "/wh addpage <名称> [内容]", "wooholograms.edit");
+        super("addpage", "cmd.desc-addpage", "cmd.usage-addpage", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.addpage-usage");
             return true;
         }
 
@@ -32,13 +31,13 @@ public class AddPageCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         HologramPage page = hologram.addPage();
         if (page == null) {
-            sender.sendMessage(ColorUtil.colorize("&c添加页面失败！"));
+            plugin.getMessages().send(sender, "page.add-failed");
             return true;
         }
 
@@ -48,7 +47,7 @@ public class AddPageCommand extends Subcommand {
         }
 
         hologram.save();
-        sender.sendMessage(ColorUtil.colorize("&a已添加第 " + hologram.getPageCount() + " 页！"));
+        plugin.getMessages().send(sender, "page.added", "count", String.valueOf(hologram.getPageCount()));
         return true;
     }
 

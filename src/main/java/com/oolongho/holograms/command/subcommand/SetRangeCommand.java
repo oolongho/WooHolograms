@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -16,14 +15,14 @@ public class SetRangeCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetRangeCommand(WooHolograms plugin) {
-        super("setrange", "设置显示范围", "/wh setrange <名称> <范围>", "wooholograms.edit");
+        super("setrange", "cmd.desc-setrange", "cmd.usage-setrange", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.setrange-usage");
             return true;
         }
 
@@ -31,23 +30,23 @@ public class SetRangeCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         try {
             int range = Integer.parseInt(args[1]);
             if (range <= 0) {
-                sender.sendMessage(ColorUtil.colorize("&c范围必须是正整数！"));
+                plugin.getMessages().send(sender, "cmd.setrange-positive");
                 return true;
             }
 
             hologram.setDisplayRange(range);
             hologram.save();
 
-            sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的显示范围设置为 " + range + " 格！"));
+            plugin.getMessages().send(sender, "cmd.setrange-set", "name", name, "range", String.valueOf(range));
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize("&c范围必须是数字！"));
+            plugin.getMessages().send(sender, "cmd.setrange-number");
         }
 
         return true;

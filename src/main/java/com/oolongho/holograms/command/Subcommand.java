@@ -13,24 +13,24 @@ import java.util.List;
 public abstract class Subcommand {
 
     private final String name;
-    private final String description;
-    private final String usage;
+    private final String descriptionKey;
+    private final String usageKey;
     private final String permission;
     private final String commandPermission;
     private boolean playerOnly = false;
 
-    public Subcommand(String name, String description, String permission) {
+    public Subcommand(String name, String descriptionKey, String permission) {
         this.name = name;
-        this.description = description;
-        this.usage = "/" + name;
+        this.descriptionKey = descriptionKey;
+        this.usageKey = "cmd.usage-" + name;
         this.permission = permission;
         this.commandPermission = "wooholograms.command." + name;
     }
 
-    public Subcommand(String name, String description, String usage, String permission) {
+    public Subcommand(String name, String descriptionKey, String usageKey, String permission) {
         this.name = name;
-        this.description = description;
-        this.usage = usage;
+        this.descriptionKey = descriptionKey;
+        this.usageKey = usageKey;
         this.permission = permission;
         this.commandPermission = "wooholograms.command." + name;
     }
@@ -39,12 +39,18 @@ public abstract class Subcommand {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    /**
+     * 获取描述的语言键（调用方通过 {@code plugin.getMessages().getRaw(key)} 解析）
+     */
+    public String getDescriptionKey() {
+        return descriptionKey;
     }
 
-    public String getUsage() {
-        return usage;
+    /**
+     * 获取用法的语言键（调用方通过 {@code plugin.getMessages().getRaw(key)} 解析）
+     */
+    public String getUsageKey() {
+        return usageKey;
     }
 
     public String getPermission() {

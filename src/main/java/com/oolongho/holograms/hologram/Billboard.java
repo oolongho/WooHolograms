@@ -2,25 +2,28 @@ package com.oolongho.holograms.hologram;
 
 public enum Billboard {
 
-    FIXED_ANGLE("fixed_angle", "固定角度"),
-    HORIZONTAL("horizontal", "水平跟随"),
-    VERTICAL("vertical", "垂直跟随"),
-    CENTER("all", "完全跟随");
+    FIXED_ANGLE("fixed_angle", "gui.billboard.name-fixed"),
+    HORIZONTAL("horizontal", "gui.billboard.name-horizontal"),
+    VERTICAL("vertical", "gui.billboard.name-vertical"),
+    CENTER("all", "gui.billboard.name-center");
 
     private final String id;
-    private final String displayName;
+    private final String displayNameKey;
 
-    Billboard(String id, String displayName) {
+    Billboard(String id, String displayNameKey) {
         this.id = id;
-        this.displayName = displayName;
+        this.displayNameKey = displayNameKey;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    /**
+     * 获取显示名称的语言键（纯文本，调用方通过 {@code plugin.getMessages().getRaw(key)} 解析）
+     */
+    public String getDisplayNameKey() {
+        return displayNameKey;
     }
 
     public static Billboard fromId(String id) {

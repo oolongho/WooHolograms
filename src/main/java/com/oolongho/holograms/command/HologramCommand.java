@@ -4,7 +4,6 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.subcommand.*;
 import com.oolongho.holograms.gui.HologramListGui;
 import com.oolongho.holograms.gui.HologramListGui.SortType;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -82,7 +81,7 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
                 if (player.hasPermission("wooholograms.command.gui")) {
                     plugin.getGuiManager().openGui(player, new HologramListGui(plugin, plugin.getGuiManager(), plugin.getChatInputManager(), 0, SortType.NAME, player));
                 } else {
-                    sender.sendMessage(ColorUtil.colorize("&c你没有权限执行此命令！"));
+                    plugin.getMessages().send(sender, "general.no-permission-cmd");
                 }
             } else {
                 subcommandMap.get("help").execute(sender, new String[0]);
@@ -94,17 +93,17 @@ public class HologramCommand implements CommandExecutor, TabCompleter {
         Subcommand subcommand = subcommandMap.get(subcommandName);
 
         if (subcommand == null) {
-            sender.sendMessage(ColorUtil.colorize("&c未知的命令！使用 /wh help 查看帮助。"));
+            plugin.getMessages().send(sender, "general.unknown-command");
             return true;
         }
 
         if (subcommand.isPlayerOnly() && !(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.colorize("&c此命令只能由玩家执行！"));
+            plugin.getMessages().send(sender, "general.player-only");
             return true;
         }
 
         if (!subcommand.hasPermission(sender)) {
-            sender.sendMessage(ColorUtil.colorize("&c你没有权限执行此命令！"));
+            plugin.getMessages().send(sender, "general.no-permission-cmd");
             return true;
         }
 

@@ -3,10 +3,8 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,14 +14,14 @@ public class SetIntervalCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetIntervalCommand(WooHolograms plugin) {
-        super("setinterval", "设置更新间隔", "/wh setinterval <名称> <tick>", "wooholograms.edit");
+        super("setinterval", "cmd.desc-setinterval", "cmd.usage-setinterval", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.setinterval-usage");
             return true;
         }
 
@@ -31,23 +29,24 @@ public class SetIntervalCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         try {
             int interval = Integer.parseInt(args[1]);
             if (interval <= 0) {
-                sender.sendMessage(ColorUtil.colorize("&c间隔必须是正整数！"));
+                plugin.getMessages().send(sender, "cmd.setinterval-positive");
                 return true;
             }
 
             hologram.setUpdateInterval(interval);
             hologram.save();
 
-            sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的更新间隔设置为 " + interval + " tick！"));
+            plugin.getMessages().send(sender, "cmd.setinterval-set",
+                    "name", name, "interval", String.valueOf(interval));
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize("&c间隔必须是数字！"));
+            plugin.getMessages().send(sender, "cmd.setinterval-number");
         }
 
         return true;
@@ -65,6 +64,6 @@ public class SetIntervalCommand extends Subcommand {
                     .filter(i -> i.startsWith(args[1]))
                     .collect(Collectors.toList());
         }
-        return new ArrayList<>();
+        return java.util.Collections.emptyList();
     }
 }

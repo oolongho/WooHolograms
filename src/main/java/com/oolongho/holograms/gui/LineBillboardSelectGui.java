@@ -5,7 +5,6 @@ import com.oolongho.holograms.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -22,7 +21,7 @@ public class LineBillboardSelectGui extends GuiScreen {
 
     public LineBillboardSelectGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                                    String hologramName, int pageIndex, int lineIndex) {
-        super("line_billboard_select", ColorUtil.colorize("&8行朝向设置"), 27);
+        super("line_billboard_select", plugin.getMessages().get("gui.title-line-billboard-select"), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -39,8 +38,8 @@ public class LineBillboardSelectGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
-                    .lore(Arrays.asList("", "&7该全息图已被删除", "", "&e点击返回列表"))
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
+                    .lore(Arrays.asList("", plugin.getMessages().getString("gui.lore-hologram-deleted"), "", plugin.getMessages().getString("gui.lore-click-back-list")))
                     .onClick(context -> guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0)))
                     .build());
             return;
@@ -49,8 +48,8 @@ public class LineBillboardSelectGui extends GuiScreen {
         HologramPage page = hologram.getPage(pageIndex);
         if (page == null || lineIndex < 0 || lineIndex >= page.size()) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&f行不存在")
-                    .lore(Arrays.asList("", "&7该行已被删除", "", "&e点击返回详情"))
+                    .name(plugin.getMessages().getString("gui.btn-line-not-exists"))
+                    .lore(Arrays.asList("", plugin.getMessages().getString("gui.lore-line-deleted"), "", plugin.getMessages().getString("gui.lore-click-back-detail")))
                     .onClick(context -> guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex)))
                     .build());
             return;
@@ -61,39 +60,39 @@ public class LineBillboardSelectGui extends GuiScreen {
         boolean isOverriding = line.getBillboard() != null;
 
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
-                .lore(Arrays.asList("", "&7返回行编辑", "", "&e点击返回"))
+                .name(plugin.getMessages().getString("gui.btn-back"))
+                .lore(Arrays.asList("", plugin.getMessages().getString("gui.lore-back-edit"), "", plugin.getMessages().getString("gui.lore-click-back")))
                 .onClick(context -> guiManager.openGui(context.getPlayer(), new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex)))
                 .build());
 
-        String currentDisplay = currentBillboard.getDisplayName();
+        String currentDisplay = plugin.getMessages().getRaw(currentBillboard.getDisplayNameKey());
         setButton(4, GuiButton.builder(Material.COMPASS)
-                .name("&f当前朝向模式")
+                .name(plugin.getMessages().getString("gui.line-billboard.current-mode"))
                 .lore(Arrays.asList(
                         "",
-                        "&7" + currentDisplay,
-                        isOverriding ? "&a(行独立设置)" : "&7(跟随整体)",
+                        plugin.getMessages().getString("gui.line-billboard.current-display", "mode", currentDisplay),
+                        isOverriding ? plugin.getMessages().getString("gui.line-billboard.override-line") : plugin.getMessages().getString("gui.line-billboard.follow-overall"),
                         ""
                 ))
                 .build());
 
         setButton(10, GuiButton.builder(Material.STONE_BUTTON)
-                .name("&f固定角度")
+                .name(plugin.getMessages().getString("gui.line-billboard.fixed-angle"))
                 .lore(Arrays.asList(
-                        "&7使用固定角度朝向",
+                        plugin.getMessages().getString("gui.line-billboard.fixed-angle-desc"),
                         "",
-                        currentBillboard == Billboard.FIXED_ANGLE && isOverriding ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.FIXED_ANGLE && isOverriding ? plugin.getMessages().getString("gui.lore-current-selected") : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
-                    chatInputManager.requestInput(player, "&a请输入固定角度 (0-360度):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-billboard-angle"),
                             ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
                                 try {
                                     float angle = Float.parseFloat(input);
                                     setLineBillboard(player, Billboard.FIXED_ANGLE, angle);
                                 } catch (NumberFormatException e) {
-                                    player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                    plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                                     guiManager.openGui(player, new LineBillboardSelectGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
                                 }
                             });
@@ -101,42 +100,42 @@ public class LineBillboardSelectGui extends GuiScreen {
                 .build());
 
         setButton(12, GuiButton.builder(Material.END_ROD)
-                .name("&f垂直跟随")
+                .name(plugin.getMessages().getString("gui.line-billboard.vertical"))
                 .lore(Arrays.asList(
-                        "&7垂直方向跟随玩家视角",
+                        plugin.getMessages().getString("gui.line-billboard.vertical-desc"),
                         "",
-                        currentBillboard == Billboard.VERTICAL && isOverriding ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.VERTICAL && isOverriding ? plugin.getMessages().getString("gui.lore-current-selected") : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> setLineBillboard(context.getPlayer(), Billboard.VERTICAL, 0))
                 .build());
 
         setButton(14, GuiButton.builder(Material.RAIL)
-                .name("&f水平跟随")
+                .name(plugin.getMessages().getString("gui.line-billboard.horizontal"))
                 .lore(Arrays.asList(
-                        "&7水平方向跟随玩家视角",
+                        plugin.getMessages().getString("gui.line-billboard.horizontal-desc"),
                         "",
-                        currentBillboard == Billboard.HORIZONTAL && isOverriding ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.HORIZONTAL && isOverriding ? plugin.getMessages().getString("gui.lore-current-selected") : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> setLineBillboard(context.getPlayer(), Billboard.HORIZONTAL, 0))
                 .build());
 
         setButton(16, GuiButton.builder(Material.END_CRYSTAL)
-                .name("&f完全跟随")
+                .name(plugin.getMessages().getString("gui.line-billboard.center"))
                 .lore(Arrays.asList(
-                        "&7完全跟随玩家视角",
+                        plugin.getMessages().getString("gui.line-billboard.center-desc"),
                         "",
-                        currentBillboard == Billboard.CENTER && isOverriding ? "&a当前选择" : "&e点击选择"
+                        currentBillboard == Billboard.CENTER && isOverriding ? plugin.getMessages().getString("gui.lore-current-selected") : plugin.getMessages().getString("gui.lore-click-select")
                 ))
                 .onClick(context -> setLineBillboard(context.getPlayer(), Billboard.CENTER, 0))
                 .build());
 
         setButton(22, GuiButton.builder(Material.BARRIER)
-                .name("&c重置为跟随整体")
+                .name(plugin.getMessages().getString("gui.line-billboard.reset"))
                 .lore(Arrays.asList(
-                        "&7取消此行的独立朝向设置",
-                        "&7使用全息图整体的朝向模式",
+                        plugin.getMessages().getString("gui.line-billboard.reset-desc-1"),
+                        plugin.getMessages().getString("gui.line-billboard.reset-desc-2"),
                         "",
-                        isOverriding ? "&e点击重置" : "&7当前已是跟随整体"
+                        isOverriding ? plugin.getMessages().getString("gui.lore-click-reset") : plugin.getMessages().getString("gui.line-billboard.already-follow")
                 ))
                 .onClick(context -> {
                     if (!isOverriding) return;
@@ -150,7 +149,7 @@ public class LineBillboardSelectGui extends GuiScreen {
                                 l.setBillboard(null);
                                 h.save();
                                 h.showToNearby();
-                                player.sendMessage(ColorUtil.colorize("&a已重置为跟随整体朝向！"));
+                                plugin.getMessages().send(player, "gui.msg-facing-reset");
                             }
                         }
                     }
@@ -174,7 +173,7 @@ public class LineBillboardSelectGui extends GuiScreen {
                     }
                     h.save();
                     h.showToNearby();
-                    player.sendMessage(ColorUtil.colorize("&a已设置行朝向模式为 " + billboard.getDisplayName() + "！"));
+                    plugin.getMessages().send(player, "gui.msg-line-billboard-set", "mode", plugin.getMessages().getRaw(billboard.getDisplayNameKey()));
                 }
             }
         }

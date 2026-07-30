@@ -8,7 +8,6 @@ import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -32,14 +31,14 @@ public class ConvertCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public ConvertCommand(WooHolograms plugin) {
-        super("convert", "从其他插件导入全息图数据", "/wh convert <holographicdisplays|hd|cmi>", "wooholograms.convert");
+        super("convert", "cmd.desc-convert", "cmd.usage-convert", "wooholograms.convert");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.usage")));
+            plugin.getMessages().send(sender, "convert.usage");
             return true;
         }
 
@@ -47,7 +46,7 @@ public class ConvertCommand extends Subcommand {
         switch (source) {
             case "holographicdisplays", "hd" -> convertHolographicDisplays(sender);
             case "cmi" -> convertCMI(sender);
-            default -> sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.unknown-source", "source", args[0])));
+            default -> plugin.getMessages().send(sender, "convert.unknown-source", "source", args[0]);
         }
         return true;
     }
@@ -61,21 +60,21 @@ public class ConvertCommand extends Subcommand {
         File hdDir = new File(pluginsDir, "HolographicDisplays");
 
         if (!hdDir.exists() || !hdDir.isDirectory()) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.hd-not-found")));
+            plugin.getMessages().send(sender, "convert.hd-not-found");
             return;
         }
 
         // 检查是否为 HD 3.x（数据库存储）
         File databaseFile = new File(hdDir, "database.db");
         if (databaseFile.exists()) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.hd-v3-unsupported")));
+            plugin.getMessages().send(sender, "convert.hd-v3-unsupported");
             return;
         }
 
         // 扫描所有 .yml 文件
         File[] ymlFiles = hdDir.listFiles((dir, name) -> name.endsWith(".yml"));
         if (ymlFiles == null || ymlFiles.length == 0) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.hd-no-data")));
+            plugin.getMessages().send(sender, "convert.hd-no-data");
             return;
         }
 
@@ -84,7 +83,7 @@ public class ConvertCommand extends Subcommand {
         int skipped = 0;
         int failed = 0;
 
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.hd-start", "count", String.valueOf(totalFiles))));
+        plugin.getMessages().send(sender, "convert.hd-start", "count", String.valueOf(totalFiles));
 
         for (File ymlFile : ymlFiles) {
             YamlConfiguration config = YamlConfiguration.loadConfiguration(ymlFile);
@@ -143,10 +142,10 @@ public class ConvertCommand extends Subcommand {
         }
 
         // 输出统计结果
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.hd-result",
+        plugin.getMessages().send(sender, "convert.hd-result",
                 "imported", String.valueOf(imported),
                 "skipped", String.valueOf(skipped),
-                "failed", String.valueOf(failed))));
+                "failed", String.valueOf(failed));
     }
 
     /**
@@ -208,7 +207,7 @@ public class ConvertCommand extends Subcommand {
         }
 
         if (!cmiFile.exists()) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.cmi-not-found")));
+            plugin.getMessages().send(sender, "convert.cmi-not-found");
             return;
         }
 
@@ -312,13 +311,13 @@ public class ConvertCommand extends Subcommand {
                     if (page == null) continue;
 
                     if (i > 0) {
-                        HologramLine prevLine = page.addLine("&c< 上一页");
+                        HologramLine prevLine = page.addLine(plugin.getMessages().getRaw("gui.convert.prev-page"));
                         if (prevLine != null) {
                             prevLine.addAction(ClickType.ANY, new Action(ActionType.PREV_PAGE, hologram.getName()));
                         }
                     }
                     if (i < hologram.getPageCount() - 1) {
-                        HologramLine nextLine = page.addLine("&a下一页 >");
+                        HologramLine nextLine = page.addLine(plugin.getMessages().getRaw("gui.convert.next-page"));
                         if (nextLine != null) {
                             nextLine.addAction(ClickType.ANY, new Action(ActionType.NEXT_PAGE, hologram.getName()));
                         }
@@ -331,10 +330,10 @@ public class ConvertCommand extends Subcommand {
         }
 
         // 输出统计结果
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("convert.cmi-result",
+        plugin.getMessages().send(sender, "convert.cmi-result",
                 "imported", String.valueOf(imported),
                 "skipped", String.valueOf(skipped),
-                "failed", String.valueOf(failed))));
+                "failed", String.valueOf(failed));
     }
 
     /**

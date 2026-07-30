@@ -1,6 +1,7 @@
 package com.oolongho.holograms.gui;
 
-import com.oolongho.holograms.util.ColorUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -12,8 +13,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class GuiButton {
+
+    /** MiniMessage 实例，用于解析按钮名称和 lore 中的 MiniMessage 标签 */
+    private static final MiniMessage MINI = MiniMessage.miniMessage();
 
     private final ItemStack itemStack;
     private Consumer<ClickContext> clickHandler;
@@ -105,14 +110,13 @@ public class GuiButton {
 
         public GuiButton build() {
             if (name != null) {
-                meta.setDisplayName(ColorUtil.colorize(name));
+                meta.displayName(MINI.deserialize(name));
             }
             if (!lore.isEmpty()) {
-                List<String> coloredLore = new ArrayList<>();
-                for (String line : lore) {
-                    coloredLore.add(ColorUtil.colorize(line));
-                }
-                meta.setLore(coloredLore);
+                List<Component> loreComponents = lore.stream()
+                        .map(MINI::deserialize)
+                        .collect(Collectors.toList());
+                meta.lore(loreComponents);
             }
             
             if (glowing) {

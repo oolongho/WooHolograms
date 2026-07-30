@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -15,14 +14,14 @@ public class DisableCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public DisableCommand(WooHolograms plugin) {
-        super("disable", "禁用一个全息图", "/wh disable <名称>", "wooholograms.admin");
+        super("disable", "cmd.desc-disable", "cmd.usage-disable", "wooholograms.admin");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.disable-usage");
             return true;
         }
 
@@ -30,12 +29,12 @@ public class DisableCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         if (!hologram.isEnabled()) {
-            sender.sendMessage(ColorUtil.colorize("&e全息图 " + name + " 已经是禁用状态！"));
+            plugin.getMessages().send(sender, "cmd.disable-already", "name", name);
             return true;
         }
 
@@ -43,7 +42,7 @@ public class DisableCommand extends Subcommand {
         hologram.save();
         hologram.hideFromAll();
 
-        sender.sendMessage(ColorUtil.colorize("&a已禁用全息图 " + name + "！"));
+        plugin.getMessages().send(sender, "cmd.disable-success", "name", name);
         return true;
     }
 

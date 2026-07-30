@@ -2,7 +2,6 @@ package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,7 +24,7 @@ public class HologramMoveGui extends GuiScreen {
     private final String hologramName;
 
     public HologramMoveGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName) {
-        super("hologram_move", ColorUtil.colorize("&8移动全息图: " + hologramName), 27);
+        super("hologram_move", plugin.getMessages().get("gui.title-hologram-move", "name", hologramName), 27);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -37,14 +36,14 @@ public class HologramMoveGui extends GuiScreen {
         // 填充背景
         for (int i = 0; i < 27; i++) {
             setButton(i, GuiButton.builder(Material.GRAY_STAINED_GLASS_PANE)
-                    .name("&r")
+                    .name("<reset>")
                     .build());
         }
 
         // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
-                .lore(Arrays.asList("&7返回全息图详情页"))
+                .name(plugin.getMessages().getString("gui.btn-back"))
+                .lore(Arrays.asList(plugin.getMessages().getString("gui.lore-back-detail")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                 })
@@ -52,29 +51,29 @@ public class HologramMoveGui extends GuiScreen {
 
         // 移动到坐标
         setButton(4, GuiButton.builder(Material.ENDER_PEARL)
-                .name("&f移动到坐标")
+                .name(plugin.getMessages().getString("gui.move.to-coords"))
                 .lore(Arrays.asList(
-                        "&7将全息图移动到指定坐标",
-                        "&7格式: x y z [世界]",
+                        plugin.getMessages().getString("gui.move.to-coords-desc-1"),
+                        plugin.getMessages().getString("gui.move.to-coords-desc-2"),
                         "",
-                        "&e点击输入"
+                        plugin.getMessages().getString("gui.lore-click-input")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入坐标 (x y z [世界]):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.move-coords"),
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                                 Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                 if (h == null) {
-                                    player.sendMessage(ColorUtil.colorize("&c全息图不存在！"));
+                                    plugin.getMessages().send(player, "gui.msg-hologram-not-exists");
                                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                                     return;
                                 }
 
                                 String[] parts = input.split(" ");
                                 if (parts.length < 3) {
-                                    player.sendMessage(ColorUtil.colorize("&c格式错误！请输入: x y z [世界]"));
+                                    plugin.getMessages().send(player, "gui.msg-format-error-xyz-world");
                                     guiManager.openGui(player, new HologramMoveGui(plugin, guiManager, chatInputManager, hologramName));
                                     return;
                                 }
@@ -86,15 +85,17 @@ public class HologramMoveGui extends GuiScreen {
                                     World world = parts.length > 3 ? Bukkit.getWorld(parts[3]) : h.getLocation().getWorld();
 
                                     if (world == null) {
-                                        player.sendMessage(ColorUtil.colorize("&c世界不存在！"));
+                                        plugin.getMessages().send(player, "gui.msg-world-not-found");
                                     } else {
                                         Location loc = new Location(world, x, y, z, h.getLocation().getYaw(), h.getLocation().getPitch());
                                         h.teleport(loc);
                                         h.save();
-                                        player.sendMessage(ColorUtil.colorize("&a已移动到 " + world.getName() + " (" + x + ", " + y + ", " + z + ")！"));
+                                        plugin.getMessages().send(player, "gui.msg-moved-to",
+                                                "world", world.getName(), "x", String.valueOf(x),
+                                                "y", String.valueOf(y), "z", String.valueOf(z));
                                     }
                                 } catch (NumberFormatException e) {
-                                    player.sendMessage(ColorUtil.colorize("&c坐标格式错误！"));
+                                    plugin.getMessages().send(player, "gui.msg-coords-format-error");
                                 }
                                 guiManager.openGui(player, new HologramMoveGui(plugin, guiManager, chatInputManager, hologramName));
                             });
@@ -102,16 +103,16 @@ public class HologramMoveGui extends GuiScreen {
                 .build());
 
         // X 轴移动
-        setButton(12, createAxisButton(Material.RED_STAINED_GLASS_PANE, "&cX 轴", 'x'));
+        setButton(12, createAxisButton(Material.RED_STAINED_GLASS_PANE, plugin.getMessages().getString("gui.move.x-axis"), 'x'));
 
         // 当前坐标显示
         setButton(13, createCoordinateButton());
 
         // Z 轴移动
-        setButton(14, createAxisButton(Material.BLUE_STAINED_GLASS_PANE, "&9Z 轴", 'z'));
+        setButton(14, createAxisButton(Material.BLUE_STAINED_GLASS_PANE, plugin.getMessages().getString("gui.move.z-axis"), 'z'));
 
         // Y 轴移动
-        setButton(22, createAxisButton(Material.GREEN_STAINED_GLASS_PANE, "&aY 轴", 'y'));
+        setButton(22, createAxisButton(Material.GREEN_STAINED_GLASS_PANE, plugin.getMessages().getString("gui.move.y-axis"), 'y'));
     }
 
     private GuiButton createCoordinateButton() {
@@ -120,16 +121,16 @@ public class HologramMoveGui extends GuiScreen {
         if (h != null) {
             Location loc = h.getLocation();
             if (loc.getWorld() != null) {
-                lore.add("&7世界: &f" + loc.getWorld().getName());
+                lore.add(plugin.getMessages().getString("gui.move.world", "world", loc.getWorld().getName()));
             }
-            lore.add("&cX: &f" + String.format("%.1f", loc.getX()));
-            lore.add("&aY: &f" + String.format("%.1f", loc.getY()));
-            lore.add("&9Z: &f" + String.format("%.1f", loc.getZ()));
+            lore.add(plugin.getMessages().getString("gui.move.x-coord", "value", String.format("%.1f", loc.getX())));
+            lore.add(plugin.getMessages().getString("gui.move.y-coord", "value", String.format("%.1f", loc.getY())));
+            lore.add(plugin.getMessages().getString("gui.move.z-coord", "value", String.format("%.1f", loc.getZ())));
         } else {
-            lore.add("&c全息图不存在");
+            lore.add(plugin.getMessages().getString("gui.move.hologram-not-exists"));
         }
         return GuiButton.builder(Material.COMPASS)
-                .name("&f当前坐标")
+                .name(plugin.getMessages().getString("gui.move.current-coords"))
                 .lore(lore)
                 .build();
     }
@@ -142,7 +143,7 @@ public class HologramMoveGui extends GuiScreen {
                     Player player = context.getPlayer();
                     Hologram h = plugin.getHologramManager().getHologram(hologramName);
                     if (h == null) {
-                        player.sendMessage(ColorUtil.colorize("&c全息图不存在！"));
+                        plugin.getMessages().send(player, "gui.msg-hologram-not-exists");
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                         return;
                     }
@@ -182,13 +183,13 @@ public class HologramMoveGui extends GuiScreen {
                 case 'z' -> loc.getZ();
                 default -> 0;
             };
-            lore.add("&7当前: &f" + String.format("%.1f", val));
+            lore.add(plugin.getMessages().getString("gui.move.current-value", "value", String.format("%.1f", val)));
             lore.add("");
         }
-        lore.add("&7左键 &a+0.1");
-        lore.add("&7右键 &c-0.1");
-        lore.add("&7SHIFT+左键 &a+1");
-        lore.add("&7SHIFT+右键 &c-1");
+        lore.add(plugin.getMessages().getString("gui.move.axis-left-click"));
+        lore.add(plugin.getMessages().getString("gui.move.axis-right-click"));
+        lore.add(plugin.getMessages().getString("gui.move.axis-shift-left-click"));
+        lore.add(plugin.getMessages().getString("gui.move.axis-shift-right-click"));
         return lore;
     }
 

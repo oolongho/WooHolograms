@@ -5,7 +5,6 @@ import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -18,14 +17,14 @@ public class OffsetCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public OffsetCommand(WooHolograms plugin) {
-        super("offset", "设置行偏移", "/wh offset <名称> <行号> <x> <y> <z>", "wooholograms.edit");
+        super("offset", "cmd.desc-offset", "cmd.usage-offset", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 5) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.offset-usage");
             return true;
         }
 
@@ -33,7 +32,7 @@ public class OffsetCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -45,7 +44,7 @@ public class OffsetCommand extends Subcommand {
 
             HologramPage page = hologram.getPage(0);
             if (page == null || lineNumber < 1 || lineNumber > page.size()) {
-                sender.sendMessage(ColorUtil.colorize("&c无效的行号！"));
+                plugin.getMessages().send(sender, "general.line-invalid");
                 return true;
             }
 
@@ -54,10 +53,14 @@ public class OffsetCommand extends Subcommand {
                 line.setOffset(offsetX, offsetY, offsetZ);
                 hologram.save();
 
-                sender.sendMessage(ColorUtil.colorize("&a已设置第 " + lineNumber + " 行的偏移为 (" + offsetX + ", " + offsetY + ", " + offsetZ + ")！"));
+                plugin.getMessages().send(sender, "cmd.offset-success",
+                        "line", String.valueOf(lineNumber),
+                        "ox", String.valueOf(offsetX),
+                        "oy", String.valueOf(offsetY),
+                        "oz", String.valueOf(offsetZ));
             }
         } catch (NumberFormatException e) {
-            sender.sendMessage(ColorUtil.colorize("&c行号和偏移值必须是数字！"));
+            plugin.getMessages().send(sender, "cmd.offset-must-be-number");
         }
 
         return true;

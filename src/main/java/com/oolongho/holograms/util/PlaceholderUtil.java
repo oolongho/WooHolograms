@@ -52,7 +52,7 @@ public class PlaceholderUtil {
         }
 
         Profiler profiler = Profiler.getInstance();
-        if (profiler.isEnabled()) profiler.start("占位符");
+        if (profiler.isEnabled()) profiler.start("placeholder");
         try {
 
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(text);
@@ -73,7 +73,7 @@ public class PlaceholderUtil {
         return result.toString();
 
         } finally {
-            if (profiler.isEnabled()) profiler.stop("占位符");
+            if (profiler.isEnabled()) profiler.stop("placeholder");
         }
     }
     

@@ -10,34 +10,34 @@ public enum ClickType {
     /**
      * 左键点击
      */
-    LEFT("left", "左键点击"),
-    
+    LEFT("left", "click_types.left"),
+
     /**
      * 右键点击
      */
-    RIGHT("right", "右键点击"),
-    
+    RIGHT("right", "click_types.right"),
+
     /**
      * Shift + 左键点击
      */
-    SHIFT_LEFT("shift_left", "Shift + 左键点击"),
-    
+    SHIFT_LEFT("shift_left", "click_types.shift_left"),
+
     /**
      * Shift + 右键点击
      */
-    SHIFT_RIGHT("shift_right", "Shift + 右键点击"),
-    
+    SHIFT_RIGHT("shift_right", "click_types.shift_right"),
+
     /**
      * 任意点击
      */
-    ANY("any", "任意点击");
+    ANY("any", "click_types.any");
 
     private final String id;
-    private final String description;
+    private final String descriptionKey;
 
-    ClickType(String id, String description) {
+    ClickType(String id, String descriptionKey) {
         this.id = id;
-        this.description = description;
+        this.descriptionKey = descriptionKey;
     }
 
     /**
@@ -49,11 +49,10 @@ public enum ClickType {
     }
 
     /**
-     * 获取描述
-     * @return 描述
+     * 获取描述的语言键（调用方通过 {@code plugin.getMessages().getRaw(key)} 解析）
      */
-    public String getDescription() {
-        return description;
+    public String getDescriptionKey() {
+        return descriptionKey;
     }
 
     /**

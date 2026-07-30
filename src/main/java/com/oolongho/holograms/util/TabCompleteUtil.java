@@ -476,34 +476,4 @@ public class TabCompleteUtil {
         }
         return completions;
     }
-
-    /**
-     * 获取帮助信息
-     */
-    public static List<String> getHelpMessages() {
-        List<String> messages = new ArrayList<>();
-        messages.add("&e========== 行内容格式帮助 ==========");
-        messages.add("&7行类型:");
-        messages.add("&f#ICON:<材质> &7- 显示物品图标");
-        messages.add("&f#HEAD:<类型> &7- 显示大头颅");
-        messages.add("&f#SMALLHEAD:<类型> &7- 显示小头颅");
-        messages.add("&f#ENTITY:<类型> &7- 显示实体");
-        messages.add("");
-        messages.add("&7头颅类型:");
-        messages.add("&fPLAYER_HEAD (玩家名) &7- 玩家头颅");
-        messages.add("&fURL (Base64) &7- URL 材质");
-        messages.add("&fHDB (ID) &7- HeadDatabase");
-        messages.add("");
-        messages.add("&7变量:");
-        messages.add("&f{player} &7- 玩家名称");
-        messages.add("&f%player_name% &7- PlaceholderAPI 变量");
-        messages.add("");
-        messages.add("&7物品参数:");
-        messages.add("&fcustom-model-data:<值> &7- 自定义模型");
-        messages.add("&fcolor:<RGB> &7- 皮革颜色");
-        messages.add("&fname:<名称> &7- 自定义名称");
-        messages.add("&fglow &7- 发光效果");
-        messages.add("&e====================================");
-        return messages;
-    }
 }

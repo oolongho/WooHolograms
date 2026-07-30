@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -15,14 +14,14 @@ public class SetPermissionCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetPermissionCommand(WooHolograms plugin) {
-        super("setpermission", "设置查看权限", "/wh setpermission <名称> [权限]", "wooholograms.admin");
+        super("setpermission", "cmd.desc-setpermission", "cmd.usage-setpermission", "wooholograms.admin");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.setpermission-usage");
             return true;
         }
 
@@ -30,7 +29,7 @@ public class SetPermissionCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -39,9 +38,9 @@ public class SetPermissionCommand extends Subcommand {
         hologram.save();
 
         if (permission == null || permission.isEmpty()) {
-            sender.sendMessage(ColorUtil.colorize("&a已清除 " + name + " 的查看权限！"));
+            plugin.getMessages().send(sender, "cmd.setpermission-clear", "name", name);
         } else {
-            sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的查看权限设置为 " + permission + "！"));
+            plugin.getMessages().send(sender, "cmd.setpermission-set", "name", name, "permission", permission);
         }
 
         return true;

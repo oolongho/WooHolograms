@@ -4,7 +4,6 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.TabCompleteUtil;
 import org.bukkit.command.CommandSender;
 
@@ -23,14 +22,14 @@ public class AddLineCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public AddLineCommand(WooHolograms plugin) {
-        super("addline", "向全息图添加一行", "/wh addline <名称> <内容>", "wooholograms.edit");
+        super("addline", "cmd.desc-addline", "cmd.usage-addline", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "line.usage");
             return true;
         }
 
@@ -38,21 +37,21 @@ public class AddLineCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.hologram-not-found", "name", name)));
+            plugin.getMessages().send(sender, "general.hologram-not-found", "name", name);
             return true;
         }
 
         String content = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        
+
         HologramPage page = hologram.getPage(0);
         if (page == null) {
             page = hologram.addPage();
         }
-        
+
         page.addLine(content);
         hologram.save();
 
-        sender.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("edit.line-added")));
+        plugin.getMessages().send(sender, "edit.line-added");
         return true;
     }
 

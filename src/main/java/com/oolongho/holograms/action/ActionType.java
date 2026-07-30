@@ -2,7 +2,6 @@ package com.oolongho.holograms.action;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.LocationUtil;
 import com.oolongho.holograms.util.SchedulerUtil;
 import org.bukkit.Bukkit;
@@ -79,7 +78,7 @@ public abstract class ActionType {
 
             String message = String.join(" ", args);
             message = message.replace("{player}", player.getName());
-            player.sendMessage(ColorUtil.colorize(message));
+            player.sendMessage(WooHolograms.getInstance().getMessages().parse(message));
             return true;
         }
         
@@ -107,7 +106,7 @@ public abstract class ActionType {
                     WooHolograms.getInstance().getLogger().warning(
                             String.format("Blocked blacklisted command for player %s: %s", player.getName(), command));
                 }
-                player.sendMessage(ColorUtil.colorize("&c该命令被禁止执行！"));
+                WooHolograms.getInstance().getMessages().send(player, "action.command-blocked");
                 return false;
             }
 
@@ -143,7 +142,7 @@ public abstract class ActionType {
                     WooHolograms.getInstance().getLogger().warning(
                             String.format("Blocked blacklisted console command for player %s: %s", player.getName(), command));
                 }
-                player.sendMessage(ColorUtil.colorize("&c该命令被禁止执行！"));
+                WooHolograms.getInstance().getMessages().send(player, "action.command-blocked");
                 return false;
             }
 

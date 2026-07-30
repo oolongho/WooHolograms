@@ -31,7 +31,10 @@ public class LineActionManageGui extends AbstractActionManageGui {
 
     public LineActionManageGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                                String hologramName, int pageIndex, int lineIndex, ClickType clickType) {
-        super("line_action_manage", "&8行动作管理 - 行 #" + (lineIndex + 1), 54,
+        super("line_action_manage",
+                plugin.getMessages().get("gui.title-line-action-manage",
+                        "line", String.valueOf(lineIndex + 1)),
+                54,
                 plugin, guiManager, chatInputManager, hologramName, pageIndex, clickType);
         this.lineIndex = lineIndex;
         render();
@@ -50,7 +53,7 @@ public class LineActionManageGui extends AbstractActionManageGui {
 
     @Override
     protected String getTargetDescription() {
-        return "行 #" + (lineIndex + 1);
+        return plugin.getMessages().getString("gui.line-action-manage.line-desc", "line", String.valueOf(lineIndex + 1));
     }
 
     @Override
@@ -61,8 +64,8 @@ public class LineActionManageGui extends AbstractActionManageGui {
     @Override
     protected void onNullTarget(Player player) {
         setButton(22, GuiButton.builder(Material.BARRIER)
-                .name("&f行不存在")
-                .lore(Arrays.asList("", "&7该行已被删除", "", "&e点击返回详情"))
+                .name(plugin.getMessages().getString("gui.btn-line-not-exists"))
+                .lore(Arrays.asList("", plugin.getMessages().getString("gui.lore-line-deleted"), "", plugin.getMessages().getString("gui.lore-click-back-detail")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                 })

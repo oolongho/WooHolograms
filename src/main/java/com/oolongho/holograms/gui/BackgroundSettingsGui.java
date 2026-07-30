@@ -3,7 +3,6 @@ package com.oolongho.holograms.gui;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Brightness;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -23,7 +22,7 @@ public class BackgroundSettingsGui extends GuiScreen {
 
     public BackgroundSettingsGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                                   String hologramName, int currentPageIndex) {
-        super("background_settings", ColorUtil.colorize("&8背景设置"), 36);
+        super("background_settings", plugin.getMessages().get("gui.title-background-settings"), 36);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -39,13 +38,12 @@ public class BackgroundSettingsGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(13, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该全息图已被删除",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
                             "",
-                            "&e点击返回"
-                    ))
+                            plugin.getMessages().getString("gui.lore-click-back-list")))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                     })
@@ -55,12 +53,11 @@ public class BackgroundSettingsGui extends GuiScreen {
 
         // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
+                .name(plugin.getMessages().getString("gui.btn-back"))
                 .lore(Arrays.asList(
-                        "&7返回全息图详情",
+                        plugin.getMessages().getString("gui.lore-back-detail"),
                         "",
-                        "&e点击返回"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-back")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
@@ -69,46 +66,52 @@ public class BackgroundSettingsGui extends GuiScreen {
         // 当前背景设置信息
         Brightness brightness = hologram.getBrightness();
         setButton(4, GuiButton.builder(Material.BLACK_STAINED_GLASS_PANE)
-                .name("&f当前背景设置")
+                .name(plugin.getMessages().getString("gui.background.btn-current"))
                 .lore(Arrays.asList(
                         "",
-                        "&7透明度: &f" + hologram.getBackgroundAlpha() + " (0=透明, 255=不透明)",
-                        "&7颜色: &f#" + String.format("%06X", hologram.getBackgroundColor()),
-                        "&7彩虹渐变: " + (hologram.isChromaBackground() ? "&a启用" : "&c禁用"),
-                        "&7亮度: &f" + (brightness != null ? "天空光=" + brightness.getSkyLight() + " 方块光=" + brightness.getBlockLight() : "默认"),
+                        plugin.getMessages().getString("gui.background.lore-alpha",
+                                "alpha", String.valueOf(hologram.getBackgroundAlpha())),
+                        plugin.getMessages().getString("gui.background.lore-color",
+                                "color", String.format("%06X", hologram.getBackgroundColor())),
+                        plugin.getMessages().getString("gui.background.lore-chroma",
+                                "state", plugin.getMessages().getRaw(hologram.isChromaBackground() ? "state-enabled" : "state-disabled")),
+                        plugin.getMessages().getString("gui.background.lore-brightness",
+                                "sky", brightness != null ? String.valueOf(brightness.getSkyLight()) : "",
+                                "block", brightness != null ? String.valueOf(brightness.getBlockLight()) : "",
+                                "default", plugin.getMessages().getString("gui.background.default")),
                         ""
                 ))
                 .build());
 
         // 背景透明度
         setButton(11, GuiButton.builder(Material.GRAY_DYE)
-                .name("&f背景透明度")
+                .name(plugin.getMessages().getString("gui.background.btn-alpha"))
                 .lore(Arrays.asList(
-                        "&7设置文本背景的透明度",
-                        "&7当前: &f" + hologram.getBackgroundAlpha() + " (0=透明, 255=不透明)",
+                        plugin.getMessages().getString("gui.background.lore-alpha-desc"),
+                        plugin.getMessages().getString("gui.background.lore-alpha-current",
+                                "alpha", String.valueOf(hologram.getBackgroundAlpha())),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入背景透明度 (0-255, 0=完全透明, 255=完全不透明):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.bg-alpha"),
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                                 try {
                                     int alpha = Integer.parseInt(input.trim());
                                     if (alpha < 0 || alpha > 255) {
-                                        player.sendMessage(ColorUtil.colorize("&c透明度必须在 0-255 之间！"));
+                                        plugin.getMessages().send(player, "gui.msg-bg-alpha-range");
                                     } else {
                                         Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                         if (h != null) {
                                             h.setBackgroundAlpha(alpha);
                                             h.save();
-                                            player.sendMessage(ColorUtil.colorize("&a已设置背景透明度为 " + alpha + "！"));
+                                            plugin.getMessages().send(player, "gui.msg-bg-alpha-set", "alpha", String.valueOf(alpha));
                                         }
                                     }
                                 } catch (NumberFormatException e) {
-                                    player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                    plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                                 }
                                 guiManager.openGui(player, new BackgroundSettingsGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                             });
@@ -117,24 +120,21 @@ public class BackgroundSettingsGui extends GuiScreen {
 
         // 背景颜色
         setButton(13, GuiButton.builder(Material.GRAY_DYE)
-                .name("&f背景颜色")
+                .name(plugin.getMessages().getString("gui.background.btn-color"))
                 .lore(Arrays.asList(
-                        "&7设置文本背景颜色",
-                        "&7当前: &f#" + String.format("%06X", hologram.getBackgroundColor()),
+                        plugin.getMessages().getString("gui.background.lore-color-desc"),
+                        plugin.getMessages().getString("gui.background.lore-color-current",
+                                "color", String.format("%06X", hologram.getBackgroundColor())),
                         "",
-                        "&7支持颜色名称: white, black, red, green,",
-                        "&7blue, yellow, aqua, gray, dark_gray,",
-                        "&7dark_red, dark_green, dark_blue,",
-                        "&7dark_aqua, dark_purple, gold",
-                        "&7或十六进制: #FF0000",
+                        plugin.getMessages().getString("gui.background.lore-color-names"),
+                        plugin.getMessages().getString("gui.background.lore-color-hex"),
                         "",
-                        "&e点击设置"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-set")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入背景颜色 (颜色名称如 red, 或十六进制如 #FF0000):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.bg-color"),
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                                 input = input.trim();
                                 Hologram h = plugin.getHologramManager().getHologram(hologramName);
@@ -143,9 +143,9 @@ public class BackgroundSettingsGui extends GuiScreen {
                                     if (color >= 0) {
                                         h.setBackgroundColor(color);
                                         h.save();
-                                        player.sendMessage(ColorUtil.colorize("&a已设置背景颜色为 #" + String.format("%06X", color) + "！"));
+                                        plugin.getMessages().send(player, "gui.msg-bg-color-set", "color", "#" + String.format("%06X", color));
                                     } else {
-                                        player.sendMessage(ColorUtil.colorize("&c无效的颜色！请使用颜色名称或 #RRGGBB 格式。"));
+                                        plugin.getMessages().send(player, "gui.msg-bg-color-invalid");
                                     }
                                 }
                                 guiManager.openGui(player, new BackgroundSettingsGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -155,13 +155,13 @@ public class BackgroundSettingsGui extends GuiScreen {
 
         // Chroma 彩虹色（背景+发光合并切换）
         setButton(15, GuiButton.builder(Material.PRISMARINE_CRYSTALS)
-                .name("&f彩虹渐变")
+                .name(plugin.getMessages().getString("gui.background.btn-chroma"))
                 .lore(Arrays.asList(
-                        "&7彩虹渐变效果",
-                        "&7当前: " + (hologram.isChromaBackground() ? "&a启用" : "&c禁用"),
+                        plugin.getMessages().getString("gui.background.lore-chroma-desc"),
+                        plugin.getMessages().getString("gui.background.lore-chroma-current",
+                                "state", plugin.getMessages().getRaw(hologram.isChromaBackground() ? "state-enabled" : "state-disabled")),
                         "",
-                        "&e点击切换"
-                ))
+                        plugin.getMessages().getString("gui.lore-click-toggle")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     Hologram h = plugin.getHologramManager().getHologram(hologramName);
@@ -169,7 +169,8 @@ public class BackgroundSettingsGui extends GuiScreen {
                         boolean newState = !h.isChromaBackground();
                         h.setChroma(newState);
                         h.save();
-                        player.sendMessage(ColorUtil.colorize("&a彩虹渐变已" + (newState ? "启用" : "禁用") + "！"));
+                        plugin.getMessages().send(player, "gui.msg-bg-rainbow-toggle", "state",
+                                plugin.getMessages().getRaw(newState ? "state-enabled" : "state-disabled"));
                     }
                     guiManager.openGui(player, new BackgroundSettingsGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                 })
@@ -177,17 +178,18 @@ public class BackgroundSettingsGui extends GuiScreen {
 
         // 亮度设置
         setButton(20, GuiButton.builder(Material.GLOWSTONE)
-                .name("&f亮度")
+                .name(plugin.getMessages().getString("gui.background.btn-brightness"))
                 .lore(Arrays.asList(
-                        "&7设置Display实体的亮度覆盖",
-                        "&7天空光: &f" + (brightness != null ? brightness.getSkyLight() : "默认"),
-                        "&7方块光: &f" + (brightness != null ? brightness.getBlockLight() : "默认"),
+                        plugin.getMessages().getString("gui.background.lore-brightness-desc"),
+                        plugin.getMessages().getString("gui.background.lore-brightness-sky",
+                                "sky", brightness != null ? String.valueOf(brightness.getSkyLight()) : plugin.getMessages().getString("gui.background.default")),
+                        plugin.getMessages().getString("gui.background.lore-brightness-block",
+                                "block", brightness != null ? String.valueOf(brightness.getBlockLight()) : plugin.getMessages().getString("gui.background.default")),
                         "",
-                        "&7左键: &e输入亮度值 (天空光 方块光)",
-                        "&7右键: &c重置为默认",
+                        plugin.getMessages().getString("gui.background.lore-brightness-left"),
+                        plugin.getMessages().getString("gui.background.lore-brightness-right"),
                         "",
-                        "&7范围 0-15，输入 -1 重置"
-                ))
+                        plugin.getMessages().getString("gui.background.lore-brightness-range")))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     org.bukkit.event.inventory.ClickType clickType = context.getClickType();
@@ -198,14 +200,14 @@ public class BackgroundSettingsGui extends GuiScreen {
                         if (h != null) {
                             h.setBrightness(null);
                             h.save();
-                            player.sendMessage(ColorUtil.colorize("&a已重置亮度为默认值！"));
+                            plugin.getMessages().send(player, "gui.msg-brightness-reset");
                         }
                         guiManager.openGui(player, new BackgroundSettingsGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     } else {
                         // 左键输入
                         player.closeInventory();
 
-                        chatInputManager.requestInput(player, "&a请输入亮度值 (天空光 方块光，0-15):",
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.bg-brightness"),
                                 ChatInputManager.InputType.GENERIC, hologramName, input -> {
                                     try {
                                         String[] parts = input.trim().split("\\s+");
@@ -218,20 +220,21 @@ public class BackgroundSettingsGui extends GuiScreen {
                                             if (h != null) {
                                                 h.setBrightness(null);
                                                 h.save();
-                                                player.sendMessage(ColorUtil.colorize("&a已重置亮度为默认值！"));
+                                                plugin.getMessages().send(player, "gui.msg-brightness-reset");
                                             }
                                         } else if (sky < 0 || sky > 15 || block < 0 || block > 15) {
-                                            player.sendMessage(ColorUtil.colorize("&c亮度值必须在 0-15 之间！输入 -1 重置。"));
+                                            plugin.getMessages().send(player, "gui.msg-brightness-range");
                                         } else {
                                             Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                             if (h != null) {
                                                 h.setBrightness(Brightness.of(sky, block));
                                                 h.save();
-                                                player.sendMessage(ColorUtil.colorize("&a已设置亮度: 天空光=" + sky + " 方块光=" + block + "！"));
+                                                plugin.getMessages().send(player, "gui.msg-brightness-set",
+                                                        "sky", String.valueOf(sky), "block", String.valueOf(block));
                                             }
                                         }
                                     } catch (NumberFormatException e) {
-                                        player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！格式: 天空光 方块光"));
+                                        plugin.getMessages().send(player, "gui.msg-input-invalid-number-format");
                                     }
                                     guiManager.openGui(player, new BackgroundSettingsGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                                 });

@@ -4,7 +4,6 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -17,17 +16,17 @@ public class SetFacingCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetFacingCommand(WooHolograms plugin) {
-        super("setfacing", "设置全息图朝向", "/wh setfacing <名称> <模式> <yaw> [pitch]", "wooholograms.edit");
+        super("setfacing", "cmd.desc-setfacing", "cmd.usage-setfacing", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
-            sender.sendMessage(ColorUtil.colorize("&7模式: fixed_angle(固定角度), horizontal(水平跟随), vertical(垂直跟随), all(完全跟随)"));
-            sender.sendMessage(ColorUtil.colorize("&7yaw: 仅 fixed_angle 模式需要，0-360度"));
-            sender.sendMessage(ColorUtil.colorize("&7pitch: 可选，垂直角度 -90~90度"));
+            plugin.getMessages().send(sender, "cmd.setfacing-usage");
+            plugin.getMessages().send(sender, "cmd.setfacing-help-mode");
+            plugin.getMessages().send(sender, "cmd.setfacing-help-yaw");
+            plugin.getMessages().send(sender, "cmd.setfacing-help-pitch");
             return true;
         }
 
@@ -35,7 +34,7 @@ public class SetFacingCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -46,7 +45,7 @@ public class SetFacingCommand extends Subcommand {
                 float yaw = Float.parseFloat(args[2]);
                 hologram.setFacing(yaw);
             } catch (NumberFormatException e) {
-                sender.sendMessage(ColorUtil.colorize("&c水平角度必须是数字！"));
+                plugin.getMessages().send(sender, "cmd.setfacing-yaw-number");
                 return true;
             }
             // 可选 pitch 参数
@@ -54,12 +53,12 @@ public class SetFacingCommand extends Subcommand {
                 try {
                     float pitch = Float.parseFloat(args[3]);
                     if (pitch < -90 || pitch > 90) {
-                        sender.sendMessage(ColorUtil.colorize("&c垂直角度必须在 -90 到 90 之间！"));
+                        plugin.getMessages().send(sender, "gui.msg-pitch-range");
                         return true;
                     }
                     hologram.setPitch(pitch);
                 } catch (NumberFormatException e) {
-                    sender.sendMessage(ColorUtil.colorize("&c垂直角度必须是数字！"));
+                    plugin.getMessages().send(sender, "cmd.setfacing-pitch-number");
                     return true;
                 }
             }
@@ -69,15 +68,18 @@ public class SetFacingCommand extends Subcommand {
         hologram.setBillboard(billboard);
         hologram.save();
 
-        String modeDisplay = billboard.getDisplayName();
+        String modeDisplay = plugin.getMessages().getRaw(billboard.getDisplayNameKey());
         if (billboard == Billboard.FIXED_ANGLE) {
-            modeDisplay += " (yaw=" + hologram.getFacing() + "度";
             if (hologram.getPitch() != null) {
-                modeDisplay += ", pitch=" + hologram.getPitch() + "度";
+                modeDisplay += plugin.getMessages().getString("gui.billboard.angle-yaw-pitch",
+                        "yaw", String.valueOf(hologram.getFacing()),
+                        "pitch", String.valueOf(hologram.getPitch()));
+            } else {
+                modeDisplay += plugin.getMessages().getString("gui.billboard.angle-yaw",
+                        "yaw", String.valueOf(hologram.getFacing()));
             }
-            modeDisplay += ")";
         }
-        sender.sendMessage(ColorUtil.colorize("&a已将 " + name + " 的朝向设置为 " + modeDisplay + "！"));
+        plugin.getMessages().send(sender, "cmd.setfacing-success", "name", name, "mode", modeDisplay);
 
         return true;
     }

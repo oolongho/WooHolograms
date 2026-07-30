@@ -5,7 +5,7 @@ import com.oolongho.holograms.action.Action;
 import com.oolongho.holograms.action.ActionType;
 import com.oolongho.holograms.action.ClickType;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -23,10 +23,10 @@ public abstract class AbstractActionManageGui extends GuiScreen {
     protected final int pageIndex;
     protected ClickType currentClickType;
 
-    public AbstractActionManageGui(String id, String title, int size,
+    public AbstractActionManageGui(String id, Component title, int size,
                                    WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                                    String hologramName, int pageIndex, ClickType currentClickType) {
-        super(id, ColorUtil.colorize(title), size);
+        super(id, title, size);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -55,8 +55,12 @@ public abstract class AbstractActionManageGui extends GuiScreen {
         Hologram hologram = getHologram();
         if (hologram == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
-                    .lore(Arrays.asList("", "&7该全息图已被删除", "", "&e点击返回列表"))
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
+                    .lore(Arrays.asList(
+                            "",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
+                            "",
+                            plugin.getMessages().getString("gui.lore-click-back-list")))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
                     })
@@ -70,14 +74,22 @@ public abstract class AbstractActionManageGui extends GuiScreen {
         }
 
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
-                .lore(Arrays.asList("&7返回" + getTargetDescription(), "", "&e点击返回"))
+                .name(plugin.getMessages().getString("gui.btn-back"))
+                .lore(Arrays.asList(
+                        plugin.getMessages().getString("gui.action-manage.lore-back", "target", getTargetDescription()),
+                        "",
+                        plugin.getMessages().getString("gui.lore-click-back")))
                 .onClick(context -> goBack(context.getPlayer()))
                 .build());
 
         setButton(4, GuiButton.builder(Material.NAME_TAG)
-                .name("&f" + hologramName + " - " + getTargetDescription())
-                .lore(Arrays.asList("", "&7当前点击类型: &f" + currentClickType.getDescription(), ""))
+                .name(plugin.getMessages().getString("gui.action-manage.name-title",
+                        "name", hologramName, "target", getTargetDescription()))
+                .lore(Arrays.asList(
+                        "",
+                        plugin.getMessages().getString("gui.action-manage.lore-click-type",
+                                "type", plugin.getMessages().getRaw(currentClickType.getDescriptionKey())),
+                        ""))
                 .build());
 
         renderClickTypeButtons();
@@ -111,14 +123,17 @@ public abstract class AbstractActionManageGui extends GuiScreen {
             Action action = actions.get(i);
 
             setButton(slot, GuiButton.builder(Material.COMMAND_BLOCK)
-                    .name("&f动作 #" + (i + 1))
+                    .name(plugin.getMessages().getString("gui.action-manage.btn-action",
+                            "index", String.valueOf(i + 1)))
                     .lore(Arrays.asList(
                             "",
-                            "&7类型: &f" + action.getType().getName(),
-                            "&7值: &f" + truncate(action.getData(), 30),
+                            plugin.getMessages().getString("gui.action-manage.lore-type",
+                                    "type", action.getType().getName()),
+                            plugin.getMessages().getString("gui.action-manage.lore-value",
+                                    "value", truncate(action.getData(), 30)),
                             "",
-                            "&e左键点击编辑",
-                            "&c右键点击删除"
+                            plugin.getMessages().getString("gui.action-manage.lore-left-click-edit"),
+                            plugin.getMessages().getString("gui.action-manage.lore-right-click-delete")
                     ))
                     .onClick(context -> {
                         Player player = context.getPlayer();
@@ -134,39 +149,29 @@ public abstract class AbstractActionManageGui extends GuiScreen {
 
     protected void renderBottomButtons() {
         setButton(45, GuiButton.builder(Material.EMERALD)
-                .name("&f添加动作")
-                .lore(Arrays.asList("&7添加新的点击动作", "", "&e点击选择动作类型"))
+                .name(plugin.getMessages().getString("gui.action-manage.btn-add-action"))
+                .lore(Arrays.asList(
+                        plugin.getMessages().getString("gui.action-manage.lore-add-action-desc"),
+                        "",
+                        plugin.getMessages().getString("gui.lore-click-select")))
                 .onClick(context -> addAction(context.getPlayer()))
                 .build());
 
         setButton(49, GuiButton.builder(Material.BOOK)
-                .name("&f动作类型说明")
-                .lore(Arrays.asList(
-                        "",
-                        "&7可用动作类型:",
-                        "&fMESSAGE &7- 发送消息",
-                        "&fCOMMAND &7- 执行命令",
-                        "&fCONSOLE &7- 控制台命令",
-                        "&fSOUND &7- 播放声音",
-                        "&fTELEPORT &7- 传送玩家",
-                        "&fSERVER &7- 跨服传送",
-                        "&fNEXT_PAGE &7- 下一页",
-                        "&fPREV_PAGE &7- 上一页",
-                        "&fPAGE &7- 页面跳转",
-                        ""
-                ))
+                .name(plugin.getMessages().getString("gui.action-manage.btn-type-help"))
+                .lore(plugin.getMessages().getLangConfig().getStringList("gui.action-manage.type-help-lore"))
                 .build());
     }
 
     protected void deleteAction(Player player, int actionIndex) {
-        guiManager.openGui(player, ConfirmGui.createDeleteActionConfirm(actionIndex, confirmed -> {
+        guiManager.openGui(player, ConfirmGui.createDeleteActionConfirm(plugin, actionIndex, confirmed -> {
             if (confirmed) {
                 removeAction(actionIndex);
                 Hologram h = getHologram();
                 if (h != null) {
                     h.save();
                 }
-                player.sendMessage(ColorUtil.colorize("&a已删除动作！"));
+                plugin.getMessages().send(player, "gui.msg-action-deleted");
             }
             reopenGui(player);
         }));
@@ -175,28 +180,29 @@ public abstract class AbstractActionManageGui extends GuiScreen {
     protected void editAction(Player player, int actionIndex, Action action) {
         player.closeInventory();
 
-        player.sendMessage(ColorUtil.colorize("&7当前动作: &f" + action.getType().getName() + ":" + action.getData()));
-        player.sendMessage(ColorUtil.colorize("&7输入新值或输入 &ecancel &7取消"));
+        plugin.getMessages().send(player, "gui.msg-action-current",
+                "type", action.getType().getName(), "value", action.getData());
+        plugin.getMessages().send(player, "gui.msg-action-input-hint");
 
-        chatInputManager.requestInput(player, "&a请输入新的动作值:",
+        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.action-value"),
                 ChatInputManager.InputType.ACTION_VALUE, hologramName, input -> {
                     String[] parts = input.split(":", 2);
                     if (parts.length < 2) {
-                        player.sendMessage(ColorUtil.colorize("&c格式错误！正确格式: <类型>:<值>"));
+                        plugin.getMessages().send(player, "gui.msg-action-format-error");
                     } else {
                         String typeStr = parts[0].toUpperCase();
                         String value = parts[1];
 
                         ActionType actionType = ActionType.getByName(typeStr);
                         if (actionType == null) {
-                            player.sendMessage(ColorUtil.colorize("&c未知的动作类型！"));
+                            plugin.getMessages().send(player, "gui.msg-action-type-unknown");
                         } else {
                             updateAction(actionIndex, new Action(actionType, value));
                             Hologram h = getHologram();
                             if (h != null) {
                                 h.save();
                             }
-                            player.sendMessage(ColorUtil.colorize("&a已更新动作！"));
+                            plugin.getMessages().send(player, "gui.msg-action-update-success");
                         }
                     }
                     reopenGui(player);
@@ -220,16 +226,17 @@ public abstract class AbstractActionManageGui extends GuiScreen {
 
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add("&7动作数量: &f" + actions.size());
+        lore.add(plugin.getMessages().getString("gui.action-manage.lore-action-count",
+                "count", String.valueOf(actions.size())));
         lore.add("");
         if (isSelected) {
-            lore.add("&a当前选中");
+            lore.add(plugin.getMessages().getString("gui.lore-current-selected"));
         } else {
-            lore.add("&e点击选择");
+            lore.add(plugin.getMessages().getString("gui.lore-click-select"));
         }
 
         return GuiButton.builder(isSelected ? Material.LIME_STAINED_GLASS_PANE : material)
-                .name("&f" + clickType.getDescription())
+                .name("<white>" + plugin.getMessages().getRaw(clickType.getDescriptionKey()))
                 .lore(lore)
                 .onClick(context -> {
                     if (!isSelected) {

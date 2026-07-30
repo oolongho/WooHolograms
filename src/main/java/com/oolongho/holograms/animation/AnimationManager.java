@@ -119,7 +119,7 @@ public class AnimationManager {
         }
 
         Profiler profiler = Profiler.getInstance();
-        if (profiler.isEnabled()) profiler.start("动画");
+        if (profiler.isEnabled()) profiler.start("animation");
         try {
 
         Matcher matcher = ANIMATION_PATTERN.matcher(string);
@@ -149,7 +149,7 @@ public class AnimationManager {
         return sb.toString();
 
         } finally {
-            if (profiler.isEnabled()) profiler.stop("动画");
+            if (profiler.isEnabled()) profiler.stop("animation");
         }
     }
 

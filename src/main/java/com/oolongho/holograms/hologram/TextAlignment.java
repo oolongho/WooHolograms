@@ -2,24 +2,27 @@ package com.oolongho.holograms.hologram;
 
 public enum TextAlignment {
 
-    LEFT("left", "左对齐"),
-    CENTER("center", "居中"),
-    RIGHT("right", "右对齐");
+    LEFT("left", "gui.alignment.name-left"),
+    CENTER("center", "gui.alignment.name-center"),
+    RIGHT("right", "gui.alignment.name-right");
 
     private final String id;
-    private final String displayName;
+    private final String displayNameKey;
 
-    TextAlignment(String id, String displayName) {
+    TextAlignment(String id, String displayNameKey) {
         this.id = id;
-        this.displayName = displayName;
+        this.displayNameKey = displayNameKey;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    /**
+     * 获取显示名称的语言键（纯文本，调用方通过 {@code plugin.getMessages().getRaw(key)} 解析）
+     */
+    public String getDisplayNameKey() {
+        return displayNameKey;
     }
 
     public static TextAlignment fromId(String id) {

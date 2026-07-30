@@ -4,7 +4,6 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,7 +22,7 @@ public class CreateCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public CreateCommand(WooHolograms plugin) {
-        super("create", "创建一个新的全息图", "/wh create <名称> [内容]", "wooholograms.create");
+        super("create", "cmd.desc-create", "cmd.usage-create", "wooholograms.create");
         this.plugin = plugin;
         setPlayerOnly(true);
     }
@@ -33,19 +32,19 @@ public class CreateCommand extends Subcommand {
         Player player = (Player) sender;
 
         if (args.length < 1) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("create.usage")));
+            plugin.getMessages().send(player, "create.usage");
             return true;
         }
 
         String name = args[0];
 
         if (!name.matches("[\\w\\-\\p{L}]+")) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("create.invalid-name", "name", name)));
+            plugin.getMessages().send(player, "create.invalid-name", "name", name);
             return true;
         }
 
         if (plugin.getHologramManager().containsHologram(name)) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("general.hologram-exists", "name", name)));
+            plugin.getMessages().send(player, "general.hologram-exists", "name", name);
             return true;
         }
 
@@ -53,7 +52,7 @@ public class CreateCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().createHologram(name, location);
 
         if (hologram == null) {
-            player.sendMessage(ColorUtil.colorize("&c创建全息图失败！"));
+            plugin.getMessages().send(player, "create.failed");
             return true;
         }
 
@@ -65,7 +64,7 @@ public class CreateCommand extends Subcommand {
             }
         }
 
-        player.sendMessage(ColorUtil.colorize(plugin.getMessages().getWithPrefix("create.success", "name", name)));
+        plugin.getMessages().send(player, "create.success", "name", name);
         return true;
     }
 

@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -15,14 +14,14 @@ public class CopyCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public CopyCommand(WooHolograms plugin) {
-        super("copy", "克隆一个全息图", "/wh copy <源名称> <目标名称>", "wooholograms.admin");
+        super("copy", "cmd.desc-copy", "cmd.usage-copy", "wooholograms.admin");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "copy.usage");
             return true;
         }
 
@@ -30,23 +29,23 @@ public class CopyCommand extends Subcommand {
         String targetName = args[1];
 
         if (!plugin.getHologramManager().containsHologram(sourceName)) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + sourceName + " 不存在！"));
+            plugin.getMessages().send(sender, "copy.source-not-found", "source", sourceName);
             return true;
         }
 
         if (plugin.getHologramManager().containsHologram(targetName)) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + targetName + " 已存在！"));
+            plugin.getMessages().send(sender, "copy.target-exists", "target", targetName);
             return true;
         }
 
         Hologram target = plugin.getHologramManager().cloneHologram(sourceName, targetName, null, false);
         if (target == null) {
-            sender.sendMessage(ColorUtil.colorize("&c克隆全息图失败！"));
+            plugin.getMessages().send(sender, "copy.failed");
             return true;
         }
 
         target.save();
-        sender.sendMessage(ColorUtil.colorize("&a成功克隆全息图 " + sourceName + " 到 " + targetName + "！"));
+        plugin.getMessages().send(sender, "copy.clone-success", "source", sourceName, "target", targetName);
         return true;
     }
 

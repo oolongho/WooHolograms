@@ -1471,7 +1471,7 @@ public class Hologram {
      */
     private void performUpdate(boolean force, Player player) {
         Profiler profiler = Profiler.getInstance();
-        if (profiler.isEnabled()) profiler.start("更新");
+        if (profiler.isEnabled()) profiler.start("update");
         try {
         // 1. 检查玩家是否正在查看
         if (!isVisible(player)) {
@@ -1506,7 +1506,7 @@ public class Hologram {
             }
         }
         } finally {
-            if (profiler.isEnabled()) profiler.stop("更新");
+            if (profiler.isEnabled()) profiler.stop("update");
         }
     }
 
@@ -1593,7 +1593,7 @@ public class Hologram {
      */
     private void performUpdateAnimations(Player player) {
         Profiler profiler = Profiler.getInstance();
-        if (profiler.isEnabled()) profiler.start("动画");
+        if (profiler.isEnabled()) profiler.start("animation");
         try {
         // 1. 检查玩家是否正在查看
         if (!isVisible(player)) {
@@ -1629,7 +1629,7 @@ public class Hologram {
             }
         }
         } finally {
-            if (profiler.isEnabled()) profiler.stop("动画");
+            if (profiler.isEnabled()) profiler.stop("animation");
         }
     }
 

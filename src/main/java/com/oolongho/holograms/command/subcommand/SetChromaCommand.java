@@ -5,7 +5,6 @@ import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -25,21 +24,21 @@ public class SetChromaCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public SetChromaCommand(WooHolograms plugin) {
-        super("setchroma", "设置Chroma彩虹色效果", "/wh setchroma <名称> [行号] <background|glow> <true|false>", "wooholograms.edit");
+        super("setchroma", "cmd.desc-setchroma", "cmd.usage-setchroma", "wooholograms.edit");
         this.plugin = plugin;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(sender, "cmd.setchroma-usage");
             return true;
         }
 
         String name = args[0];
         Hologram hologram = plugin.getHologramManager().getHologram(name);
         if (hologram == null) {
-            sender.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(sender, "general.hologram-not-exists", "name", name);
             return true;
         }
 
@@ -49,13 +48,13 @@ public class SetChromaCommand extends Subcommand {
             if (lineNumber != null) {
                 // 行级别设置: /wh setchroma <名称> <行号> <type> <value>
                 if (args.length < 4) {
-                    sender.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+                    plugin.getMessages().send(sender, "cmd.setchroma-usage");
                     return true;
                 }
 
                 HologramPage page = hologram.getPage(0);
                 if (page == null || lineNumber < 1 || lineNumber > page.size()) {
-                    sender.sendMessage(ColorUtil.colorize("&c无效的行号！"));
+                    plugin.getMessages().send(sender, "general.line-invalid");
                     return true;
                 }
 
@@ -63,7 +62,7 @@ public class SetChromaCommand extends Subcommand {
                 boolean value = Boolean.parseBoolean(args[3]);
                 HologramLine line = page.getLine(lineNumber - 1);
                 if (line == null) {
-                    sender.sendMessage(ColorUtil.colorize("&c无效的行号！"));
+                    plugin.getMessages().send(sender, "general.line-invalid");
                     return true;
                 }
 
@@ -71,14 +70,16 @@ public class SetChromaCommand extends Subcommand {
                     line.setChromaBackground(value);
                     hologram.save();
                     hologram.refreshAllViewers();
-                    sender.sendMessage(ColorUtil.colorize("&a已设置第 " + lineNumber + " 行的 Chroma 背景为 " + value + "！"));
+                    plugin.getMessages().send(sender, "display.chroma-background-set-line",
+                            "line", String.valueOf(lineNumber), "value", String.valueOf(value));
                 } else if (type.equals("glow")) {
                     line.setChromaGlow(value);
                     hologram.save();
                     hologram.refreshAllViewers();
-                    sender.sendMessage(ColorUtil.colorize("&a已设置第 " + lineNumber + " 行的 Chroma 发光为 " + value + "！"));
+                    plugin.getMessages().send(sender, "display.chroma-glow-set-line",
+                            "line", String.valueOf(lineNumber), "value", String.valueOf(value));
                 } else {
-                    sender.sendMessage(ColorUtil.colorize("&c类型必须是 background 或 glow！"));
+                    plugin.getMessages().send(sender, "display.chroma-type-invalid");
                 }
             } else {
                 // 全息图级别设置: /wh setchroma <名称> <type> <value>
@@ -88,17 +89,17 @@ public class SetChromaCommand extends Subcommand {
                 if (type.equals("background") || type.equals("bg")) {
                     hologram.setChromaBackground(value);
                     hologram.save();
-                    sender.sendMessage(ColorUtil.colorize("&a已设置全息图 " + name + " 的 Chroma 背景为 " + value + "！"));
+                    plugin.getMessages().send(sender, "display.chroma-background-set", "value", String.valueOf(value));
                 } else if (type.equals("glow")) {
                     hologram.setChromaGlow(value);
                     hologram.save();
-                    sender.sendMessage(ColorUtil.colorize("&a已设置全息图 " + name + " 的 Chroma 发光为 " + value + "！"));
+                    plugin.getMessages().send(sender, "display.chroma-glow-set", "value", String.valueOf(value));
                 } else {
-                    sender.sendMessage(ColorUtil.colorize("&c类型必须是 background 或 glow！"));
+                    plugin.getMessages().send(sender, "display.chroma-type-invalid");
                 }
             }
         } catch (Exception e) {
-            sender.sendMessage(ColorUtil.colorize("&c设置 Chroma 时出错: " + e.getMessage()));
+            plugin.getMessages().send(sender, "display.chroma-error", "error", e.getMessage());
         }
 
         return true;

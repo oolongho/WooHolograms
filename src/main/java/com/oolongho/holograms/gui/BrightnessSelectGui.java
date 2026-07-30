@@ -5,7 +5,6 @@ import com.oolongho.holograms.hologram.Brightness;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -29,7 +28,7 @@ public class BrightnessSelectGui extends GuiScreen {
 
     public BrightnessSelectGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                                String hologramName, int pageIndex, int lineIndex, boolean selectingSkyLight) {
-        super("brightness_select", ColorUtil.colorize("&8亮度设置"), 9);
+        super("brightness_select", plugin.getMessages().get("gui.title-brightness-select"), 9);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -47,12 +46,12 @@ public class BrightnessSelectGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(4, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该全息图已被删除",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
                             "",
-                            "&e点击返回"
+                            plugin.getMessages().getString("gui.lore-click-back")
                     ))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
@@ -64,12 +63,12 @@ public class BrightnessSelectGui extends GuiScreen {
         HologramPage page = hologram.getPage(pageIndex);
         if (page == null || lineIndex < 0 || lineIndex >= page.size()) {
             setButton(4, GuiButton.builder(Material.BARRIER)
-                    .name("&f行不存在")
+                    .name(plugin.getMessages().getString("gui.btn-line-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该行已被删除",
+                            plugin.getMessages().getString("gui.lore-line-deleted"),
                             "",
-                            "&e点击返回"
+                            plugin.getMessages().getString("gui.lore-click-back")
                     ))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageIndex));
@@ -82,14 +81,16 @@ public class BrightnessSelectGui extends GuiScreen {
         Brightness currentBrightness = line.getBrightness();
         int currentSkyLight = currentBrightness != null ? currentBrightness.getSkyLight() : -1;
         int currentBlockLight = currentBrightness != null ? currentBrightness.getBlockLight() : -1;
+        String skyLightDisplay = currentSkyLight >= 0 ? String.valueOf(currentSkyLight) : plugin.getMessages().getRaw("gui.brightness.default");
+        String blockLightDisplay = currentBlockLight >= 0 ? String.valueOf(currentBlockLight) : plugin.getMessages().getRaw("gui.brightness.default");
 
         // 返回按钮
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
+                .name(plugin.getMessages().getString("gui.btn-back"))
                 .lore(Arrays.asList(
-                        "&7返回行编辑",
+                        plugin.getMessages().getString("gui.lore-back-edit"),
                         "",
-                        "&e点击返回"
+                        plugin.getMessages().getString("gui.lore-click-back")
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
@@ -98,22 +99,22 @@ public class BrightnessSelectGui extends GuiScreen {
 
         // 当前设置显示
         setButton(4, GuiButton.builder(Material.GLOWSTONE)
-                .name("&f当前亮度设置")
+                .name(plugin.getMessages().getString("gui.brightness.current"))
                 .lore(Arrays.asList(
                         "",
-                        "&7天空光: &f" + (currentSkyLight >= 0 ? currentSkyLight : "默认"),
-                        "&7方块光: &f" + (currentBlockLight >= 0 ? currentBlockLight : "默认"),
+                        plugin.getMessages().getString("gui.brightness.sky-light", "value", skyLightDisplay),
+                        plugin.getMessages().getString("gui.brightness.block-light", "value", blockLightDisplay),
                         ""
                 ))
                 .build());
 
         // 选择天空光按钮
         setButton(6, GuiButton.builder(Material.SUNFLOWER)
-                .name("&f设置天空光")
+                .name(plugin.getMessages().getString("gui.brightness.set-sky"))
                 .lore(Arrays.asList(
-                        "&7当前: &f" + (currentSkyLight >= 0 ? currentSkyLight : "默认"),
+                        plugin.getMessages().getString("gui.brightness.current-value", "value", skyLightDisplay),
                         "",
-                        "&e点击设置天空光"
+                        plugin.getMessages().getString("gui.brightness.click-set-sky")
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new BrightnessSelectGui(plugin, guiManager, chatInputManager,
@@ -123,11 +124,11 @@ public class BrightnessSelectGui extends GuiScreen {
 
         // 选择方块光按钮
         setButton(7, GuiButton.builder(Material.LANTERN)
-                .name("&f设置方块光")
+                .name(plugin.getMessages().getString("gui.brightness.set-block"))
                 .lore(Arrays.asList(
-                        "&7当前: &f" + (currentBlockLight >= 0 ? currentBlockLight : "默认"),
+                        plugin.getMessages().getString("gui.brightness.current-value", "value", blockLightDisplay),
                         "",
-                        "&e点击设置方块光"
+                        plugin.getMessages().getString("gui.brightness.click-set-block")
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new BrightnessSelectGui(plugin, guiManager, chatInputManager,
@@ -137,11 +138,11 @@ public class BrightnessSelectGui extends GuiScreen {
 
         // 重置按钮
         setButton(8, GuiButton.builder(Material.BARRIER)
-                .name("&f重置为默认")
+                .name(plugin.getMessages().getString("gui.brightness.reset"))
                 .lore(Arrays.asList(
-                        "&7将亮度重置为默认值",
+                        plugin.getMessages().getString("gui.brightness.reset-lore"),
                         "",
-                        "&e点击重置"
+                        plugin.getMessages().getString("gui.lore-click-reset")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -154,7 +155,7 @@ public class BrightnessSelectGui extends GuiScreen {
                                 l.setBrightness(null);
                                 h.save();
                                 h.updateDisplayPropertiesAllViewers();
-                                player.sendMessage(ColorUtil.colorize("&a已重置亮度为默认值！"));
+                                plugin.getMessages().send(player, "gui.msg-brightness-reset");
                             }
                         }
                     }
@@ -165,23 +166,24 @@ public class BrightnessSelectGui extends GuiScreen {
         // 亮度等级选择 (0-15)
         // 使用聊天输入方式设置亮度值
         setButton(2, GuiButton.builder(Material.OAK_SIGN)
-                .name("&f输入亮度值")
+                .name(plugin.getMessages().getString("gui.brightness.input-value"))
                 .lore(Arrays.asList(
-                        "&7选择设置: &f" + (selectingSkyLight ? "天空光" : "方块光"),
-                        "&7范围: &f0-15",
+                        plugin.getMessages().getString("gui.brightness.select-setting", "value",
+                                plugin.getMessages().getRaw(selectingSkyLight ? "gui.brightness.sky" : "gui.brightness.block")),
+                        plugin.getMessages().getString("gui.brightness.range"),
                         "",
-                        "&e点击输入"
+                        plugin.getMessages().getString("gui.lore-click-input")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, "&a请输入亮度值 (0-15):",
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.brightness-value"),
                             ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
                                 try {
                                     int value = Integer.parseInt(input);
                                     if (value < 0 || value > 15) {
-                                        player.sendMessage(ColorUtil.colorize("&c亮度值必须在 0-15 之间！"));
+                                        plugin.getMessages().send(player, "gui.msg-brightness-range");
                                     } else {
                                         Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                         if (h != null) {
@@ -195,13 +197,15 @@ public class BrightnessSelectGui extends GuiScreen {
                                                     l.setBrightness(Brightness.of(skyLight, blockLight));
                                                     h.save();
                                                     h.updateDisplayPropertiesAllViewers();
-                                                    player.sendMessage(ColorUtil.colorize("&a已设置" + (selectingSkyLight ? "天空光" : "方块光") + "为 " + value + "！"));
+                                                    plugin.getMessages().send(player, "gui.msg-brightness-set-alt",
+                                                            "type", plugin.getMessages().getRaw(selectingSkyLight ? "gui.brightness.sky" : "gui.brightness.block"),
+                                                            "value", String.valueOf(value));
                                                 }
                                             }
                                         }
                                     }
                                 } catch (NumberFormatException e) {
-                                    player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                                    plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                                 }
                                 guiManager.openGui(player, new BrightnessSelectGui(plugin, guiManager, chatInputManager,
                                         hologramName, pageIndex, lineIndex, selectingSkyLight));

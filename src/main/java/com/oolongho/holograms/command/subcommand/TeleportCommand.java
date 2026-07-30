@@ -3,7 +3,6 @@ package com.oolongho.holograms.command.subcommand;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.util.ColorUtil;
 import com.oolongho.holograms.util.SchedulerUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,7 +16,7 @@ public class TeleportCommand extends Subcommand {
     private final WooHolograms plugin;
 
     public TeleportCommand(WooHolograms plugin) {
-        super("teleport", "传送到全息图位置", "/wh teleport <名称>", "wooholograms.admin");
+        super("teleport", "cmd.desc-teleport", "cmd.usage-teleport", "wooholograms.admin");
         this.plugin = plugin;
         setPlayerOnly(true);
     }
@@ -27,7 +26,7 @@ public class TeleportCommand extends Subcommand {
         Player player = (Player) sender;
 
         if (args.length < 1) {
-            player.sendMessage(ColorUtil.colorize("&c用法: " + getUsage()));
+            plugin.getMessages().send(player, "cmd.teleport-usage");
             return true;
         }
 
@@ -35,12 +34,12 @@ public class TeleportCommand extends Subcommand {
         Hologram hologram = plugin.getHologramManager().getHologram(name);
 
         if (hologram == null) {
-            player.sendMessage(ColorUtil.colorize("&c全息图 " + name + " 不存在！"));
+            plugin.getMessages().send(player, "general.hologram-not-exists", "name", name);
             return true;
         }
 
         SchedulerUtil.teleportAsync(player, hologram.getLocation());
-        player.sendMessage(ColorUtil.colorize("&a已传送到全息图 " + name + "！"));
+        plugin.getMessages().send(player, "cmd.teleport-success", "name", name);
         return true;
     }
 

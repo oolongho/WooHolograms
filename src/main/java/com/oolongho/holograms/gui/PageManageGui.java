@@ -3,7 +3,6 @@ package com.oolongho.holograms.gui;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.util.ColorUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -24,7 +23,7 @@ public class PageManageGui extends GuiScreen {
     private int selectedPage = -1;
 
     public PageManageGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager, String hologramName) {
-        super("page_manage", ColorUtil.colorize("&8页面管理: " + hologramName), 54);
+        super("page_manage", plugin.getMessages().get("gui.title-page-manage", "name", hologramName), 54);
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.chatInputManager = chatInputManager;
@@ -39,12 +38,12 @@ public class PageManageGui extends GuiScreen {
         Hologram hologram = plugin.getHologramManager().getHologram(hologramName);
         if (hologram == null) {
             setButton(22, GuiButton.builder(Material.BARRIER)
-                    .name("&f全息图不存在")
+                    .name(plugin.getMessages().getString("gui.btn-hologram-not-exists"))
                     .lore(Arrays.asList(
                             "",
-                            "&7该全息图已被删除",
+                            plugin.getMessages().getString("gui.lore-hologram-deleted"),
                             "",
-                            "&e点击返回列表"
+                            plugin.getMessages().getString("gui.lore-click-back-list")
                     ))
                     .onClick(context -> {
                         guiManager.openGui(context.getPlayer(), new HologramListGui(plugin, guiManager, chatInputManager, 0));
@@ -52,24 +51,24 @@ public class PageManageGui extends GuiScreen {
                     .build());
             return;
         }
-        
+
         setButton(0, GuiButton.builder(Material.BOOK)
-                .name("&f返回")
+                .name(plugin.getMessages().getString("gui.btn-back"))
                 .lore(Arrays.asList(
-                        "&7返回全息图详情",
+                        plugin.getMessages().getString("gui.lore-back-detail"),
                         "",
-                        "&e点击返回"
+                        plugin.getMessages().getString("gui.lore-click-back")
                 ))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                 })
                 .build());
-        
+
         setButton(4, GuiButton.builder(Material.NAME_TAG)
-                .name("&f" + hologramName)
+                .name(plugin.getMessages().getString("gui.page-manage.hologram-name", "name", hologramName))
                 .lore(Arrays.asList(
                         "",
-                        "&7总页数: &f" + hologram.getPageCount(),
+                        plugin.getMessages().getString("gui.page-manage.total-pages", "count", String.valueOf(hologram.getPageCount())),
                         ""
                 ))
                 .build());
@@ -100,26 +99,28 @@ public class PageManageGui extends GuiScreen {
             
             java.util.List<String> lore = new java.util.ArrayList<>();
             lore.add("");
-            lore.add("&7行数: &f" + lineCount);
+            lore.add(plugin.getMessages().getString("gui.page-manage.line-count", "count", String.valueOf(lineCount)));
             if (!previewText.isEmpty()) {
-                lore.add("&7首行: &f" + previewText);
+                lore.add(plugin.getMessages().getString("gui.page-manage.first-line", "text", previewText));
             }
             lore.add("");
             if (sortMode) {
                 if (selectedPage == -1) {
-                    lore.add("&e点击选中此页");
+                    lore.add(plugin.getMessages().getString("gui.page-manage.click-select"));
                 } else if (selectedPage == i) {
-                    lore.add("&a已选中 - 点击另一个页面交换");
+                    lore.add(plugin.getMessages().getString("gui.page-manage.click-swap-other"));
                 } else {
-                    lore.add("&e点击与此页交换");
+                    lore.add(plugin.getMessages().getString("gui.page-manage.click-swap-this"));
                 }
             } else {
-                lore.add("&e左键点击查看");
-                lore.add("&c右键点击删除");
+                lore.add(plugin.getMessages().getString("gui.page-manage.left-click-view"));
+                lore.add(plugin.getMessages().getString("gui.page-manage.right-click-delete"));
             }
             
             setButton(slot, GuiButton.builder(buttonMaterial)
-                    .name((sortMode && selectedPage == i ? "&a" : "&f") + "第 " + (i + 1) + " 页")
+                    .name(plugin.getMessages().getString(
+                            sortMode && selectedPage == i ? "gui.page-manage.page-selected" : "gui.page-manage.page-normal",
+                            "page", String.valueOf(i + 1)))
                     .lore(lore)
                     .onClick(context -> {
                         Player player = context.getPlayer();
@@ -129,7 +130,7 @@ public class PageManageGui extends GuiScreen {
                             if (selectedPage == -1) {
                                 // 选中第一个页面
                                 selectedPage = pageIndex;
-                                player.sendMessage(ColorUtil.colorize("&a已选中第 " + (pageIndex + 1) + " 页，请点击另一个页面进行交换"));
+                                plugin.getMessages().send(player, "gui.msg-page-swap-selected", "page", String.valueOf(pageIndex + 1));
                                 render();
                                 guiManager.openGui(player, this);
                             } else if (selectedPage != pageIndex) {
@@ -139,9 +140,10 @@ public class PageManageGui extends GuiScreen {
                                     if (h.swapPages(selectedPage, pageIndex)) {
                                         h.save();
                                         h.showToNearby();
-                                        player.sendMessage(ColorUtil.colorize("&a已交换第 " + (selectedPage + 1) + " 页和第 " + (pageIndex + 1) + " 页！"));
+                                        plugin.getMessages().send(player, "gui.msg-page-swap-success",
+                                                "p1", String.valueOf(selectedPage + 1), "p2", String.valueOf(pageIndex + 1));
                                     } else {
-                                        player.sendMessage(ColorUtil.colorize("&c交换失败！"));
+                                        plugin.getMessages().send(player, "gui.msg-page-swap-failed");
                                     }
                                 }
                                 selectedPage = -1;
@@ -152,17 +154,17 @@ public class PageManageGui extends GuiScreen {
                             // 普通模式逻辑
                             if (context.getClickType().isRightClick()) {
                                 if (pageCount <= 1) {
-                                    player.sendMessage(ColorUtil.colorize("&c至少需要保留一页！"));
+                                    plugin.getMessages().send(player, "gui.msg-page-keep-one");
                                     return;
                                 }
-                                guiManager.openGui(player, ConfirmGui.createDeletePageConfirm(hologramName, pageIndex + 1, confirmed -> {
+                                guiManager.openGui(player, ConfirmGui.createDeletePageConfirm(plugin, hologramName, pageIndex + 1, confirmed -> {
                                     if (confirmed) {
                                         Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                         if (h != null) {
                                             h.removePage(pageIndex);
                                             h.save();
                                             h.showToNearby();
-                                            player.sendMessage(ColorUtil.colorize("&a已删除第 " + (pageIndex + 1) + " 页！"));
+                                            plugin.getMessages().send(player, "gui.msg-page-deleted", "page", String.valueOf(pageIndex + 1));
                                         }
                                         guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
                                     } else {
@@ -178,11 +180,11 @@ public class PageManageGui extends GuiScreen {
         }
         
         setButton(45, GuiButton.builder(Material.EMERALD)
-                .name("&f添加页面")
+                .name(plugin.getMessages().getString("gui.page-manage.add-page"))
                 .lore(Arrays.asList(
-                        "&7在末尾添加新页面",
+                        plugin.getMessages().getString("gui.page-manage.add-page-desc"),
                         "",
-                        "&e点击添加"
+                        plugin.getMessages().getString("gui.lore-click-add")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
@@ -191,22 +193,22 @@ public class PageManageGui extends GuiScreen {
                         HologramPage newPage = h.addPage();
                         if (newPage != null) {
                             h.save();
-                            player.sendMessage(ColorUtil.colorize("&a已添加新页面！"));
+                            plugin.getMessages().send(player, "gui.msg-page-add-success", "count", String.valueOf(h.getPageCount()));
                             guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
                         } else {
-                            player.sendMessage(ColorUtil.colorize("&c添加页面失败！"));
+                            plugin.getMessages().send(player, "gui.msg-page-add-failed");
                         }
                     }
                 })
                 .build());
         
         setButton(46, GuiButton.builder(sortMode ? Material.LIME_STAINED_GLASS_PANE : Material.HOPPER)
-                .name(sortMode ? "&c退出排序模式" : "&f排序模式")
+                .name(plugin.getMessages().getString(sortMode ? "gui.page-manage.exit-sort" : "gui.page-manage.sort-mode"))
                 .lore(Arrays.asList(
-                        sortMode ? "&7点击退出排序模式" : "&7进入页面排序模式",
-                        sortMode ? "&7点击两个页面进行交换" : "&7交换页面的顺序",
+                        plugin.getMessages().getString(sortMode ? "gui.page-manage.exit-sort-desc" : "gui.page-manage.enter-sort-desc"),
+                        plugin.getMessages().getString(sortMode ? "gui.page-manage.exit-sort-action" : "gui.page-manage.enter-sort-action"),
                         "",
-                        sortMode ? "&e点击退出" : "&e点击进入"
+                        plugin.getMessages().getString(sortMode ? "gui.lore-click-exit" : "gui.lore-click-enter")
                 ))
                 .onClick(context -> {
                     sortMode = !sortMode;
@@ -217,31 +219,31 @@ public class PageManageGui extends GuiScreen {
                 .build());
         
         setButton(49, GuiButton.builder(Material.COMPASS)
-                .name("&f快速跳转")
+                .name(plugin.getMessages().getString("gui.page-manage.quick-jump"))
                 .lore(Arrays.asList(
-                        "&7跳转到指定页面",
+                        plugin.getMessages().getString("gui.page-manage.quick-jump-desc"),
                         "",
-                        "&e点击跳转"
+                        plugin.getMessages().getString("gui.page-manage.click-jump")
                 ))
                 .onClick(context -> {
                     Player player = context.getPlayer();
                     player.closeInventory();
-                    
-                    chatInputManager.requestInput(player, "&a请输入页码:", 
+
+                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.page-number"),
                             ChatInputManager.InputType.GENERIC, hologramName, input -> {
                         try {
                             int pageNum = Integer.parseInt(input);
                             Hologram h = plugin.getHologramManager().getHologram(hologramName);
                             if (h != null) {
                                 if (pageNum < 1 || pageNum > h.getPageCount()) {
-                                    player.sendMessage(ColorUtil.colorize("&c页码超出范围！有效范围: 1-" + h.getPageCount()));
+                                    plugin.getMessages().send(player, "gui.msg-page-out-of-range", "max", String.valueOf(h.getPageCount()));
                                     guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
                                 } else {
                                     guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, pageNum - 1));
                                 }
                             }
                         } catch (NumberFormatException e) {
-                            player.sendMessage(ColorUtil.colorize("&c请输入有效的数字！"));
+                            plugin.getMessages().send(player, "gui.msg-input-invalid-number");
                             guiManager.openGui(player, new PageManageGui(plugin, guiManager, chatInputManager, hologramName));
                         }
                     });

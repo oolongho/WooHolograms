@@ -20,7 +20,10 @@ public class ActionManageGui extends AbstractActionManageGui {
 
     public ActionManageGui(WooHolograms plugin, GuiManager guiManager, ChatInputManager chatInputManager,
                           String hologramName, int pageIndex, ClickType clickType) {
-        super("action_manage", "&8动作管理: " + hologramName + " P" + (pageIndex + 1), 54,
+        super("action_manage",
+                plugin.getMessages().get("gui.title-action-manage",
+                        "name", hologramName, "page", String.valueOf(pageIndex + 1)),
+                54,
                 plugin, guiManager, chatInputManager, hologramName, pageIndex, clickType);
         render();
     }
@@ -42,7 +45,7 @@ public class ActionManageGui extends AbstractActionManageGui {
 
     @Override
     protected String getTargetDescription() {
-        return "第 " + (pageIndex + 1) + " 页";
+        return plugin.getMessages().getString("gui.action-manage.page-desc", "page", String.valueOf(pageIndex + 1));
     }
 
     @Override
@@ -53,8 +56,8 @@ public class ActionManageGui extends AbstractActionManageGui {
     @Override
     protected void onNullTarget(Player player) {
         setButton(22, GuiButton.builder(org.bukkit.Material.BARRIER)
-                .name("&f页面不存在")
-                .lore(java.util.Arrays.asList("", "&7该页面已被删除", "", "&e点击返回详情"))
+                .name(plugin.getMessages().getString("gui.btn-page-not-exists"))
+                .lore(java.util.Arrays.asList("", plugin.getMessages().getString("gui.lore-page-deleted"), "", plugin.getMessages().getString("gui.lore-click-back-detail")))
                 .onClick(context -> {
                     guiManager.openGui(context.getPlayer(), new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, 0));
                 })
