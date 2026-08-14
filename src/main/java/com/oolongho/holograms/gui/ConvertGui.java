@@ -73,6 +73,21 @@ public class ConvertGui extends GuiScreen {
                 })
                 .build());
 
+        // FancyHolograms 导入
+        setButton(17, GuiButton.builder(Material.OAK_SIGN)
+                .name("<white>FancyHolograms")
+                .lore(Arrays.asList(
+                        plugin.getMessages().getString("gui.convert.fh-lore"),
+                        "",
+                        plugin.getMessages().getString("gui.lore-click-import")
+                ))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    player.closeInventory();
+                    Bukkit.dispatchCommand(player, "wh convert fh");
+                })
+                .build());
+
         // DecentHolograms 导入
         File dhDir = new File(plugin.getDataFolder().getParent(), "DecentHolograms/holograms");
         boolean dhExists = dhDir.exists() && dhDir.isDirectory();

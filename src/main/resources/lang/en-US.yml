@@ -350,6 +350,7 @@ gui:
   convert:
     hd-lore: "<gray>Import data from HolographicDisplays</gray>"
     cmi-lore: "<gray>Import data from CMI</gray>"
+    fh-lore: "<gray>Import data from FancyHolograms v2</gray>"
     dh-auto: "<gray>DecentHolograms data will be imported automatically</gray>"
     dh-status-found: "<gray>Status: <green>Data directory detected</green></gray>"
     dh-status-not-found: "<gray>Status: <red>Data directory not found</red></gray>"
@@ -992,7 +993,7 @@ animation:
 
 # ==================== Convert ====================
 convert:
-  usage: "{prefix}<color:#EF4444>Usage: /wh convert <holographicdisplays|hd|cmi></color>"
+  usage: "{prefix}<color:#EF4444>Usage: /wh convert <holographicdisplays|hd|cmi|fancyholograms|fh></color>"
   unknown-source: "{prefix}<color:#EF4444>Unknown convert source: {source}</color>"
   hd-not-found: "{prefix}<color:#EF4444>HolographicDisplays data directory not found!</color>"
   hd-v3-unsupported: "{prefix}<color:#EF4444>HolographicDisplays 3.x (database storage) import is not supported yet!</color>"
@@ -1002,6 +1003,11 @@ convert:
   cmi-not-found: "{prefix}<color:#EF4444>CMI plugin data not found!</color>"
   cmi-start: "{prefix}<color:#F59E0B>Starting import from CMI...</color>"
   cmi-result: "{prefix}<color:#10B981>Import complete! Imported: {imported}, Skipped: {skipped}, Failed: {failed}</color>"
+  fh-not-found: "{prefix}<color:#EF4444>FancyHolograms plugin data not found!</color>"
+  fh-v1-unsupported: "{prefix}<color:#EF4444>Legacy FancyHolograms (v1) format import is not supported yet!</color>"
+  fh-no-data: "{prefix}<color:#EF4444>No importable holograms found in the FancyHolograms data file!</color>"
+  fh-start: "{prefix}<color:#F59E0B>Starting import from FancyHolograms, {count} hologram(s) found...</color>"
+  fh-result: "{prefix}<color:#10B981>Import complete! Imported: {imported}, Skipped: {skipped}, Failed: {failed}</color>"
 
 # ==================== Debug ====================
 debug:
@@ -1050,7 +1056,7 @@ cmd:
   desc-addpage: "Add a new page"
   usage-addpage: "/wh addpage <name> [content]"
   desc-convert: "Import hologram data from other plugins"
-  usage-convert: "/wh convert <holographicdisplays|hd|cmi>"
+  usage-convert: "/wh convert <holographicdisplays|hd|cmi|fancyholograms|fh>"
   desc-copy: "Clone a hologram"
   usage-copy: "/wh copy <source_name> <target_name>"
   desc-create: "Create a new hologram"

@@ -350,6 +350,7 @@ gui:
   convert:
     hd-lore: "<gray>从 HolographicDisplays 导入数据</gray>"
     cmi-lore: "<gray>从 CMI 导入数据</gray>"
+    fh-lore: "<gray>从 FancyHolograms v2 导入数据</gray>"
     dh-auto: "<gray>DecentHolograms 数据会自动导入</gray>"
     dh-status-found: "<gray>状态: <green>检测到数据目录</green></gray>"
     dh-status-not-found: "<gray>状态: <red>未检测到数据目录</red></gray>"
@@ -992,7 +993,7 @@ animation:
 
 # ==================== 数据转换相关 ====================
 convert:
-  usage: "{prefix}<color:#EF4444>用法: /wh convert <holographicdisplays|hd|cmi></color>"
+  usage: "{prefix}<color:#EF4444>用法: /wh convert <holographicdisplays|hd|cmi|fancyholograms|fh></color>"
   unknown-source: "{prefix}<color:#EF4444>未知的转换源: {source}</color>"
   hd-not-found: "{prefix}<color:#EF4444>未找到 HolographicDisplays 插件数据目录！</color>"
   hd-v3-unsupported: "{prefix}<color:#EF4444>暂不支持 HolographicDisplays 3.x（数据库存储）的导入！</color>"
@@ -1002,6 +1003,11 @@ convert:
   cmi-not-found: "{prefix}<color:#EF4444>未找到 CMI 插件数据！</color>"
   cmi-start: "{prefix}<color:#F59E0B>开始从 CMI 导入全息图数据...</color>"
   cmi-result: "{prefix}<color:#10B981>导入完成！成功: {imported}，跳过: {skipped}，失败: {failed}</color>"
+  fh-not-found: "{prefix}<color:#EF4444>未找到 FancyHolograms 插件数据！</color>"
+  fh-v1-unsupported: "{prefix}<color:#EF4444>暂不支持 FancyHolograms 旧版（v1）格式的导入！</color>"
+  fh-no-data: "{prefix}<color:#EF4444>FancyHolograms 数据文件中没有可导入的全息图！</color>"
+  fh-start: "{prefix}<color:#F59E0B>开始从 FancyHolograms 导入全息图数据，共 {count} 个...</color>"
+  fh-result: "{prefix}<color:#10B981>导入完成！成功: {imported}，跳过: {skipped}，失败: {failed}</color>"
 
 # ==================== 调试消息 ====================
 debug:
@@ -1050,7 +1056,7 @@ cmd:
   desc-addpage: "添加一个新页面"
   usage-addpage: "/wh addpage <名称> [内容]"
   desc-convert: "从其他插件导入全息图数据"
-  usage-convert: "/wh convert <holographicdisplays|hd|cmi>"
+  usage-convert: "/wh convert <holographicdisplays|hd|cmi|fancyholograms|fh>"
   desc-copy: "克隆一个全息图"
   usage-copy: "/wh copy <源名称> <目标名称>"
   desc-create: "创建一个新的全息图"
