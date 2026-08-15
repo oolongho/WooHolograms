@@ -7,7 +7,7 @@ paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArt
 
 group = 'com.oolongho'
 
-version = '1.0.8'
+version = '1.0.9'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
