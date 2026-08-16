@@ -89,6 +89,12 @@ renderer-pool:
   # 最大缓存数量
   max-size: 100
 
+# 兼容设置
+compat:
+  # 是否启用 DecentHolograms 伪装
+  # 关闭后其他插件将不再识别 WooHolograms 为 DecentHolograms（需重启生效）
+  decentholograms: false
+
 # 安全设置
 security:
   # 命令黑名单（禁止通过全息图执行的命令）

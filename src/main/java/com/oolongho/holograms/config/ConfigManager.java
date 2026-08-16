@@ -365,4 +365,12 @@ public class ConfigManager {
     public FileConfiguration getConfig() {
         return config;
     }
+
+    /**
+     * 是否启用 DecentHolograms 伪装层
+     * @return true 表示其他插件可将 WooHolograms 识别为 DecentHolograms
+     */
+    public boolean isDecentHologramsCompatEnabled() {
+        return config.getBoolean("compat.decentholograms", true);
+    }
 }

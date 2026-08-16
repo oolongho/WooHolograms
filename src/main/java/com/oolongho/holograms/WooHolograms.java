@@ -153,12 +153,17 @@ public class WooHolograms extends JavaPlugin {
             getLogger().info("PlaceholderAPI 扩展已注册");
         }
         
-        // 检查 DecentHolograms 兼容层（provides 会让 getPlugin 返回自身，需排除）
-        var dhPlugin = Bukkit.getPluginManager().getPlugin("DecentHolograms");
-        if (dhPlugin != null && dhPlugin != this) {
-            getLogger().info("检测到 DecentHolograms 已安装，DH 兼容层未激活");
+        // DecentHolograms 兼容层开关（provides 会让 getPlugin 返回自身，需排除）
+        if (!configManager.isDecentHologramsCompatEnabled()) {
+            unregisterDecentHologramsAlias();
+            getLogger().info("DecentHolograms 兼容层已禁用（其他插件将不会识别 WooHolograms 为 DecentHolograms）");
         } else {
-            getLogger().info("DecentHolograms 兼容层已激活（依赖 DH 的插件将使用 WooHolograms）");
+            var dhPlugin = Bukkit.getPluginManager().getPlugin("DecentHolograms");
+            if (dhPlugin != null && dhPlugin != this) {
+                getLogger().info("检测到 DecentHolograms 已安装，DH 兼容层未激活");
+            } else {
+                getLogger().info("DecentHolograms 兼容层已激活（依赖 DH 的插件将使用 WooHolograms）");
+            }
         }
 
         // bStats 统计
@@ -168,6 +173,29 @@ public class WooHolograms extends JavaPlugin {
         pluginEnabled = true;
         String version = getPluginMeta().getVersion();
         getLogger().info(() -> "WooHolograms v" + version + " 已启用!");
+    }
+
+    /**
+     * 移除 PluginManager 中 provides 注册的 DecentHolograms 别名，
+     * 使其他插件无法通过 getPlugin("DecentHolograms") 检测到本插件。
+     */
+    private void unregisterDecentHologramsAlias() {
+        org.bukkit.plugin.PluginManager pluginManager = getServer().getPluginManager();
+        for (Class<?> c = pluginManager.getClass(); c != null && c != Object.class; c = c.getSuperclass()) {
+            try {
+                java.lang.reflect.Field field = c.getDeclaredField("lookupNames");
+                field.setAccessible(true);
+                if (field.get(pluginManager) instanceof java.util.Map<?, ?> lookupNames) {
+                    lookupNames.remove("DecentHolograms");
+                    return;
+                }
+            } catch (NoSuchFieldException ignored) {
+                // 继续向父类查找
+            } catch (ReflectiveOperationException e) {
+                break;
+            }
+        }
+        getLogger().warning("无法移除 DecentHolograms 别名映射，其他插件可能仍会识别本插件，请反馈服务器版本");
     }
     
     @Override
