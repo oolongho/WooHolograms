@@ -39,19 +39,23 @@ public class ColorUtil {
                     .build())
             .build();
 
-    // Legacy 序列化器
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
-            LegacyComponentSerializer.legacyAmpersand();
-
+    // Legacy 序列化器（§ 格式，支持 RGB 十六进制 §x 序列，与 CraftChatMessage 解析格式一致）
     private static final LegacyComponentSerializer SECTION_SERIALIZER =
-            LegacyComponentSerializer.legacySection();
+            LegacyComponentSerializer.builder()
+                    .character('§')
+                    .hexColors()
+                    .build();
 
-    // 十六进制颜色模式：&#RRGGBB
-    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
+    // 十六进制颜色模式：&#RRGGBB 与 §#RRGGBB（DH 兼容层的 IridiumColorAPI 输出）
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("[&§]#([0-9a-fA-F]{6})");
+
+    // adventure 序列化输出的紧凑十六进制 §#RRGGBB（CraftChatMessage 不识别，需展开为 §x 长格式）
+    private static final Pattern COMPACT_HEX_PATTERN = Pattern.compile("§#([0-9a-fA-F]{6})");
 
     private static final Pattern LEGACY_COLOR_PATTERN = Pattern.compile("[&§]([0-9a-fA-Fk-oK-OrR])");
 
-    private static final Pattern MINI_MESSAGE_TAG_PATTERN = Pattern.compile("<[a-z_/!]+>");
+    // MiniMessage 标签模式：覆盖 <#hex>、<gradient:...>、<color:...>、</close>、<!negation> 等带参数形式
+    private static final Pattern MINI_MESSAGE_TAG_PATTERN = Pattern.compile("<[!?/#]?[a-zA-Z#][^<>]*>");
 
     /**
      * 将颜色代码转换为实际颜色
@@ -67,13 +71,17 @@ public class ColorUtil {
 
         text = text.replace("\\n", "\n");
 
-        if (text.indexOf('&') >= 0 || text.indexOf('§') >= 0) {
-            text = ChatColor.translateAlternateColorCodes('&', text);
-            text = translateHexColors(text);
+        // &#RRGGBB / §#RRGGBB 统一转换为 MiniMessage 颜色标签
+        if (text.indexOf('#') >= 0) {
+            text = HEX_COLOR_PATTERN.matcher(text).replaceAll("<color:#$1>");
         }
 
         if (containsMiniMessageTags(text)) {
             return processMiniMessage(text);
+        }
+
+        if (text.indexOf('&') >= 0 || text.indexOf('§') >= 0) {
+            return ChatColor.translateAlternateColorCodes('&', text);
         }
 
         return text;
@@ -100,14 +108,14 @@ public class ColorUtil {
      */
     private static String processMiniMessage(String text) {
         try {
-            // 先处理传统颜色代码
-            text = ChatColor.translateAlternateColorCodes('&', text);
+            // & 颜色代码先转为 MiniMessage 标签（MiniMessage 不解析 § 遗留代码）
+            text = legacyToMiniMessage(text);
 
             // 解析 MiniMessage 为 Component
             Component component = MINI_MESSAGE_WITH_GRADIENT.deserialize(text);
 
             // 序列化为 Legacy 格式
-            return SECTION_SERIALIZER.serialize(component);
+            return serializeLegacy(component);
         } catch (Exception e) {
             // 如果 MiniMessage 解析失败，回退到传统处理
             return ChatColor.translateAlternateColorCodes('&', text);
@@ -115,40 +123,26 @@ public class ColorUtil {
     }
 
     /**
-     * 转换十六进制颜色代码
-     * 格式: &#RRGGBB
-     * 
-     * @param text 原始文本
-     * @return 转换后的文本
+     * 序列化 Component 为 § 格式字符串，并将紧凑十六进制 §#RRGGBB
+     * 展开为 CraftChatMessage 可解析的 §x§R§R§G§G§B§B 长格式
      */
-    private static String translateHexColors(String text) {
-        if (text == null) {
-            return "";
+    private static String serializeLegacy(Component component) {
+        String serialized = SECTION_SERIALIZER.serialize(component);
+        Matcher matcher = COMPACT_HEX_PATTERN.matcher(serialized);
+        if (!matcher.find()) {
+            return serialized;
         }
-
-        Matcher matcher = HEX_COLOR_PATTERN.matcher(text);
-        StringBuilder result = new StringBuilder();
-
+        StringBuilder result = new StringBuilder(serialized.length() + 16);
+        matcher.reset();
         while (matcher.find()) {
-            String hex = matcher.group(1);
-            // 转换为 MiniMessage 格式
-            matcher.appendReplacement(result, Matcher.quoteReplacement("<color:#" + hex + ">"));
+            StringBuilder expanded = new StringBuilder("§x");
+            for (char c : matcher.group(1).toCharArray()) {
+                expanded.append('§').append(c);
+            }
+            matcher.appendReplacement(result, Matcher.quoteReplacement(expanded.toString()));
         }
         matcher.appendTail(result);
-
-        String processedText = result.toString();
-
-        // 如果包含转换后的 MiniMessage 颜色标签，需要解析
-        if (processedText.contains("<color:#")) {
-            try {
-                Component component = MINI_MESSAGE.deserialize(processedText);
-                return SECTION_SERIALIZER.serialize(component);
-            } catch (Exception e) {
-                return processedText;
-            }
-        }
-
-        return processedText;
+        return result.toString();
     }
 
     /**
@@ -203,18 +197,8 @@ public class ColorUtil {
             return Component.empty();
         }
 
-        // 检查是否包含 MiniMessage 标签
-        if (containsMiniMessageTags(text)) {
-            try {
-                return MINI_MESSAGE_WITH_GRADIENT.deserialize(text);
-            } catch (Exception e) {
-                // 回退到 Legacy 解析
-            }
-        }
-
-        // 处理传统颜色代码和十六进制颜色
-        String processed = colorize(text);
-        return LEGACY_SERIALIZER.deserialize(processed);
+        // colorize 统一处理全部颜色格式后输出 § 格式，再用 section 序列化器解析
+        return SECTION_SERIALIZER.deserialize(colorize(text));
     }
 
     /**
@@ -227,7 +211,7 @@ public class ColorUtil {
         if (component == null) {
             return "";
         }
-        return SECTION_SERIALIZER.serialize(component);
+        return serializeLegacy(component);
     }
 
     /**
@@ -270,7 +254,7 @@ public class ColorUtil {
 
         try {
             Component component = MINI_MESSAGE_WITH_GRADIENT.deserialize(text);
-            return SECTION_SERIALIZER.serialize(component);
+            return serializeLegacy(component);
         } catch (Exception e) {
             return text;
         }
