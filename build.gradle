@@ -25,7 +25,6 @@ repositories {
 dependencies {
     paperweight.paperDevBundle('1.21.11-R0.1-SNAPSHOT')
     compileOnly 'me.clip:placeholderapi:2.11.6'
-    // CraftEngine API（自定义物品/方块，软依赖）—— 复用 WooSimMarket 本地 libs，规避 Gradle HTTP client 与 CE 仓库的 TLS 握手问题
     compileOnly files('../WooSimMarket/libs/craft-engine-bukkit-26.7.4.jar', '../WooSimMarket/libs/craft-engine-core-26.7.4.jar')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
