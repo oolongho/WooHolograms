@@ -490,6 +490,8 @@ public class HologramDetailGui extends GuiScreen {
                 })
                 .build());
 
+        setButton(43, createUpdateIntervalButton(hologram));
+
         setButton(44, GuiButton.builder(Material.COMMAND_BLOCK)
                 .name(plugin.getMessages().getString("gui.hologram-detail.btn-action-manage"))
                 .lore(Arrays.asList(
@@ -832,6 +834,77 @@ public class HologramDetailGui extends GuiScreen {
         fillLastTwoRows();
     }
     
+    /**
+     * 刷新间隔按钮（槽位 43）：控制该全息图占位符/动画文本的自动刷新周期
+     * 左键聊天输入 tick 数（0=禁用），右键在快捷档位间循环
+     */
+    private GuiButton createUpdateIntervalButton(Hologram hologram) {
+        int interval = hologram.getUpdateInterval();
+        String intervalDisplay = interval > 0
+                ? interval + " tick (" + String.format("%.1f", interval / 20.0) + "s)"
+                : plugin.getMessages().getString("gui.hologram-detail.update-interval-disabled");
+
+        return GuiButton.builder(Material.CLOCK)
+                .name(plugin.getMessages().getString("gui.hologram-detail.btn-update-interval"))
+                .lore(Arrays.asList(
+                        plugin.getMessages().getString("gui.hologram-detail.lore-update-interval"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-update-interval-current",
+                                "interval", intervalDisplay),
+                        "",
+                        plugin.getMessages().getString("gui.hologram-detail.lore-update-interval-left"),
+                        plugin.getMessages().getString("gui.hologram-detail.lore-update-interval-right")))
+                .onClick(context -> {
+                    Player player = context.getPlayer();
+                    if (context.getClickType().isRightClick()) {
+                        // 右键：快捷档位循环 0 → 10 → 20 → 40 → 100 → 0（未匹配档位时回到 0）
+                        int[] presets = {0, 10, 20, 40, 100};
+                        int next = presets[0];
+                        for (int i = 0; i < presets.length; i++) {
+                            if (presets[i] == interval) {
+                                next = presets[(i + 1) % presets.length];
+                                break;
+                            }
+                        }
+                        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                        if (h != null) {
+                            h.setUpdateInterval(next);
+                            h.save();
+                            String display = next > 0
+                                    ? next + " tick (" + String.format("%.1f", next / 20.0) + "s)"
+                                    : plugin.getMessages().getString("gui.hologram-detail.update-interval-disabled");
+                            plugin.getMessages().send(player, "gui.msg-update-interval-set", "interval", display);
+                        }
+                        guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                    } else {
+                        // 左键：聊天输入
+                        player.closeInventory();
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.update-interval"),
+                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                                    try {
+                                        int value = Integer.parseInt(input.trim());
+                                        if (value < 0 || value > 1200) {
+                                            plugin.getMessages().send(player, "gui.msg-update-interval-range");
+                                        } else {
+                                            Hologram h = plugin.getHologramManager().getHologram(hologramName);
+                                            if (h != null) {
+                                                h.setUpdateInterval(value);
+                                                h.save();
+                                                String display = value > 0
+                                                        ? value + " tick (" + String.format("%.1f", value / 20.0) + "s)"
+                                                        : plugin.getMessages().getString("gui.hologram-detail.update-interval-disabled");
+                                                plugin.getMessages().send(player, "gui.msg-update-interval-set", "interval", display);
+                                            }
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        plugin.getMessages().send(player, "gui.msg-input-invalid-number");
+                                    }
+                                    guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
+                                });
+                    }
+                })
+                .build();
+    }
+
     private void fillLastTwoRows() {
         GuiButton background = GuiButton.builder(Material.LIME_STAINED_GLASS_PANE)
                 .name(" ")

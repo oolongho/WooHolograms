@@ -584,12 +584,15 @@ public class HologramManager {
     private void updateTick() {
         plugin.getAnimationManager().tick();
 
+        // 全局任务周期，作为每全息图 update-interval 节流的推进步长
+        int deltaTicks = (int) plugin.getConfigManager().getUpdateInterval();
+
         for (Hologram hologram : holograms.values()) {
             if (!hologram.isEnabled()) {
                 continue;
             }
 
-            hologram.updateAnimationsAll();
+            hologram.tickUpdate(deltaTicks);
         }
 
         updateVisibilityForAllPlayers();

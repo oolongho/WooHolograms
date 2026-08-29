@@ -35,8 +35,8 @@ public class SetIntervalCommand extends Subcommand {
 
         try {
             int interval = Integer.parseInt(args[1]);
-            if (interval <= 0) {
-                plugin.getMessages().send(sender, "cmd.setinterval-positive");
+            if (interval < 0 || interval > 1200) {
+                plugin.getMessages().send(sender, "cmd.setinterval-range");
                 return true;
             }
 
@@ -59,7 +59,7 @@ public class SetIntervalCommand extends Subcommand {
                     .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         } else if (args.length == 2) {
-            List<String> intervals = Arrays.asList("1", "5", "10", "20", "40", "60");
+            List<String> intervals = Arrays.asList("0", "10", "20", "40", "60", "100");
             return intervals.stream()
                     .filter(i -> i.startsWith(args[1]))
                     .collect(Collectors.toList());

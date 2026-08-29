@@ -102,7 +102,7 @@ public class ConfigManager {
         // 默认值设置
         defaultDisplayRange = config.getDouble("defaults.display-range", 48.0);
         defaultUpdateRange = config.getDouble("defaults.update-range", 48.0);
-        defaultUpdateInterval = config.getInt("defaults.update-interval", 3);
+        defaultUpdateInterval = config.getInt("defaults.update-interval", 0);
         defaultLineHeight = config.getDouble("defaults.line-height", 0.3);
         defaultTextHeight = config.getDouble("defaults.text-height", 0.3);
         defaultItemHeight = config.getDouble("defaults.item-height", 0.6);

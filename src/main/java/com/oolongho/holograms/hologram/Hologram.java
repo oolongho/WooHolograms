@@ -38,6 +38,8 @@ public class Hologram {
     private volatile double displayRange;
     private volatile double updateRange;
     private int updateInterval;
+    /** 自动刷新节流剩余 tick（tickUpdate 用） */
+    private int updateTicksRemaining;
     private Billboard billboard = Billboard.CENTER;
     private float facing;
     private Float pitch = null; // null 表示不覆盖（pitch 硬编码为 0）
@@ -317,11 +319,33 @@ public class Hologram {
 
     /**
      * 设置更新间隔
-     * 
-     * @param updateInterval 更新间隔（tick）
+     *
+     * @param updateInterval 更新间隔（tick，0 = 禁用自动刷新）
      */
     public void setUpdateInterval(int updateInterval) {
         this.updateInterval = updateInterval;
+        // 重置节流计时，新间隔立即生效
+        this.updateTicksRemaining = 0;
+    }
+
+    /**
+     * 由全局更新任务推进自动刷新计时，到期触发动画/占位符刷新。
+     *
+     * <p>每全息图 update-interval 节流：&gt;0 按各自周期触发（低频全息图省性能），
+     * 0 禁用自动刷新。命令/GUI 的强制刷新不受此节流影响。</p>
+     *
+     * @param deltaTicks 距上次推进经过的 tick 数（= 全局任务周期）
+     */
+    public void tickUpdate(int deltaTicks) {
+        if (updateInterval <= 0) {
+            return;
+        }
+        updateTicksRemaining -= deltaTicks;
+        if (updateTicksRemaining > 0) {
+            return;
+        }
+        updateTicksRemaining = updateInterval;
+        updateAnimationsAll();
     }
 
     /**

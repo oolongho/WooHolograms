@@ -16,7 +16,8 @@ defaults:
   display-range: 48
   # 默认更新距离（方块）
   update-range: 48
-  # 默认更新间隔（tick），0 表示禁用自动更新
+  # 默认更新间隔（tick），控制占位符/动画文本的自动刷新周期
+  # 0 表示禁用自动刷新（静态全息图省性能，大部分全息图推荐 0）
   update-interval: 0
   # 默认行高
   line-height: 0.3
