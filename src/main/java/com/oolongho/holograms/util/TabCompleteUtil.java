@@ -1,5 +1,6 @@
 package com.oolongho.holograms.util;
 
+import com.oolongho.holograms.WooHolograms;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,17 +16,24 @@ import java.util.stream.Collectors;
  * TAB 补全工具类
  * 提供各种类型的补全提示
  *
- * 
+ *
  */
 public class TabCompleteUtil {
 
     // 行类型前缀
     public static final List<String> LINE_TYPE_PREFIXES = Arrays.asList(
             "#ICON:",
+            "#BLOCK:",
             "#HEAD:",
             "#SMALLHEAD:",
             "#ENTITY:"
     );
+
+    // 原版方块材质名（Material 中 isBlock 的子集）
+    private static final List<String> BLOCK_MATERIALS = Arrays.stream(Material.values())
+            .filter(Material::isBlock)
+            .map(Enum::name)
+            .collect(Collectors.toList());
 
     // 常用变量（从 PlaceholderUtil 派生）
     public static final Map<String, String> PLACEHOLDERS = new HashMap<>();
@@ -381,11 +390,20 @@ public class TabCompleteUtil {
             }
         }
 
-        // 如果已经输入了 #ICON:，补全物品材质
+        // 如果已经输入了 #ICON:，补全物品材质与 CraftEngine 自定义物品 ID
         if (upperInput.startsWith("#ICON:")) {
             String afterPrefix = input.substring(6);
             String materialPart = afterPrefix.split("\\s+")[0];
             completions.addAll(getMaterialCompletions(materialPart));
+            completions.addAll(getCraftEngineItemCompletions(materialPart));
+        }
+
+        // 如果已经输入了 #BLOCK:，补全方块材质与 CraftEngine 自定义方块 ID
+        if (upperInput.startsWith("#BLOCK:")) {
+            String afterPrefix = input.substring(7);
+            String materialPart = afterPrefix.split("\\s+")[0];
+            completions.addAll(getBlockMaterialCompletions(materialPart));
+            completions.addAll(getCraftEngineBlockCompletions(materialPart));
         }
 
         // 如果已经输入了 #HEAD: 或 #SMALLHEAD:，补全头颅类型
@@ -433,6 +451,44 @@ public class TabCompleteUtil {
         String upperInput = input.toUpperCase();
         return COMMON_MATERIALS.stream()
                 .filter(m -> m.startsWith(upperInput))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取方块材质补全（原版 Block Material）
+     */
+    public static List<String> getBlockMaterialCompletions(String input) {
+        String upperInput = input.toUpperCase();
+        return BLOCK_MATERIALS.stream()
+                .filter(m -> m.startsWith(upperInput))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取 CraftEngine 自定义物品 ID 补全（CE 在线时）
+     */
+    public static List<String> getCraftEngineItemCompletions(String input) {
+        var hook = WooHolograms.getInstance().getCraftEngineHook();
+        if (hook == null || !hook.isReady()) {
+            return List.of();
+        }
+        String lowerInput = input.toLowerCase(Locale.ROOT);
+        return hook.listItemIds().stream()
+                .filter(id -> id.startsWith(lowerInput))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取 CraftEngine 自定义方块 ID 补全（CE 在线时）
+     */
+    public static List<String> getCraftEngineBlockCompletions(String input) {
+        var hook = WooHolograms.getInstance().getCraftEngineHook();
+        if (hook == null || !hook.isReady()) {
+            return List.of();
+        }
+        String lowerInput = input.toLowerCase(Locale.ROOT);
+        return hook.listBlockIds().stream()
+                .filter(id -> id.startsWith(lowerInput))
                 .collect(Collectors.toList());
     }
 

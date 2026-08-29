@@ -2,7 +2,6 @@ package com.oolongho.holograms.nms;
 
 import com.oolongho.holograms.hologram.HologramType;
 import com.oolongho.holograms.nms.renderer.NmsTextHologramRenderer;
-import com.oolongho.holograms.nms.renderer.NmsIconHologramRenderer;
 import com.oolongho.holograms.nms.renderer.NmsItemDisplayRenderer;
 import com.oolongho.holograms.nms.renderer.NmsHeadHologramRenderer;
 import com.oolongho.holograms.nms.renderer.NmsSmallHeadHologramRenderer;
@@ -113,8 +112,6 @@ public class HologramRendererPool {
             return HologramType.ICON;
         } else if (renderer instanceof NmsTextHologramRenderer) {
             return HologramType.TEXT;
-        } else if (renderer instanceof NmsIconHologramRenderer) {
-            return HologramType.ICON;
         } else if (renderer instanceof NmsSmallHeadHologramRenderer) {
             return HologramType.SMALLHEAD;
         } else if (renderer instanceof NmsHeadHologramRenderer) {

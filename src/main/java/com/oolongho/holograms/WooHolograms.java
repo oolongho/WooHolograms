@@ -8,6 +8,7 @@ import com.oolongho.holograms.config.Messages;
 import com.oolongho.holograms.gui.ChatInputManager;
 import com.oolongho.holograms.gui.GuiManager;
 import com.oolongho.holograms.hologram.HologramManager;
+import com.oolongho.holograms.hook.CraftEngineHook;
 import com.oolongho.holograms.hook.PlaceholderHook;
 import com.oolongho.holograms.listener.PacketListener;
 import com.oolongho.holograms.listener.PlayerListener;
@@ -49,6 +50,7 @@ public class WooHolograms extends JavaPlugin {
     private NmsHologramRendererFactory rendererFactory;
     private HologramRendererPool rendererPool;
     private PlaceholderHook placeholderHook;
+    private CraftEngineHook craftEngineHook;
     
     // 状态
     private boolean pluginEnabled = false;
@@ -97,6 +99,12 @@ public class WooHolograms extends JavaPlugin {
         storage = new YamlHologramStorage(this);
         ((YamlHologramStorage) storage).migrateFromOldFormat();
         
+        // 初始化 CraftEngine 钩子（软依赖，渲染器通过它解析 CE 自定义物品/方块）
+        craftEngineHook = new CraftEngineHook();
+        if (craftEngineHook.init()) {
+            getLogger().info("已挂钩 CraftEngine：#ICON/#BLOCK 行支持 CE 自定义物品/方块");
+        }
+
         // 初始化渲染器工厂
         EntityIdGenerator entityIdGenerator = new EntityIdGenerator();
         rendererFactory = new HologramRendererFactoryImpl(entityIdGenerator);
@@ -399,13 +407,22 @@ public class WooHolograms extends JavaPlugin {
     
     /**
      * 获取占位符钩子
-     * 
+     *
      * @return 占位符钩子
      */
     public PlaceholderHook getPlaceholderHook() {
         return placeholderHook;
     }
-    
+
+    /**
+     * 获取 CraftEngine 钩子
+     *
+     * @return CraftEngine 钩子（onEnable 后可用，不为 null）
+     */
+    public CraftEngineHook getCraftEngineHook() {
+        return craftEngineHook;
+    }
+
     /**
      * 检查插件是否启用
      * 

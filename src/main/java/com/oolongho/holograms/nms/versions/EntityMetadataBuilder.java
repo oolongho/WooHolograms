@@ -674,6 +674,19 @@ public class EntityMetadataBuilder {
     }
 
     /**
+     * 设置 BlockDisplay Entity 的方块状态（BlockData 重载，用于 CraftEngine 自定义方块）
+     *
+     * @param blockData Bukkit BlockData
+     * @return this
+     */
+    public EntityMetadataBuilder withBlockState(org.bukkit.block.data.BlockData blockData) {
+        if (blockData instanceof CraftBlockData craftBlockData) {
+            watchableObjects.add(EntityMetadataType.BLOCK_DISPLAY_BLOCK_STATE.construct(craftBlockData.getState()));
+        }
+        return this;
+    }
+
+    /**
      * 创建一个新的构建器
      *
      * @return 新的构建器实例

@@ -3,6 +3,7 @@ package com.oolongho.holograms.hologram;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.Action;
 import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.hook.CraftEngineHook;
 import com.oolongho.holograms.hologram.HologramManager;
 import com.oolongho.holograms.nms.NmsHologramRenderer;
 import com.oolongho.holograms.nms.NmsHologramRendererFactory;
@@ -53,6 +54,10 @@ public class HologramLine {
     private HeadTexture headTexture;
     private org.bukkit.entity.EntityType entityType = org.bukkit.entity.EntityType.ZOMBIE;
     private org.bukkit.Material blockMaterial = org.bukkit.Material.STONE;
+    /** CraftEngine 自定义方块解析结果（null 表示原版 Material 模式） */
+    private org.bukkit.block.data.BlockData blockData;
+    /** #BLOCK 未识别兜底警告只记录一次（每行一次） */
+    private final java.util.concurrent.atomic.AtomicBoolean warnedBlockFallback = new java.util.concurrent.atomic.AtomicBoolean(false);
 
     // 偏移
     private double offsetX;
@@ -283,21 +288,51 @@ public class HologramLine {
 
     /**
      * 解析方块类型
+     * 支持原版 Material 与 CraftEngine 自定义方块（namespace:path，需 CE 在线）；
+     * CE 解析结果保存为 BlockData 供渲染器优先使用，未识别时兜底 STONE 并记录一次 warning
      * @param content 内容
      */
     private void parseBlockType(String content) {
+        this.blockData = null;
+
         if (content == null || content.isEmpty()) {
             this.blockMaterial = org.bukkit.Material.STONE;
             return;
         }
 
         String upperContent = content.toUpperCase(Locale.ROOT);
-        if (upperContent.startsWith("#BLOCK:")) {
-            String materialName = content.substring(7).trim();
-            org.bukkit.Material material = org.bukkit.Material.matchMaterial(materialName);
-            this.blockMaterial = material != null && material.isBlock() ? material : org.bukkit.Material.STONE;
-        } else {
+        if (!upperContent.startsWith("#BLOCK:")) {
             this.blockMaterial = org.bukkit.Material.STONE;
+            return;
+        }
+
+        String materialName = content.substring(7).trim();
+
+        // CraftEngine 自定义方块
+        if (materialName.contains(":")) {
+            CraftEngineHook hook = WooHolograms.getInstance().getCraftEngineHook();
+            if (hook != null && hook.isReady()) {
+                org.bukkit.block.data.BlockData data = hook.resolveBlockData(materialName);
+                if (data != null) {
+                    this.blockData = data;
+                    this.blockMaterial = data.getMaterial();
+                    return;
+                }
+            }
+        }
+
+        // 原版 Material
+        org.bukkit.Material material = org.bukkit.Material.matchMaterial(materialName);
+        if (material != null && material.isBlock()) {
+            this.blockMaterial = material;
+            return;
+        }
+
+        // 兜底 STONE + warning（每行一次）
+        this.blockMaterial = org.bukkit.Material.STONE;
+        if (warnedBlockFallback.compareAndSet(false, true)) {
+            WooHolograms.getInstance().getLogger().warning(() ->
+                    "无法解析 #BLOCK 行方块，已使用 STONE 兜底: " + content);
         }
     }
 
@@ -1292,6 +1327,15 @@ public class HologramLine {
 
     public org.bukkit.Material getBlockMaterial() {
         return blockMaterial;
+    }
+
+    /**
+     * 获取 CraftEngine 自定义方块解析结果
+     *
+     * @return BlockData；非 CE 方块或解析失败返回 null（此时使用 BlockMaterial）
+     */
+    public org.bukkit.block.data.BlockData getBlockData() {
+        return blockData;
     }
 
     public double getHeight() {
