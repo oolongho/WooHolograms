@@ -1,6 +1,7 @@
 package com.oolongho.holograms.gui;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -110,11 +111,13 @@ public class GuiButton {
 
         public GuiButton build() {
             if (name != null) {
-                meta.displayName(MINI.deserialize(name));
+                // 原版客户端对物品名默认施加斜体，显式关闭
+                meta.displayName(MINI.deserialize(name).decoration(TextDecoration.ITALIC, false));
             }
             if (!lore.isEmpty()) {
+                // 原版客户端对物品 lore 默认施加斜体，显式关闭
                 List<Component> loreComponents = lore.stream()
-                        .map(MINI::deserialize)
+                        .map(line -> MINI.deserialize(line).decoration(TextDecoration.ITALIC, false))
                         .collect(Collectors.toList());
                 meta.lore(loreComponents);
             }
