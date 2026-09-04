@@ -2,16 +2,14 @@ package com.oolongho.holograms.nms.versions;
 
 import com.oolongho.holograms.nms.util.WooHologramsException;
 import net.minecraft.world.entity.EntityType;
-import org.bukkit.NamespacedKey;
-
-import java.util.Optional;
+import org.bukkit.craftbukkit.entity.CraftEntityType;
 
 /**
  * 实体类型注册表
  * 用于将 Bukkit EntityType 转换为 NMS EntityTypes
  *
- * 
- * 
+ *
+ *
  */
 public final class EntityTypeRegistry {
 
@@ -32,24 +30,17 @@ public final class EntityTypeRegistry {
     /**
      * 查找 NMS EntityTypes
      *
+     * 使用 CraftBukkit 桥接而非 EntityType.byString（MC 26.2 起该方法已被移除），
+     * bukkitToMinecraft 在 1.21.x ~ 26.2+ 上签名一致，编译产物可直接跨版本链接
+     *
      * @param entityType Bukkit 实体类型
      * @return NMS EntityTypes
      */
     static EntityType<?> findEntityTypes(org.bukkit.entity.EntityType entityType) {
-        NamespacedKey namespacedKey = getNamespacedKey(entityType);
-        String key = namespacedKey.getKey();
-        Optional<EntityType<?>> entityTypes = EntityType.byString(key);
-        if (entityTypes.isPresent()) {
-            return entityTypes.get();
+        EntityType<?> type = CraftEntityType.bukkitToMinecraft(entityType);
+        if (type == null) {
+            throw new WooHologramsException("Invalid entity type: " + entityType);
         }
-        throw new WooHologramsException("Invalid entity type: " + entityType);
-    }
-
-    private static NamespacedKey getNamespacedKey(org.bukkit.entity.EntityType entityType) {
-        try {
-            return entityType.getKey();
-        } catch (IllegalStateException e) {
-            throw new WooHologramsException("Couldn't get key for entity type: " + entityType);
-        }
+        return type;
     }
 }
