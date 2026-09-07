@@ -7,7 +7,8 @@ import com.oolongho.holograms.api.hologram.Billboard;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.api.action.ClickType;
-import com.oolongho.holograms.api.event.HologramClickEvent;
+import com.oolongho.holograms.api.event.HologramMoveEvent;
+import com.oolongho.holograms.api.event.HologramPageSwitchEvent;
 import com.oolongho.holograms.storage.HologramStorage;
 import com.oolongho.holograms.util.LocationUtil;
 import com.oolongho.holograms.util.Profiler;
@@ -212,6 +213,13 @@ public class Hologram implements com.oolongho.holograms.api.hologram.Hologram {
      */
     public void setLocation(Location location) {
         synchronized (visibilityMutex) {
+            // 移动事件（可取消）
+            HologramMoveEvent moveEvent = new HologramMoveEvent(this, this.location, location);
+            Bukkit.getPluginManager().callEvent(moveEvent);
+            if (moveEvent.isCancelled()) {
+                return;
+            }
+
             String oldWorldName = this.location != null && this.location.getWorld() != null
                     ? this.location.getWorld().getName() : null;
             String newWorldName = location != null && location.getWorld() != null
@@ -1321,6 +1329,12 @@ public class Hologram implements com.oolongho.holograms.api.hologram.Hologram {
 
             HologramPage currentPage = getPage(player);
             if (currentPage != null && currentPage != page) {
+                // 翻页事件（可取消；玩家首次显示不触发）
+                HologramPageSwitchEvent switchEvent = new HologramPageSwitchEvent(player, this, currentPage.getIndex(), pageIndex);
+                Bukkit.getPluginManager().callEvent(switchEvent);
+                if (switchEvent.isCancelled()) {
+                    return false;
+                }
                 hidePageFrom(player, currentPage);
             }
 
@@ -1692,6 +1706,13 @@ public class Hologram implements com.oolongho.holograms.api.hologram.Hologram {
      */
     public void teleport(Location location, boolean updateViewers) {
         synchronized (visibilityMutex) {
+            // 移动事件（可取消）
+            HologramMoveEvent moveEvent = new HologramMoveEvent(this, this.location, location);
+            Bukkit.getPluginManager().callEvent(moveEvent);
+            if (moveEvent.isCancelled()) {
+                return;
+            }
+
             String oldWorldName = this.location != null && this.location.getWorld() != null
                     ? this.location.getWorld().getName() : null;
             String newWorldName = location != null && location.getWorld() != null
@@ -2164,21 +2185,14 @@ public class Hologram implements com.oolongho.holograms.api.hologram.Hologram {
             return false;
         }
 
-        // 5. 触发 HologramClickEvent 事件
-        HologramClickEvent event = new HologramClickEvent(this, page, player, clickType, entityId);
-        Bukkit.getPluginManager().callEvent(event);
-
-        // 6. 检查事件是否被取消
-        if (event.isCancelled()) {
-            return false;
-        }
-
-        // 7. 检查是否禁用动作
+        // 5. 检查是否禁用动作
         if (hasFlag(EnumFlag.DISABLE_ACTIONS)) {
             return true;
         }
 
-        // 8. 执行动作
+        // 6. 执行动作
+        // 注意：HologramClickEvent 由数据包监听层（PacketListener）统一触发，
+        // 此处不再重复触发，避免同一点击产生双重事件
         page.executeActions(player, clickType);
 
         return true;

@@ -4,7 +4,9 @@ import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.api.hologram.Brightness;
 import com.oolongho.holograms.api.hologram.EnumFlag;
 import com.oolongho.holograms.api.hologram.HologramEditor;
+import com.oolongho.holograms.api.event.HologramEditEvent;
 import com.oolongho.holograms.api.hologram.TextAlignment;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -234,5 +236,8 @@ public class HologramEditorImpl implements HologramEditor {
         if (updateInterval != null) hologram.setUpdateInterval(updateInterval);
         if (permission != null) hologram.setPermission(permission);
         if (!flags.isEmpty()) hologram.addFlags(flags.toArray(new EnumFlag[0]));
+
+        // 编辑事件（修改已生效，不可取消）
+        Bukkit.getPluginManager().callEvent(new HologramEditEvent(hologram));
     }
 }
