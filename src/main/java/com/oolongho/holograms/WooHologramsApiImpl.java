@@ -12,13 +12,27 @@ import com.oolongho.holograms.api.hologram.HologramRegistry;
 public class WooHologramsApiImpl implements HologramApi {
 
     private final WooHolograms plugin;
+    private final com.oolongho.holograms.api.registry.ActionTypeRegistry actionRegistry =
+            new com.oolongho.holograms.action.ActionTypeRegistryImpl();
+    private final com.oolongho.holograms.api.registry.AnimationRegistry animationRegistry;
 
     public WooHologramsApiImpl(WooHolograms plugin) {
         this.plugin = plugin;
+        this.animationRegistry = new com.oolongho.holograms.animation.AnimationRegistryImpl(plugin.getAnimationManager());
     }
 
     @Override
     public HologramRegistry holograms() {
         return plugin.getHologramManager();
+    }
+
+    @Override
+    public com.oolongho.holograms.api.registry.ActionTypeRegistry actions() {
+        return actionRegistry;
+    }
+
+    @Override
+    public com.oolongho.holograms.api.registry.AnimationRegistry animations() {
+        return animationRegistry;
     }
 }

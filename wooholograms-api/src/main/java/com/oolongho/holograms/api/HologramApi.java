@@ -1,6 +1,8 @@
 package com.oolongho.holograms.api;
 
 import com.oolongho.holograms.api.hologram.HologramRegistry;
+import com.oolongho.holograms.api.registry.ActionTypeRegistry;
+import com.oolongho.holograms.api.registry.AnimationRegistry;
 
 /**
  * WooHolograms 公共 API 顶层入口
@@ -35,4 +37,18 @@ public interface HologramApi {
      * @return 注册表实例
      */
     HologramRegistry holograms();
+
+    /**
+     * 获取动作类型注册表（注册自定义点击动作）
+     *
+     * @return 注册表实例
+     */
+    ActionTypeRegistry actions();
+
+    /**
+     * 获取动画注册表（注册自定义文本动画）
+     *
+     * @return 注册表实例
+     */
+    AnimationRegistry animations();
 }

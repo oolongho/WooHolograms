@@ -30,6 +30,7 @@ public final class HologramBuilder {
     private final List<String> lines = new ArrayList<>();
 
     private boolean temporary = false;
+    private long expireAfterTicks = -1;
     private double lineHeight = -1;
     private double displayRange = -1;
     private double updateRange = -1;
@@ -96,6 +97,22 @@ public final class HologramBuilder {
      * @return this
      */
     public HologramBuilder temporary() {
+        this.temporary = true;
+        return this;
+    }
+
+    /**
+     * 设置存活时长：创建后延迟指定 tick 自动删除（隐含临时全息图，不写入文件）。
+     * 适用于副本特效、商店预览、活动倒计时等场景
+     *
+     * @param ticks 存活 tick 数（20 tick = 1 秒）
+     * @return this
+     */
+    public HologramBuilder expireAfter(long ticks) {
+        if (ticks < 0) {
+            throw new IllegalArgumentException("expireAfter 不能为负: " + ticks);
+        }
+        this.expireAfterTicks = ticks;
         this.temporary = true;
         return this;
     }
@@ -307,6 +324,11 @@ public final class HologramBuilder {
 
         // 创建时页面为空未能立即显示，内容就绪后向范围内玩家显示
         hologram.showToNearby();
+
+        // 定时销毁
+        if (expireAfterTicks >= 0) {
+            registry.scheduleDeletion(hologram, expireAfterTicks);
+        }
         return hologram;
     }
 }

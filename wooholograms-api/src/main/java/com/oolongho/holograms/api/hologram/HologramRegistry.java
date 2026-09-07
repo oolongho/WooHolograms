@@ -153,4 +153,12 @@ public interface HologramRegistry {
      * @return 是否成功删除
      */
     boolean deleteHologram(String name);
+
+    /**
+     * 计划延迟删除全息图（临时全息图定时销毁；全息图被提前删除时任务自动跳过）
+     *
+     * @param hologram   全息图
+     * @param delayTicks 延迟 tick 数
+     */
+    void scheduleDeletion(Hologram hologram, long delayTicks);
 }

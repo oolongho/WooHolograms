@@ -290,6 +290,25 @@ public class HologramManager implements com.oolongho.holograms.api.hologram.Holo
     }
 
     /**
+     * 计划延迟删除全息图（HologramRegistry API，临时全息图定时销毁）
+     * 全息图被提前删除时任务自动跳过
+     */
+    @Override
+    public void scheduleDeletion(com.oolongho.holograms.api.hologram.Hologram hologram, long delayTicks) {
+        if (hologram == null || delayTicks < 0) {
+            return;
+        }
+        String name = hologram.getName();
+        SchedulerUtil.runTaskLater(() -> {
+            com.oolongho.holograms.api.hologram.Hologram current = holograms.get(name);
+            // 仅当仍是同一实例时删除（期间可能已被删除并重建同名全息图）
+            if (current == hologram) {
+                deleteHologram(name);
+            }
+        }, delayTicks);
+    }
+
+    /**
      * 移除全息图（不删除文件）
      * 
      * @param name 名称
