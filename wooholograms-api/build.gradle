@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group = 'com.oolongho'
@@ -33,4 +34,15 @@ tasks.withType(JavaCompile).configureEach {
 javadoc {
     options.encoding = 'UTF-8'
     options.charSet = 'UTF-8'
+}
+
+// JitPack / Maven 发布坐标：com.oolongho:wooholograms-api:<version>
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'com.oolongho'
+            artifactId = 'wooholograms-api'
+        }
+    }
 }

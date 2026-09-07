@@ -1,0 +1,8 @@
+# JitPack 构建配置
+# API 制品坐标: com.oolongho:wooholograms-api:<tag>
+# 用法: repositories { maven { url = 'https://jitpack.io' } }
+#       dependencies { compileOnly 'com.oolongho:wooholograms-api:1.2.0' }
+jdk:
+  - openjdk21
+install:
+  - ./gradlew :wooholograms-api:publishToMavenLocal --no-daemon
