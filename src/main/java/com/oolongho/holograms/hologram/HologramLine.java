@@ -1458,6 +1458,35 @@ public class HologramLine implements com.oolongho.holograms.api.hologram.Hologra
         }
     }
 
+    /**
+     * 为本行添加点击动作（HologramLine API，解析 actionData 字符串）
+     */
+    @Override
+    public boolean addAction(ClickType clickType, String actionData) {
+        Action action = Action.fromString(actionData);
+        if (action == null) {
+            return false;
+        }
+        addAction(clickType, action);
+        return true;
+    }
+
+    /**
+     * 获取本行动作数据（HologramLine API，返回配置格式的字符串列表）
+     */
+    @Override
+    public java.util.List<String> getActionData(ClickType clickType) {
+        List<Action> list = actions.get(clickType);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> data = new ArrayList<>(list.size());
+        for (Action action : list) {
+            data.add(action.toString());
+        }
+        return data;
+    }
+
     public List<Action> getActions(ClickType clickType) {
         List<Action> list = actions.get(clickType);
         return list != null ? new ArrayList<>(list) : new ArrayList<>();

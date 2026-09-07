@@ -1,5 +1,7 @@
 package com.oolongho.holograms.api.hologram;
 
+import com.oolongho.holograms.api.action.ClickType;
+
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
 
@@ -263,7 +265,7 @@ public interface HologramLine {
     java.util.Set<EnumFlag> getFlags();
 
     /*
-     * 动作（只读查询；注册/修改动作请通过页面或后续版本的动作 API）
+     * 动作
      */
 
     /**
@@ -272,6 +274,34 @@ public interface HologramLine {
      * @return 是否有动作
      */
     boolean hasActions();
+
+    /**
+     * 为本行添加点击动作
+     *
+     * <p>添加首个动作时插件会自动重建点击判定实体，无需额外刷新。
+     * 动作格式与配置文件一致：{@code TYPE:参数}（如 {@code MESSAGE:你好 {player}}、
+     * {@code CONSOLE:say hello}、自定义注册的动作类型）。</p>
+     *
+     * @param clickType  触发的点击类型
+     * @param actionData 动作数据字符串
+     * @return 是否成功（格式非法返回 false）
+     */
+    boolean addAction(ClickType clickType, String actionData);
+
+    /**
+     * 获取本行在指定点击类型下的全部动作数据（与 {@link #addAction} 格式一致，可直接回写）
+     *
+     * @param clickType 点击类型
+     * @return 动作数据列表（只读副本，可能为空）
+     */
+    java.util.List<String> getActionData(ClickType clickType);
+
+    /**
+     * 清除本行在指定点击类型下的全部动作
+     *
+     * @param clickType 点击类型
+     */
+    void clearActions(ClickType clickType);
 
     /**
      * 获取本行的位置（仅供只读参考；行位置由页面统一对齐管理）

@@ -27,7 +27,26 @@ public final class HologramBuilder {
     private final HologramRegistry registry;
     private final String name;
     private final Location location;
-    private final List<String> lines = new ArrayList<>();
+
+    /** 单行内容与偏移 */
+    private static final class LineSpec {
+        final String content;
+        final double offsetX;
+        final double offsetY;
+        final double offsetZ;
+
+        LineSpec(String content, double offsetX, double offsetY, double offsetZ) {
+            this.content = content;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+            this.offsetZ = offsetZ;
+        }
+    }
+
+    /** 第一页的行（与 page() 追加的后续页区分） */
+    private final List<LineSpec> lines = new ArrayList<>();
+    /** page() 追加的额外页（每页多行） */
+    private final List<List<LineSpec>> pages = new ArrayList<>();
 
     private boolean temporary = false;
     private long expireAfterTicks = -1;
@@ -74,7 +93,21 @@ public final class HologramBuilder {
      * @return this
      */
     public HologramBuilder line(String content) {
-        lines.add(content);
+        lines.add(new LineSpec(content, 0, 0, 0));
+        return this;
+    }
+
+    /**
+     * 追加一行带 X/Y/Z 偏移的内容（偏移行独立渲染，不占据纵向空间，可用于错位/双列布局）
+     *
+     * @param content 行内容
+     * @param x       X 轴偏移
+     * @param y       Y 轴偏移
+     * @param z       Z 轴偏移
+     * @return this
+     */
+    public HologramBuilder offsetLine(String content, double x, double y, double z) {
+        lines.add(new LineSpec(content, x, y, z));
         return this;
     }
 
@@ -88,6 +121,27 @@ public final class HologramBuilder {
         for (String content : contents) {
             line(content);
         }
+        return this;
+    }
+
+    /**
+     * 开启一个新页面（后续 line()/lines() 的内容写入新页）
+     *
+     * <pre>{@code
+     * builder.line("第一页标题")
+     *        .page("第二页标题", "第二页内容")
+     *        .create();
+     * }</pre>
+     *
+     * @param lines 新页的行内容（可为空数组，稍后再补）
+     * @return this
+     */
+    public HologramBuilder page(String... lines) {
+        List<LineSpec> page = new ArrayList<>();
+        for (String content : lines) {
+            page.add(new LineSpec(content, 0, 0, 0));
+        }
+        pages.add(page);
         return this;
     }
 
@@ -248,7 +302,7 @@ public final class HologramBuilder {
         return this;
     }
 
-    /** 设置查看权限（null 表示无限制） */
+    /** 设置查看权限（null 或空字符串表示无限制） */
     public HologramBuilder permission(@Nullable String permission) {
         this.permission = permission;
         return this;
@@ -310,16 +364,10 @@ public final class HologramBuilder {
         if (permission != null) hologram.setPermission(permission);
         if (!flags.isEmpty()) hologram.addFlags(flags.toArray(new EnumFlag[0]));
 
-        // 写入行内容（保证页面非空可显示）
-        HologramPage page = hologram.getPage(0);
-        if (page == null) {
-            page = hologram.addPage();
-        }
-        List<String> finalLines = lines.isEmpty() ? List.of("") : lines;
-        for (String content : finalLines) {
-            if (content != null) {
-                page.addLine(content);
-            }
+        // 写入行内容（保证首页非空可显示）
+        writePage(hologram.getPage(0), lines);
+        for (List<LineSpec> pageLines : pages) {
+            writePage(hologram.addPage(), pageLines);
         }
 
         // 创建时页面为空未能立即显示，内容就绪后向范围内玩家显示
@@ -330,5 +378,24 @@ public final class HologramBuilder {
             registry.scheduleDeletion(hologram, expireAfterTicks);
         }
         return hologram;
+    }
+
+    /**
+     * 向指定页面写入行内容；空页自动补一行空文本保证可显示；偏移行应用偏移
+     */
+    private static void writePage(HologramPage page, List<LineSpec> specs) {
+        if (page == null) {
+            return;
+        }
+        List<LineSpec> finalSpecs = specs.isEmpty() ? List.of(new LineSpec("", 0, 0, 0)) : specs;
+        for (LineSpec spec : finalSpecs) {
+            if (spec.content == null) {
+                continue;
+            }
+            HologramLine line = page.addLine(spec.content);
+            if (line != null && (spec.offsetX != 0 || spec.offsetY != 0 || spec.offsetZ != 0)) {
+                line.setOffset(spec.offsetX, spec.offsetY, spec.offsetZ);
+            }
+        }
     }
 }

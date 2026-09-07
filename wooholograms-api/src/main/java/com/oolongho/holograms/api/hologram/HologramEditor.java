@@ -79,7 +79,7 @@ public interface HologramEditor {
     /** 设置自动刷新间隔（tick，0 = 禁用） */
     HologramEditor updateInterval(int updateInterval);
 
-    /** 设置查看权限（null 或空表示无限制） */
+    /** 设置查看权限（传 null 表示不修改；传空字符串清除权限限制） */
     HologramEditor permission(@Nullable String permission);
 
     /** 追加标志 */

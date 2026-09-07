@@ -789,6 +789,35 @@ public class HologramPage implements com.oolongho.holograms.api.hologram.Hologra
     }
 
     /**
+     * 为页面添加点击动作（HologramPage API，解析 actionData 字符串）
+     */
+    @Override
+    public boolean addAction(ClickType clickType, String actionData) {
+        Action action = Action.fromString(actionData);
+        if (action == null) {
+            return false;
+        }
+        addAction(clickType, action);
+        return true;
+    }
+
+    /**
+     * 获取页面动作数据（HologramPage API，返回配置格式的字符串列表）
+     */
+    @Override
+    public java.util.List<String> getActionData(ClickType clickType) {
+        List<Action> list = actions.get(clickType);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> data = new ArrayList<>(list.size());
+        for (Action action : list) {
+            data.add(action.toString());
+        }
+        return data;
+    }
+
+    /**
      * 获取指定点击类型的动作列表
      *
      * @param clickType 点击类型

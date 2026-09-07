@@ -183,6 +183,7 @@ public class HologramEditorImpl implements HologramEditor {
 
     @Override
     public HologramEditor permission(@Nullable String permission) {
+        // null 表示不修改（apply 时跳过）；空字符串清除权限
         this.permission = permission;
         return this;
     }
@@ -234,6 +235,7 @@ public class HologramEditorImpl implements HologramEditor {
         if (displayRange != null) hologram.setDisplayRange(displayRange);
         if (updateRange != null) hologram.setUpdateRange(updateRange);
         if (updateInterval != null) hologram.setUpdateInterval(updateInterval);
+        // null = 不修改；空字符串 = 清除权限（hasPermission 视 null/空为无限制）
         if (permission != null) hologram.setPermission(permission);
         if (!flags.isEmpty()) hologram.addFlags(flags.toArray(new EnumFlag[0]));
 

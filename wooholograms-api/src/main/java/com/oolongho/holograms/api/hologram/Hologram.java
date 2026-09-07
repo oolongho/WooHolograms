@@ -1,5 +1,7 @@
 package com.oolongho.holograms.api.hologram;
 
+import com.oolongho.holograms.api.action.ClickType;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -678,12 +680,10 @@ public interface Hologram {
     void delete();
 
     /**
-     * 克隆为新的全息图
+     * 触发本全息图当前页面在指定点击类型下的全部动作（程序化触发，等价于玩家点击）
      *
-     * @param name     新全息图名称
-     * @param location 新位置
-     * @param temp     true 时不保存到文件（临时全息图）
-     * @return 克隆出的全息图
+     * @param player    动作作用的目标玩家
+     * @param clickType 点击类型
      */
-    Hologram clone(String name, Location location, boolean temp);
+    void executeActions(Player player, ClickType clickType);
 }

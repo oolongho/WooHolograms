@@ -101,6 +101,31 @@ public interface HologramRegistry {
     boolean isValidName(String name);
 
     /**
+     * 获取指定位置附近的全息图（同世界且距离 ≤ range）
+     *
+     * @param center 中心位置
+     * @param range  搜索半径（方块）
+     * @return 按距离无序的全息图列表
+     */
+    default java.util.List<Hologram> getHologramsNear(org.bukkit.Location center, double range) {
+        java.util.List<Hologram> result = new java.util.ArrayList<>();
+        if (center == null || center.getWorld() == null) {
+            return result;
+        }
+        double rangeSq = range * range;
+        for (Hologram hologram : getAllHolograms()) {
+            org.bukkit.Location loc = hologram.getLocation();
+            if (loc == null || loc.getWorld() == null || !loc.getWorld().equals(center.getWorld())) {
+                continue;
+            }
+            if (loc.distanceSquared(center) <= rangeSq) {
+                result.add(hologram);
+            }
+        }
+        return result;
+    }
+
+    /**
      * 创建流式构建器（链式设置内容与属性后调用 create() 完成创建）
      *
      * @param name     全息图名称

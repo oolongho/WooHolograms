@@ -48,18 +48,26 @@ public class MyPlugin extends JavaPlugin {
 所有 API 方法必须在**服务器主线程**（Folia 下为全息图所在区域的线程）调用。
 建议在自己的事件监听/任务中直接调用；跨线程场景请使用 Bukkit 调度器回主线程。
 
+事件处理器中调用同一全息图的其他 API 方法是安全的（内部状态锁可重入），
+但请避免在事件处理器中执行重量级操作。
+
 ## 创建全息图（Builder）
 
 ```java
 Hologram holo = api.holograms().builder("shop", location)
         .line(HologramLines.text("&6&l★ 商店 ★"))
         .line(HologramLines.icon(Material.EMERALD))
-        .line(HologramLines.text("&7点击打开"))
+        .offsetLine(HologramLines.text("&e限时"), 1.2, 0.5, 0)  // 偏移行（悬浮）
+        .page()                                                  // 开启第二页
+        .line("&a第二页内容")
         .lineHeight(0.3)
         .billboard(Billboard.CENTER)
         .backgroundAlpha(64)
         .permission("shop.use")
-        .create();   // 名称非法/已存在时抛 IllegalStateException
+        .create();   // 名称非法/已存在/创建事件被取消时抛 IllegalStateException
+
+// 克隆已有全息图（正确入口是注册表，而非 Hologram 上的方法）
+Hologram copy = api.holograms().cloneHologram("shop", "shop2", otherLocation, false);
 ```
 
 ### 临时全息图
@@ -114,6 +122,19 @@ holo.edit()
         .backgroundAlpha(32)
         .apply();
 
+// 附近查询
+for (Hologram near : registry.getHologramsNear(location, 16)) {
+    near.getName();
+}
+
+// 动作操作（行级/页面级，格式与配置文件一致）
+page.addAction(ClickType.LEFT, "MESSAGE:你好 {player}");
+page.addAction(ClickType.RIGHT, "CONSOLE:say 有人点击了商店");
+page.addAction(ClickType.RIGHT, "SHOP_OPEN:shop1");   // 自定义注册的动作类型
+page.getActionData(ClickType.RIGHT);   // 读取（可回写 addAction）
+page.clearActions(ClickType.LEFT);
+holo.executeActions(player, ClickType.RIGHT);   // 程序化触发当前页动作
+
 // 玩家会话
 holo.show(player);
 holo.hide(player);
@@ -154,7 +175,8 @@ api.actions().register("SHOP_OPEN", (player, args) -> {
     player.sendMessage("打开商店: " + String.join(" ", args));
     return true;   // false 中断后续动作
 });
-// 动作配置格式与内置一致: SHOP_OPEN:shop1
+// 注册后即可在动作配置中使用,也可通过 API 挂载:
+page.addAction(ClickType.LEFT, "SHOP_OPEN:shop1");
 ```
 
 内置类型（`NONE`/`MESSAGE`/`COMMAND`/`CONSOLE`/`SOUND`/`TELEPORT`/`SERVER`/`NEXT_PAGE`/`PREV_PAGE`/`PAGE`）不可覆盖；同名自定义动作重复注册视为更新。

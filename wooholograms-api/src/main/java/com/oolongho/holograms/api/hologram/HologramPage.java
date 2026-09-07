@@ -1,5 +1,7 @@
 package com.oolongho.holograms.api.hologram;
 
+import com.oolongho.holograms.api.action.ClickType;
+
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
 
@@ -142,6 +144,40 @@ public interface HologramPage {
      * @return 是否有动作
      */
     boolean hasActions();
+
+    /**
+     * 为页面添加点击动作
+     *
+     * <p>动作格式与配置文件一致：{@code TYPE:参数}（如 {@code NEXT_PAGE:}、{@code MESSAGE:翻页了}）。
+     * 添加首个动作时会自动重建点击判定实体。</p>
+     *
+     * @param clickType  触发的点击类型
+     * @param actionData 动作数据字符串
+     * @return 是否成功（格式非法返回 false）
+     */
+    boolean addAction(ClickType clickType, String actionData);
+
+    /**
+     * 获取页面在指定点击类型下的全部动作数据（可直接回写 {@link #addAction}）
+     *
+     * @param clickType 点击类型
+     * @return 动作数据列表（只读副本，可能为空）
+     */
+    java.util.List<String> getActionData(ClickType clickType);
+
+    /**
+     * 清除页面在指定点击类型下的全部动作
+     *
+     * @param clickType 点击类型
+     */
+    void clearActions(ClickType clickType);
+
+    /**
+     * 获取当前正在查看此页的玩家 UUID
+     *
+     * @return 只读 UUID 集合
+     */
+    java.util.Set<java.util.UUID> getViewers();
 
     /*
      * 标志

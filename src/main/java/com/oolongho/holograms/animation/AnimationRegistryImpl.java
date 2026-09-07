@@ -49,10 +49,10 @@ public class AnimationRegistryImpl implements AnimationRegistry {
             return false;
         }
         String lower = name.toLowerCase(Locale.ROOT);
-        if (BUILT_IN.contains(lower)) {
+        // 仅允许注销本注册表注册的动画；内置与 YML 加载的动画不可通过 API 注销
+        if (!customNames.remove(lower)) {
             return false;
         }
-        customNames.remove(lower);
         return manager.unregisterAnimation(lower) != null;
     }
 
