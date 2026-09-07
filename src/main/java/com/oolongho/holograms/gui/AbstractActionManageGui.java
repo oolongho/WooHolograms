@@ -3,7 +3,7 @@ package com.oolongho.holograms.gui;
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.Action;
 import com.oolongho.holograms.action.ActionType;
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
 import com.oolongho.holograms.hologram.Hologram;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;

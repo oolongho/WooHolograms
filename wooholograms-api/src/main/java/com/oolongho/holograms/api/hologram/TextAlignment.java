@@ -1,4 +1,4 @@
-package com.oolongho.holograms.hologram;
+package com.oolongho.holograms.api.hologram;
 
 public enum TextAlignment {
 

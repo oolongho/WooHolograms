@@ -1,4 +1,5 @@
 package com.oolongho.holograms.action;
+import com.oolongho.holograms.api.action.ClickType;
 
 import com.oolongho.holograms.WooHolograms;
 import org.bukkit.entity.Player;

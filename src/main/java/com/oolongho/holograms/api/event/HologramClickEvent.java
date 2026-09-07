@@ -1,6 +1,6 @@
 package com.oolongho.holograms.api.event;
 
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramPage;
 import org.bukkit.entity.Player;

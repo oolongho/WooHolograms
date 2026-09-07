@@ -1,7 +1,8 @@
 package com.oolongho.holograms.listener;
+import com.oolongho.holograms.api.hologram.EnumFlag;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
 import com.oolongho.holograms.api.event.HologramClickEvent;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
@@ -268,7 +269,7 @@ public class PacketListener {
         }
 
         // 检查是否禁用动作
-        if (hologram.hasFlag(com.oolongho.holograms.hologram.EnumFlag.DISABLE_ACTIONS)) {
+        if (hologram.hasFlag(com.oolongho.holograms.api.hologram.EnumFlag.DISABLE_ACTIONS)) {
             return;
         }
 

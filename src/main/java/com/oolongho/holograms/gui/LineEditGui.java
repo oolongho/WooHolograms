@@ -1,16 +1,16 @@
 package com.oolongho.holograms.gui;
+import com.oolongho.holograms.api.hologram.Billboard;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.hologram.Brightness;
+import com.oolongho.holograms.api.hologram.Brightness;
 import com.oolongho.holograms.hologram.HeadTexture;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.hologram.HologramType;
+import com.oolongho.holograms.api.hologram.HologramType;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.BiConsumer;

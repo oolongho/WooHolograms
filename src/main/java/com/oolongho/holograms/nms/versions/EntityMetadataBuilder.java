@@ -1,8 +1,8 @@
 package com.oolongho.holograms.nms.versions;
 
-import com.oolongho.holograms.hologram.Brightness;
-import com.oolongho.holograms.hologram.TextAlignment;
-import com.oolongho.holograms.hologram.Billboard;
+import com.oolongho.holograms.api.hologram.Brightness;
+import com.oolongho.holograms.api.hologram.TextAlignment;
+import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import net.minecraft.core.Rotations;

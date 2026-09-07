@@ -1,4 +1,5 @@
 package com.oolongho.holograms.nms.versions;
+import com.oolongho.holograms.api.hologram.Billboard;
 
 import net.minecraft.core.Rotations;
 import net.minecraft.network.chat.Component;

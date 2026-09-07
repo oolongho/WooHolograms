@@ -13,7 +13,7 @@ public enum HologramType {
 	BLOCK,
 	ENTITY;
 
-	public static HologramType fromWoo(com.oolongho.holograms.hologram.HologramType wooType) {
+	public static HologramType fromWoo(com.oolongho.holograms.api.hologram.HologramType wooType) {
 		if (wooType == null) return TEXT;
 		return switch (wooType) {
 			case TEXT, UNKNOWN -> TEXT;

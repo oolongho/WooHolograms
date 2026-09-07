@@ -1,12 +1,12 @@
 package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.action.ClickType;
-import com.oolongho.holograms.hologram.Billboard;
+import com.oolongho.holograms.api.action.ClickType;
+import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
-import com.oolongho.holograms.hologram.HologramType;
+import com.oolongho.holograms.api.hologram.HologramType;
 import com.oolongho.holograms.util.SchedulerUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;

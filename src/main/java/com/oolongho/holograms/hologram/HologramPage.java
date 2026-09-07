@@ -1,8 +1,10 @@
 package com.oolongho.holograms.hologram;
+import com.oolongho.holograms.api.hologram.EnumFlag;
+import com.oolongho.holograms.api.hologram.HologramType;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.Action;
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
 import com.oolongho.holograms.hologram.HologramManager;
 import com.oolongho.holograms.nms.versions.renderer.PageTextRendererImpl;
 import org.bukkit.Bukkit;

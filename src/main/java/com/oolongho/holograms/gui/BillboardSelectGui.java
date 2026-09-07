@@ -1,7 +1,7 @@
 package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.hologram.Billboard;
+import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

@@ -2,7 +2,7 @@ package com.oolongho.holograms.gui;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.Hologram;
-import com.oolongho.holograms.hologram.TextAlignment;
+import com.oolongho.holograms.api.hologram.TextAlignment;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 

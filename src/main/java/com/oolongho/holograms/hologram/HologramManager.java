@@ -1,4 +1,5 @@
 package com.oolongho.holograms.hologram;
+import com.oolongho.holograms.api.action.ClickType;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.api.event.HologramCreateEvent;
@@ -742,7 +743,7 @@ public class HologramManager {
      * @param clickType 点击类型
      * @return 是否处理成功
      */
-    public boolean handleClick(Player player, int entityId, com.oolongho.holograms.action.ClickType clickType) {
+    public boolean handleClick(Player player, int entityId, com.oolongho.holograms.api.action.ClickType clickType) {
         Hologram hologram = entityIdIndex.get(entityId);
         if (hologram != null && hologram.isVisible(player)) {
             return hologram.onClick(player, entityId, clickType);

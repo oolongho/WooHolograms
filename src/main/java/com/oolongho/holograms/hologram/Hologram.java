@@ -1,7 +1,12 @@
 package com.oolongho.holograms.hologram;
+import com.oolongho.holograms.api.hologram.EnumFlag;
+import com.oolongho.holograms.api.hologram.HologramType;
+import com.oolongho.holograms.api.hologram.Brightness;
+import com.oolongho.holograms.api.hologram.TextAlignment;
+import com.oolongho.holograms.api.hologram.Billboard;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
 import com.oolongho.holograms.api.event.HologramClickEvent;
 import com.oolongho.holograms.storage.HologramStorage;
 import com.oolongho.holograms.util.LocationUtil;

@@ -1,5 +1,5 @@
 package com.oolongho.holograms.nms.versions.renderer;
-import com.oolongho.holograms.hologram.Billboard;
+import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.hologram.HeadTexture;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;

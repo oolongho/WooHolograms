@@ -1,7 +1,8 @@
 package com.oolongho.holograms.gui;
+import com.oolongho.holograms.api.action.ClickType;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.hologram.Brightness;
+import com.oolongho.holograms.api.hologram.Brightness;
 import com.oolongho.holograms.hologram.Hologram;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

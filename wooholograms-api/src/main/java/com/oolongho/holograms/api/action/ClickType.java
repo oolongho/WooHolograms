@@ -1,4 +1,4 @@
-package com.oolongho.holograms.action;
+package com.oolongho.holograms.api.action;
 
 /**
  * 点击类型枚举

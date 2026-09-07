@@ -1,4 +1,7 @@
 package com.oolongho.holograms.nms.versions.renderer;
+import com.oolongho.holograms.api.hologram.HologramType;
+import com.oolongho.holograms.api.hologram.TextAlignment;
+import com.oolongho.holograms.api.hologram.Billboard;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.hologram.*;
