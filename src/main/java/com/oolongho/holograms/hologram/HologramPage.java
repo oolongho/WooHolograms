@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * 参考 DecentHolograms 的 HologramPage 实现
  * 
  */
-public class HologramPage {
+public class HologramPage implements com.oolongho.holograms.api.hologram.HologramPage {
 
     /*
      * 字段

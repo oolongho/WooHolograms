@@ -143,8 +143,9 @@ public class WooHolograms extends JavaPlugin {
         getCommand("wooholograms").setExecutor(hologramCommand);
         getCommand("wooholograms").setDescription("Hologram management command");
         
-        // 初始化 API
+        // 初始化 API（v1 静态门面 + v2 HologramApi 实例）
         WooHologramsAPI.initialize(this);
+        com.oolongho.holograms.api.WooHologramsApiProvider.register(new WooHologramsApiImpl(this));
         
         // 加载全息图
         hologramManager.loadAll();
@@ -265,6 +266,9 @@ public class WooHolograms extends JavaPlugin {
             getLogger().severe("清理渲染器缓存池时出错: " + e.getMessage());
         }
         
+        // 注销 API 实例
+        com.oolongho.holograms.api.WooHologramsApiProvider.register(null);
+
         pluginEnabled = false;
         getLogger().info("WooHolograms 已禁用");
     }

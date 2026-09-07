@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 参考 DecentHolograms 的 HologramManager 实现
  * 
  */
-public class HologramManager {
+public class HologramManager implements com.oolongho.holograms.api.hologram.HologramRegistry {
 
     private static final long TELEPORT_DELAY_TICKS = 20L;
     private static final int MAX_NAME_LENGTH = 50;
@@ -197,13 +197,23 @@ public class HologramManager {
 
     /**
      * 获取所有全息图
-     * 
+     *
      * @return 全息图集合
      */
     public Collection<Hologram> getHolograms() {
         return Collections.unmodifiableCollection(holograms.values());
     }
-    
+
+    /**
+     * 获取所有全息图（HologramRegistry API 桥接方法，等价于 {@link #getHolograms()}）
+     *
+     * @return 全息图集合
+     */
+    @Override
+    public Collection<Hologram> getAllHolograms() {
+        return getHolograms();
+    }
+
     /**
      * 获取全息图数量
      * 

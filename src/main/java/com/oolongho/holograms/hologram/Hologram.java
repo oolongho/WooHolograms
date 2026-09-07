@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * 参考 DecentHolograms 的 Hologram 实现
  * 
  */
-public class Hologram {
+public class Hologram implements com.oolongho.holograms.api.hologram.Hologram {
 
     /*
      * 字段

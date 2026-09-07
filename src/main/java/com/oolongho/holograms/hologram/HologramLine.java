@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * 参考 DecentHolograms 的 HologramLine 实现
  * 
  */
-public class HologramLine {
+public class HologramLine implements com.oolongho.holograms.api.hologram.HologramLine {
 
     // 动画匹配模式 - 与 AnimationManager 保持一致
     private static final Pattern ANIMATION_PATTERN = Pattern.compile("[<{]#?ANIM:(\\w+)(:\\S+)?[}>](.*?)[<{]/#?ANIM[}>]");
