@@ -100,6 +100,15 @@ public interface HologramRegistry {
      */
     boolean isValidName(String name);
 
+    /**
+     * 创建流式构建器（链式设置内容与属性后调用 create() 完成创建）
+     *
+     * @param name     全息图名称
+     * @param location 初始位置
+     * @return 构建器
+     */
+    HologramBuilder builder(String name, Location location);
+
     /*
      * 创建 / 克隆 / 删除
      */
@@ -113,6 +122,17 @@ public interface HologramRegistry {
      */
     @Nullable
     Hologram createHologram(String name, Location location);
+
+    /**
+     * 创建全息图
+     *
+     * @param name       名称（需合法且唯一）
+     * @param location   初始位置
+     * @param saveToFile false 时为临时全息图（不写入存储文件）
+     * @return 新全息图；失败返回 null
+     */
+    @Nullable
+    Hologram createHologram(String name, Location location, boolean saveToFile);
 
     /**
      * 克隆全息图

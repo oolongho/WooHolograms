@@ -2274,6 +2274,16 @@ public class Hologram implements com.oolongho.holograms.api.hologram.Hologram {
     }
 
     /**
+     * 获取批量编辑器（HologramEditor API，多处属性修改一次性提交）
+     *
+     * @return 编辑器
+     */
+    @Override
+    public com.oolongho.holograms.api.hologram.HologramEditor edit() {
+        return new HologramEditorImpl(this);
+    }
+
+    /**
      * 删除
      */
     public void delete() {

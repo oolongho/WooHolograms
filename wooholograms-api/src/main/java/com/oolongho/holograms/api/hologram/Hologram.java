@@ -661,6 +661,13 @@ public interface Hologram {
      */
     void move(double dx, double dy, double dz);
 
+    /**
+     * 获取批量编辑器（多处属性修改一次性提交）
+     *
+     * @return 编辑器
+     */
+    HologramEditor edit();
+
     /*
      * 生命周期
      */

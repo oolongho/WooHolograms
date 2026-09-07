@@ -84,6 +84,14 @@ public class HologramManager implements com.oolongho.holograms.api.hologram.Holo
      * @param saveToFile 是否保存到文件
      * @return 创建的全息图，如果名称已存在则返回 null
      */
+    /**
+     * 创建流式构建器（HologramRegistry API）
+     */
+    @Override
+    public com.oolongho.holograms.api.hologram.HologramBuilder builder(String name, Location location) {
+        return new com.oolongho.holograms.api.hologram.HologramBuilder(this, name, location);
+    }
+
     public Hologram createHologram(String name, Location location, boolean saveToFile) {
         if (!isValidName(name)) {
             return null;
