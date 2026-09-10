@@ -731,9 +731,9 @@ gui:
   # ===== Line Edit =====
   line-edit:
     btn-current-content: "<white>Current Content</white>"
-    btn-back-to-edit: "<color:#F59E0B>[ Back to line editor ]</color>"
+    btn-back-to-edit: "<color:#3B82F6>[ Back to line editor ]</color>"
     hover-back-to-edit: "<color:#9CA3AF>Open the edit menu for this line</color>"
-    btn-edit-next: "<color:#F59E0B>[ Edit next line (#{index}) ]</color>"
+    btn-edit-next: "<color:#06B6D4>[ Edit next line (#{index}) ]</color>"
     hover-edit-next: "<color:#9CA3AF>Start editing the next line directly (current content pre-filled)</color>"
     btn-set-text: "<white>Set Text</white>"
     lore-set-text: "<gray>Modify the text content of this line</gray>"
@@ -1231,9 +1231,9 @@ cmd:
 # ==================== Chat input ====================
 input:
   prefill-current: "<color:#9CA3AF>Current:</color><color:#E5E7EB>{value}</color>"
-  prefill-button: "<color:#F59E0B>[ > Click to pre-fill ]</color>"
+  prefill-button: "<color:#10B981>[ > Click to pre-fill ]</color>"
   prefill-hover: "<color:#9CA3AF>Click to fill the current content into your chat input, then edit and press Enter</color>\n<color:#EF4444>Note: content starting with / runs as a command if submitted directly</color>"
-  cancel-button: "<color:#F59E0B>[ ✕ Cancel input ]</color>"
+  cancel-button: "<color:#EF4444>[ ✕ Cancel input ]</color>"
   cancel-hover: "<color:#9CA3AF>Click to cancel this input and return chat to normal</color>"
   cancel-hint: "<color:#9CA3AF>Type <color:#F59E0B>cancel</color> to cancel input</color>"
   timeout: "{prefix}<color:#EF4444>Input timed out and cancelled!</color>"
