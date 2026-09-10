@@ -8,9 +8,12 @@ import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
 import com.oolongho.holograms.api.hologram.HologramType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.BiConsumer;
@@ -234,17 +237,8 @@ public class LineEditGui extends GuiScreen {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-text"),
-                            ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, line.getContent(), input -> {
-                                if (withHologramPage(player, (h, p) -> {
-                                    p.setLine(lineIndex, input);
-                                    h.save();
-                                    h.refreshAllViewers();
-                                    plugin.getMessages().send(player, "gui.msg-line-update-success");
-                                })) {
-                                    reopenGui(player);
-                                }
-                            });
+                    // 行文本编辑统一入口:提交成功后不自动回 GUI,改为聊天按钮行
+                    submitLineTextInput(player, lineIndex, pageIndex);
                 })
                 .build());
 
@@ -391,17 +385,8 @@ public class LineEditGui extends GuiScreen {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-text"),
-                            ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, line.getContent(), input -> {
-                                if (withHologramPage(player, (h, p) -> {
-                                    p.setLine(lineIndex, input);
-                                    h.save();
-                                    h.refreshAllViewers();
-                                    plugin.getMessages().send(player, "gui.msg-line-update-success");
-                                })) {
-                                    reopenGui(player);
-                                }
-                            });
+                    // 行文本编辑统一入口:提交成功后不自动回 GUI,改为聊天按钮行
+                    submitLineTextInput(player, lineIndex, pageIndex);
                 })
                 .build());
 
@@ -1194,4 +1179,69 @@ public class LineEditGui extends GuiScreen {
             default -> null;
         };
     }
+    /** 行文本编辑成功按钮的有效期(聊天记录里可点击的时长) */
+    private static final Duration SUCCESS_BUTTON_LIFETIME = Duration.ofMinutes(5);
+
+    /**
+     * 发起指定行的文本编辑输入（带当前内容预填）。
+     * 供"设置文本"按钮与成功按钮行的"编辑下一行"共用;
+     * 提交成功后不再自动弹回 GUI,改为显示聊天按钮行。
+     */
+    private void submitLineTextInput(Player player, int lineIndex, int pageIndex) {
+        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+        HologramPage p = h == null ? null : h.getPage(pageIndex);
+        HologramLine line = p == null ? null : p.getLine(lineIndex);
+        String prefill = line == null ? "" : line.getContent();
+        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-text"),
+                ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, prefill, input -> {
+                    if (withHologramPage(player, (holo, page) -> {
+                        page.setLine(lineIndex, input);
+                        holo.save();
+                        holo.refreshAllViewers();
+                        plugin.getMessages().send(player, "gui.msg-line-update-success");
+                    })) {
+                        sendLineEditSuccessButtons(player, lineIndex, pageIndex);
+                    }
+                });
+    }
+
+    /**
+     * 行文本编辑成功后的聊天按钮行:
+     * [返回本行编辑] 打开本行编辑 GUI;[编辑下一行] 直接发起下一行的预填输入。
+     * 回调点击时重新拉取实时数据,全息图/页面/行已删除则静默失效;
+     * 已是最后一行时不显示"编辑下一行"按钮。
+     */
+    private void sendLineEditSuccessButtons(Player player, int lineIndex, int pageIndex) {
+        if (!player.isOnline()) {
+            return;
+        }
+        Component back = plugin.getMessages().get("gui.line-edit.btn-back-to-edit")
+                .clickEvent(ClickEvent.callback(audience -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+                    guiManager.openGui(player, new LineEditGui(plugin, guiManager, chatInputManager, hologramName, pageIndex, lineIndex));
+                }, builder -> builder.uses(1).lifetime(SUCCESS_BUTTON_LIFETIME)))
+                .hoverEvent(plugin.getMessages().get("gui.line-edit.hover-back-to-edit"));
+
+        Component row = back;
+
+        Hologram h = plugin.getHologramManager().getHologram(hologramName);
+        HologramPage p = h == null ? null : h.getPage(pageIndex);
+        if (p != null && lineIndex + 1 < p.size()) {
+            final int nextIndex = lineIndex + 1;
+            Component next = plugin.getMessages().get("gui.line-edit.btn-edit-next", "index", String.valueOf(nextIndex + 1))
+                    .clickEvent(ClickEvent.callback(audience -> {
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        submitLineTextInput(player, nextIndex, pageIndex);
+                    }, builder -> builder.uses(1).lifetime(SUCCESS_BUTTON_LIFETIME)))
+                    .hoverEvent(plugin.getMessages().get("gui.line-edit.hover-edit-next"));
+            row = row.append(Component.space()).append(next);
+        }
+
+        player.sendMessage(row);
+    }
+
 }

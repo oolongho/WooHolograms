@@ -5,6 +5,8 @@ import com.oolongho.holograms.util.SchedulerUtil;
 import com.oolongho.holograms.util.SchedulerUtil.TaskHandle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+
+import java.time.Duration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,7 +31,7 @@ public class ChatInputManager implements Listener {
     private final WooHolograms plugin;
     private final Map<UUID, InputContext> pendingInputs;
     private final Map<UUID, TaskHandle> timeoutTasks;
-    private static final long INPUT_TIMEOUT = 30 * 20; // 30秒超时
+    private static final long INPUT_TIMEOUT = 120 * 20; // 120秒超时(给玩家留足构思时间)
 
     public ChatInputManager(WooHolograms plugin) {
         this.plugin = plugin;
@@ -160,7 +162,8 @@ public class ChatInputManager implements Listener {
         if (prefill != null && !prefill.isEmpty()) {
             player.sendMessage(buildPrefillMessage(prefill));
         }
-        plugin.getMessages().send(player, "input.cancel-hint");
+        // 取消提示:文本 + 可点击取消按钮(打字 cancel/取消 仍然可用)
+        player.sendMessage(buildCancelMessage(playerId, player, context));
 
         timeoutTasks.put(playerId, createTimeoutTask(player, playerId, context));
     }
@@ -180,6 +183,26 @@ public class ChatInputManager implements Listener {
                 .clickEvent(ClickEvent.suggestCommand(prefill))
                 .hoverEvent(plugin.getMessages().get("input.prefill-hover"));
         return current.append(Component.space()).append(button);
+    }
+
+    /**
+     * 构建取消提示行：原提示文本 + 可点击取消按钮（Paper ClickCallback）
+     *
+     * <p>回调内做实例身份比对：仅当当前挂起的仍是发起本次输入的上下文时才取消，
+     * 防止玩家点击聊天记录里旧消息的取消按钮误杀后续发起的新输入。
+     * 按钮 uses=1、生命周期略长于输入超时，过期后点击自然失效。</p>
+     */
+    private Component buildCancelMessage(UUID playerId, Player player, InputContext context) {
+        Component cancelButton = plugin.getMessages().get("input.cancel-button")
+                .clickEvent(ClickEvent.callback(audience -> {
+                    if (pendingInputs.get(playerId) == context) {
+                        pendingInputs.remove(playerId);
+                        cancelTimeoutTask(playerId);
+                        plugin.getMessages().send(player, "input.cancelled");
+                    }
+                }, builder -> builder.uses(1).lifetime(Duration.ofSeconds(INPUT_TIMEOUT / 20 + 5))))
+                .hoverEvent(plugin.getMessages().get("input.cancel-hover"));
+        return plugin.getMessages().get("input.cancel-hint").append(Component.space()).append(cancelButton);
     }
 
     private TaskHandle createTimeoutTask(Player player, UUID playerId, InputContext context) {
