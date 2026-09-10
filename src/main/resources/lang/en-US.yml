@@ -1226,6 +1226,9 @@ cmd:
 
 # ==================== Chat input ====================
 input:
+  prefill-current: "<color:#9CA3AF>Current:</color><color:#E5E7EB>{value}</color>"
+  prefill-button: "<color:#F59E0B>[ > Click to pre-fill ]</color>"
+  prefill-hover: "<color:#9CA3AF>Click to fill the current content into your chat input, then edit and press Enter</color>\n<color:#EF4444>Note: content starting with / runs as a command if submitted directly</color>"
   cancel-hint: "<color:#9CA3AF>Type <color:#F59E0B>cancel</color> to cancel input</color>"
   timeout: "{prefix}<color:#EF4444>Input timed out and cancelled!</color>"
   cancelled: "{prefix}<color:#EF4444>Input cancelled!</color>"

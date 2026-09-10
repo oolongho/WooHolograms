@@ -97,8 +97,8 @@ public class BackgroundSettingsGui extends GuiScreen {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.bg-alpha"),
-                            ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                    chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.bg-alpha"),
+                            ChatInputManager.InputType.GENERIC, hologramName, String.valueOf(hologram.getBackgroundAlpha()), input -> {
                                 try {
                                     int alpha = Integer.parseInt(input.trim());
                                     if (alpha < 0 || alpha > 255) {
@@ -135,8 +135,8 @@ public class BackgroundSettingsGui extends GuiScreen {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.bg-color"),
-                            ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                    chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.bg-color"),
+                            ChatInputManager.InputType.GENERIC, hologramName, String.valueOf(hologram.getBackgroundColor()), input -> {
                                 input = input.trim();
                                 Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                 if (h != null) {
@@ -208,8 +208,9 @@ public class BackgroundSettingsGui extends GuiScreen {
                         // 左键输入
                         player.closeInventory();
 
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.bg-brightness"),
-                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.bg-brightness"),
+                                ChatInputManager.InputType.GENERIC, hologramName,
+                                hologram.getBrightness() != null ? hologram.getBrightness().getSkyLight() + " " + hologram.getBrightness().getBlockLight() : "", input -> {
                                     try {
                                         String[] parts = input.trim().split("\\s+");
                                         int sky = Integer.parseInt(parts[0]);

@@ -28,3 +28,5 @@ Thumbs.db
 
 .oolongho/
 WooHolograms.wiki/
+# Mimosa 安全钩子会话状态(本地工具产物,不入库)
+.mimosa/

@@ -1226,6 +1226,9 @@ cmd:
 
 # ==================== 聊天输入相关 ====================
 input:
+  prefill-current: "<color:#9CA3AF>当前内容:</color><color:#E5E7EB>{value}</color>"
+  prefill-button: "<color:#F59E0B>[ ▸ 点击预填后修改 ]</color>"
+  prefill-hover: "<color:#9CA3AF>点击后将当前内容填入聊天框，修改后回车提交</color>\n<color:#EF4444>注意：以 / 开头的内容直接回车会被当作命令执行</color>"
   cancel-hint: "<color:#9CA3AF>输入 <color:#F59E0B>cancel</color> 或 <color:#F59E0B>取消</color> 来取消输入</color>"
   timeout: "{prefix}<color:#EF4444>输入已超时取消！</color>"
   cancelled: "{prefix}<color:#EF4444>输入已取消！</color>"

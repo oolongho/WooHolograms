@@ -184,8 +184,8 @@ public abstract class AbstractActionManageGui extends GuiScreen {
                 "type", action.getType().getName(), "value", action.getData());
         plugin.getMessages().send(player, "gui.msg-action-input-hint");
 
-        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.action-value"),
-                ChatInputManager.InputType.ACTION_VALUE, hologramName, input -> {
+        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.action-value"),
+                ChatInputManager.InputType.ACTION_VALUE, hologramName, action.getType().getName() + ":" + action.getData(), input -> {
                     String[] parts = input.split(":", 2);
                     if (parts.length < 2) {
                         plugin.getMessages().send(player, "gui.msg-action-format-error");

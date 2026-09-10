@@ -235,7 +235,7 @@ public class LineEditGui extends GuiScreen {
                     player.closeInventory();
 
                     chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-text"),
-                            ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, input -> {
+                            ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, line.getContent(), input -> {
                                 if (withHologramPage(player, (h, p) -> {
                                     p.setLine(lineIndex, input);
                                     h.save();
@@ -392,7 +392,7 @@ public class LineEditGui extends GuiScreen {
                     player.closeInventory();
 
                     chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-text"),
-                            ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, input -> {
+                            ChatInputManager.InputType.LINE_TEXT, hologramName, lineIndex, pageIndex, line.getContent(), input -> {
                                 if (withHologramPage(player, (h, p) -> {
                                     p.setLine(lineIndex, input);
                                     h.save();
@@ -437,7 +437,8 @@ public class LineEditGui extends GuiScreen {
                     } else {
                         player.closeInventory();
                         chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.scale"),
-                                ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                                ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex,
+                                (line.getScaleX() != null ? line.getScaleX() : 1.0f) + " " + (line.getScaleY() != null ? line.getScaleY() : 1.0f) + " " + (line.getScaleZ() != null ? line.getScaleZ() : 1.0f), input -> {
                                     try {
                                         String[] parts = input.split(" ");
                                         if (parts.length == 3) {
@@ -643,7 +644,8 @@ public class LineEditGui extends GuiScreen {
                     } else {
                         player.closeInventory();
                         chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.shadow"),
-                                ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                                ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex,
+                                (line.getShadowRadius() != null ? line.getShadowRadius() : 0.0f) + " " + (line.getShadowStrength() != null ? line.getShadowStrength() : 1.0f), input -> {
                                     try {
                                         String[] parts = input.split(" ");
                                         if (parts.length == 2) {
@@ -791,7 +793,8 @@ public class LineEditGui extends GuiScreen {
                             player.closeInventory();
 
                             chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.block-material"),
-                                    ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                                    ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex,
+                                    line.getContent() != null && line.getContent().toUpperCase(Locale.ROOT).startsWith("#BLOCK:") ? line.getContent().substring(7) : "", input -> {
                                         Material material = Material.matchMaterial(input.toUpperCase(Locale.ROOT));
                                         if (material == null || !material.isBlock()) {
                                             plugin.getMessages().send(player, "gui.msg-block-material-invalid");
@@ -880,7 +883,8 @@ public class LineEditGui extends GuiScreen {
                             player.closeInventory();
 
                             chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.head-texture"),
-                                    ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                                    ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex,
+                                    line.getHeadTexture() != null ? line.getHeadTexture().getValue() : "", input -> {
                                         if (withHologramLine(player, (h, p, l) -> {
                                             String prefix = lineType == HologramType.HEAD ? "#HEAD:" : "#SMALLHEAD:";
                                             String newContent = prefix.toUpperCase(Locale.ROOT) + input;
@@ -936,7 +940,8 @@ public class LineEditGui extends GuiScreen {
                     player.closeInventory();
 
                     chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-offset"),
-                            ChatInputManager.InputType.LINE_OFFSET, hologramName, lineIndex, pageIndex, input -> {
+                            ChatInputManager.InputType.LINE_OFFSET, hologramName, lineIndex, pageIndex,
+                            line.getOffsetX() + " " + line.getOffsetY() + " " + line.getOffsetZ(), input -> {
                                 try {
                                     String[] parts = input.split(" ");
                                     if (parts.length == 3) {
@@ -1016,7 +1021,8 @@ public class LineEditGui extends GuiScreen {
                     } else {
                         player.closeInventory();
                         chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.glow-color"),
-                                ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex, input -> {
+                                ChatInputManager.InputType.GENERIC, hologramName, lineIndex, pageIndex,
+                                line.getGlowColor() != null ? String.valueOf(line.getGlowColor()) : "reset", input -> {
                                     input = input.trim();
                                     if (input.equalsIgnoreCase("reset")) {
                                         if (withHologramLine(player, (h, p, l) -> {
@@ -1115,7 +1121,8 @@ public class LineEditGui extends GuiScreen {
                     player.closeInventory();
 
                     chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-height-value"),
-                            ChatInputManager.InputType.LINE_HEIGHT, hologramName, lineIndex, pageIndex, input -> {
+                            ChatInputManager.InputType.LINE_HEIGHT, hologramName, lineIndex, pageIndex,
+                            String.valueOf(line.getBaseHeight()), input -> {
                                 try {
                                     double height = Double.parseDouble(input);
                                     if (withHologramLine(player, (h, p, l) -> {

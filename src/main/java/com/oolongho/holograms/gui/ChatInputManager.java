@@ -4,6 +4,7 @@ import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.util.SchedulerUtil;
 import com.oolongho.holograms.util.SchedulerUtil.TaskHandle;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -90,6 +91,62 @@ public class ChatInputManager implements Listener {
         requestInputInternal(player, prompt, new InputContext(type, hologramName, lineNumber, pageIndex, callback));
     }
 
+    /**
+     * 请求玩家输入（带预填：提示后附一条可点击消息，点击将当前内容填入聊天框供修改）
+     *
+     * <p>预填内容为原始文本（含 & 颜色代码等），提交后与配置存储格式一致。</p>
+     *
+     * @param player  玩家
+     * @param prompt  提示语（Component）
+     * @param prefill 当前内容（null 或空则不显示预填按钮）
+     * @param callback 输入完成回调
+     */
+    public void requestInput(Player player, Component prompt, String prefill, Consumer<String> callback) {
+        requestInputInternal(player, prompt, new InputContext(InputType.GENERIC, callback).withPrefill(prefill));
+    }
+
+    /**
+     * 请求玩家输入（完整上下文 + 预填）
+     *
+     * @param player       玩家
+     * @param prompt       提示语（Component）
+     * @param type         输入类型
+     * @param hologramName 全息图名称
+     * @param lineNumber   行号
+     * @param pageIndex    页码
+     * @param prefill      当前内容（null 或空则不显示预填按钮）
+     * @param callback     输入完成回调
+     */
+    public void requestInput(Player player, Component prompt, InputType type, String hologramName, int lineNumber, int pageIndex, String prefill, Consumer<String> callback) {
+        requestInputInternal(player, prompt, new InputContext(type, hologramName, lineNumber, pageIndex, callback).withPrefill(prefill));
+    }
+
+    /**
+     * 请求玩家输入（带预填；供 (type, hologramName) 形状使用，
+     * 该形状无法直接插入 prefill 参数——会与既有重载发生擦除冲突）
+     *
+     * @param player       玩家
+     * @param prompt       提示语（Component）
+     * @param type         输入类型
+     * @param hologramName 全息图名称
+     * @param prefill      当前内容（null 或空则不显示预填按钮）
+     * @param callback     输入完成回调
+     */
+    public void requestInputPrefill(Player player, Component prompt, InputType type, String hologramName, String prefill, Consumer<String> callback) {
+        requestInputInternal(player, prompt, new InputContext(type, hologramName, callback).withPrefill(prefill));
+    }
+
+    /**
+     * 请求玩家输入（自定义上下文，供需要预填的其它重载形状使用）
+     *
+     * @param player  玩家
+     * @param prompt  提示语（Component）
+     * @param context 输入上下文（可用 withPrefill 附加预填内容）
+     */
+    public void requestInput(Player player, Component prompt, InputContext context) {
+        requestInputInternal(player, prompt, context);
+    }
+
     private void requestInputInternal(Player player, Component prompt, InputContext context) {
         UUID playerId = player.getUniqueId();
 
@@ -98,9 +155,31 @@ public class ChatInputManager implements Listener {
         pendingInputs.put(playerId, context);
 
         player.sendMessage(prompt);
+        // 预填提示：点击后聊天栏填入当前内容供修改（suggest_command 不覆盖已有输入）
+        String prefill = context.getPrefill();
+        if (prefill != null && !prefill.isEmpty()) {
+            player.sendMessage(buildPrefillMessage(prefill));
+        }
         plugin.getMessages().send(player, "input.cancel-hint");
 
         timeoutTasks.put(playerId, createTimeoutTask(player, playerId, context));
+    }
+
+    /**
+     * 构建预填提示消息：当前内容预览（原样截断显示）+ 可点击预填按钮
+     *
+     * <p>预览有意显示原始文本（含 & 色码），与提交后插件解析的格式一致。</p>
+     *
+     * @param prefill 当前内容
+     * @return 消息 Component
+     */
+    private Component buildPrefillMessage(String prefill) {
+        String preview = prefill.length() > 32 ? prefill.substring(0, 32) + "..." : prefill;
+        Component current = plugin.getMessages().get("input.prefill-current", "value", preview);
+        Component button = plugin.getMessages().get("input.prefill-button")
+                .clickEvent(ClickEvent.suggestCommand(prefill))
+                .hoverEvent(plugin.getMessages().get("input.prefill-hover"));
+        return current.append(Component.space()).append(button);
     }
 
     private TaskHandle createTimeoutTask(Player player, UUID playerId, InputContext context) {
@@ -281,6 +360,8 @@ public class ChatInputManager implements Listener {
         private final int lineNumber;
         private final int pageIndex;
         private final Consumer<String> callback;
+        /** 预填内容（null 表示无预填） */
+        private String prefill;
 
         public InputContext(InputType type, Consumer<String> callback) {
             this.type = type;
@@ -320,6 +401,26 @@ public class ChatInputManager implements Listener {
 
         public int getPageIndex() {
             return pageIndex;
+        }
+
+        /**
+         * 附加预填内容（链式）
+         *
+         * @param prefill 当前内容（null 或空则不显示预填按钮）
+         * @return this
+         */
+        public InputContext withPrefill(String prefill) {
+            this.prefill = prefill;
+            return this;
+        }
+
+        /**
+         * 获取预填内容
+         *
+         * @return 预填内容；无预填返回 null
+         */
+        public String getPrefill() {
+            return prefill;
         }
     }
 }

@@ -468,8 +468,8 @@ public class HologramDetailGui extends GuiScreen {
                     Player player = context.getPlayer();
                     player.closeInventory();
 
-                    chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.target-name"),
-                            ChatInputManager.InputType.TARGET_NAME, hologramName, input -> {
+                    chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.target-name"),
+                            ChatInputManager.InputType.TARGET_NAME, hologramName, hologramName + "-copy", input -> {
                         if (plugin.getHologramManager().containsHologram(input)) {
                             plugin.getMessages().send(player, "gui.msg-clone-exists", "name", input);
                             guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -531,7 +531,7 @@ public class HologramDetailGui extends GuiScreen {
                     Player player = context.getPlayer();
                     if (context.getClickType().isRightClick()) {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-width"), input -> {
+                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-width"), String.valueOf(hologram.getLineWidth()), input -> {
                             try {
                                 int width = Integer.parseInt(input.trim());
                                 if (width < 1 || width > 999) {
@@ -551,8 +551,8 @@ public class HologramDetailGui extends GuiScreen {
                         });
                     } else {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.line-height"),
-                                ChatInputManager.InputType.LINE_HEIGHT, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.line-height"),
+                                ChatInputManager.InputType.LINE_HEIGHT, hologramName, String.valueOf(hologram.getLineHeight()), input -> {
                                     try {
                                         double height = Double.parseDouble(input);
                                         Hologram h = plugin.getHologramManager().getHologram(hologramName);
@@ -635,8 +635,9 @@ public class HologramDetailGui extends GuiScreen {
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     } else {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.scale"),
-                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.scale"),
+                                ChatInputManager.InputType.GENERIC, hologramName,
+                                hologram.getScaleX() + " " + hologram.getScaleY() + " " + hologram.getScaleZ(), input -> {
                                     try {
                                         String[] parts = input.trim().split("\\s+");
                                         if (parts.length != 3) {
@@ -692,8 +693,8 @@ public class HologramDetailGui extends GuiScreen {
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
                     } else {
                         player.closeInventory();
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.glow-color"),
-                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.glow-color"),
+                                ChatInputManager.InputType.GENERIC, hologramName, String.valueOf(hologram.getGlowColor()), input -> {
                                     input = input.trim();
                                     Hologram h = plugin.getHologramManager().getHologram(hologramName);
                                     if (h != null) {
@@ -754,8 +755,8 @@ public class HologramDetailGui extends GuiScreen {
 
                     if (context.getClickType().isRightClick()) {
                         // 右键: 设置权限
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.permission"),
-                                ChatInputManager.InputType.PERMISSION, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.permission"),
+                                ChatInputManager.InputType.PERMISSION, hologramName, hologram.getPermission(), input -> {
                             Hologram h = plugin.getHologramManager().getHologram(hologramName);
                             if (h != null) {
                                 if (input.equalsIgnoreCase("clear")) {
@@ -771,8 +772,8 @@ public class HologramDetailGui extends GuiScreen {
                         });
                     } else if (context.getClickType().isShiftClick()) {
                         // Shift+左键: 设置更新范围
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.update-range"),
-                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.update-range"),
+                                ChatInputManager.InputType.GENERIC, hologramName, String.valueOf((int) hologram.getUpdateRange()), input -> {
                             try {
                                 int range = Integer.parseInt(input);
                                 Hologram h = plugin.getHologramManager().getHologram(hologramName);
@@ -788,8 +789,8 @@ public class HologramDetailGui extends GuiScreen {
                         });
                     } else {
                         // 左键: 设置显示范围
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.display-range"),
-                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.display-range"),
+                                ChatInputManager.InputType.GENERIC, hologramName, String.valueOf((int) hologram.getDisplayRange()), input -> {
                             try {
                                 int range = Integer.parseInt(input);
                                 Hologram h = plugin.getHologramManager().getHologram(hologramName);
@@ -878,8 +879,8 @@ public class HologramDetailGui extends GuiScreen {
                     } else {
                         // 左键：聊天输入
                         player.closeInventory();
-                        chatInputManager.requestInput(player, plugin.getMessages().get("gui.prompt.update-interval"),
-                                ChatInputManager.InputType.GENERIC, hologramName, input -> {
+                        chatInputManager.requestInputPrefill(player, plugin.getMessages().get("gui.prompt.update-interval"),
+                                ChatInputManager.InputType.GENERIC, hologramName, String.valueOf(hologram.getUpdateInterval()), input -> {
                                     try {
                                         int value = Integer.parseInt(input.trim());
                                         if (value < 0 || value > 1200) {
