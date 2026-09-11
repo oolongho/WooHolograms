@@ -1,8 +1,10 @@
 package com.oolongho.holograms.hologram;
+import com.oolongho.holograms.api.hologram.EnumFlag;
+import com.oolongho.holograms.api.hologram.HologramType;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.action.Action;
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
 import com.oolongho.holograms.hologram.HologramManager;
 import com.oolongho.holograms.nms.versions.renderer.PageTextRendererImpl;
 import org.bukkit.Bukkit;
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
  * 参考 DecentHolograms 的 HologramPage 实现
  * 
  */
-public class HologramPage {
+public class HologramPage implements com.oolongho.holograms.api.hologram.HologramPage {
 
     /*
      * 字段
@@ -784,6 +786,35 @@ public class HologramPage {
         if (parent != null) {
             parent.onActionsChanged();
         }
+    }
+
+    /**
+     * 为页面添加点击动作（HologramPage API，解析 actionData 字符串）
+     */
+    @Override
+    public boolean addAction(ClickType clickType, String actionData) {
+        Action action = Action.fromString(actionData);
+        if (action == null) {
+            return false;
+        }
+        addAction(clickType, action);
+        return true;
+    }
+
+    /**
+     * 获取页面动作数据（HologramPage API，返回配置格式的字符串列表）
+     */
+    @Override
+    public java.util.List<String> getActionData(ClickType clickType) {
+        List<Action> list = actions.get(clickType);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> data = new ArrayList<>(list.size());
+        for (Action action : list) {
+            data.add(action.toString());
+        }
+        return data;
     }
 
     /**

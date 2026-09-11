@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 用于处理文本相关的动画效果
  *
  */
-public abstract class TextAnimation extends Animation {
+public abstract class TextAnimation extends Animation implements com.oolongho.holograms.api.animation.TextAnimation {
 
     /**
      * 预编译帧缓存：key 为 text+args 组合，value 为帧数组

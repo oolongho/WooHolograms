@@ -2,7 +2,7 @@ package com.oolongho.holograms.command.subcommand;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.command.Subcommand;
-import com.oolongho.holograms.hologram.Billboard;
+import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
 import org.bukkit.command.CommandSender;
 

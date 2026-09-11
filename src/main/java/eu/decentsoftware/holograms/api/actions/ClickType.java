@@ -12,11 +12,11 @@ public enum ClickType {
 	SHIFT_RIGHT,
 	ANY;
 
-	public com.oolongho.holograms.action.ClickType toWoo() {
-		return com.oolongho.holograms.action.ClickType.valueOf(this.name());
+	public com.oolongho.holograms.api.action.ClickType toWoo() {
+		return com.oolongho.holograms.api.action.ClickType.valueOf(this.name());
 	}
 
-	public static ClickType fromWoo(com.oolongho.holograms.action.ClickType wooClickType) {
+	public static ClickType fromWoo(com.oolongho.holograms.api.action.ClickType wooClickType) {
 		if (wooClickType == null) return null;
 		return valueOf(wooClickType.name());
 	}

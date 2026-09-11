@@ -1,10 +1,11 @@
 package com.oolongho.holograms.api.event;
 
-import com.oolongho.holograms.hologram.Hologram;
+import com.oolongho.holograms.api.hologram.Hologram;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class HologramsLoadedEvent extends Event {
     
     private final List<Hologram> holograms;
 
-    public HologramsLoadedEvent(List<Hologram> holograms) {
-        this.holograms = holograms;
+    public HologramsLoadedEvent(List<? extends Hologram> holograms) {
+        this.holograms = new ArrayList<>(holograms);
     }
 
     /**

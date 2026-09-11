@@ -48,6 +48,19 @@ public abstract class ActionType {
         return VALUES.values();
     }
 
+    /**
+     * 注销动作类型（供 API 注册表移除自定义类型；内置类型不应注销）
+     *
+     * @param name 动作类型名称
+     * @return 被移除的动作类型；不存在返回 null
+     */
+    public static ActionType unregister(String name) {
+        if (name == null) {
+            return null;
+        }
+        return VALUES.remove(name.toUpperCase());
+    }
+
     /*
      * 内置动作类型
      */

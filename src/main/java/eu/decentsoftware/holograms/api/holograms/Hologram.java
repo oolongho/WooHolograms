@@ -218,7 +218,7 @@ public class Hologram {
 
 	public Set<EnumFlag> getFlags() {
 		Set<EnumFlag> result = EnumSet.noneOf(EnumFlag.class);
-		for (com.oolongho.holograms.hologram.EnumFlag flag : handle.getFlags()) {
+		for (com.oolongho.holograms.api.hologram.EnumFlag flag : handle.getFlags()) {
 			EnumFlag dhFlag = EnumFlag.fromWoo(flag);
 			if (dhFlag != null) {
 				result.add(dhFlag);
@@ -229,8 +229,8 @@ public class Hologram {
 
 	public void addFlags(EnumFlag... flags) {
 		if (flags == null) return;
-		com.oolongho.holograms.hologram.EnumFlag[] wooFlags =
-				new com.oolongho.holograms.hologram.EnumFlag[flags.length];
+		com.oolongho.holograms.api.hologram.EnumFlag[] wooFlags =
+				new com.oolongho.holograms.api.hologram.EnumFlag[flags.length];
 		for (int i = 0; i < flags.length; i++) {
 			wooFlags[i] = flags[i].toWoo();
 		}

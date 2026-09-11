@@ -1,7 +1,9 @@
 package com.oolongho.holograms.listener;
+import com.oolongho.holograms.api.hologram.EnumFlag;
 
 import com.oolongho.holograms.WooHolograms;
-import com.oolongho.holograms.action.ClickType;
+import com.oolongho.holograms.api.action.ClickType;
+import com.oolongho.holograms.api.event.HologramActionExecuteEvent;
 import com.oolongho.holograms.api.event.HologramClickEvent;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
@@ -268,7 +270,7 @@ public class PacketListener {
         }
 
         // 检查是否禁用动作
-        if (hologram.hasFlag(com.oolongho.holograms.hologram.EnumFlag.DISABLE_ACTIONS)) {
+        if (hologram.hasFlag(com.oolongho.holograms.api.hologram.EnumFlag.DISABLE_ACTIONS)) {
             return;
         }
 
@@ -282,7 +284,24 @@ public class PacketListener {
         if (page == null && hologram.hasEntity(entityId)) {
             page = hologram.getPage(player);
         }
-        HologramClickEvent event = new HologramClickEvent(hologram, page, player, clickType, entityId);
+
+        // 先完成行路由，再触发事件（事件携带命中行信息）
+        HologramLine line = null;
+        if (page != null) {
+            // 左键（ATTACK）时 Minecraft 不发送 INTERACT_AT 包，hitY=null
+            // 此时无法从数据包获取精确点击坐标，用玩家视线（射线-AABB 相交）估算 hitY
+            if (hitY == null) {
+                Float rayHitY = page.calculateHitYFromRay(player, entityId);
+                if (rayHitY != null) {
+                    hitY = rayHitY;
+                }
+            }
+            // 用 entityId + hitY 路由到具体行
+            // pageTextRenderer.getLineByEntityId 现已支持 Interaction entityId（含 hitY 组内路由）
+            line = page.getLineByEntityId(entityId, hitY);
+        }
+
+        HologramClickEvent event = new HologramClickEvent(hologram, page, line, player, clickType, entityId);
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
@@ -295,17 +314,6 @@ public class PacketListener {
         }
 
         if (page != null) {
-            // 左键（ATTACK）时 Minecraft 不发送 INTERACT_AT 包，hitY=null
-            // 此时无法从数据包获取精确点击坐标，用玩家视线（射线-AABB 相交）估算 hitY
-            if (hitY == null) {
-                Float rayHitY = page.calculateHitYFromRay(player, entityId);
-                if (rayHitY != null) {
-                    hitY = rayHitY;
-                }
-            }
-            // 用 entityId + hitY 路由到具体行
-            // pageTextRenderer.getLineByEntityId 现已支持 Interaction entityId（含 hitY 组内路由）
-            HologramLine line = page.getLineByEntityId(entityId, hitY);
 
             boolean lineFound = line != null && line.hasActions();
             int actionCount = lineFound
@@ -317,6 +325,13 @@ public class PacketListener {
             plugin.debug(() -> String.format(
                     "[Debug.click] line-route, player=%s, entityId=%d, clickType=%s, lineFound=%s, actionCount=%d, hitY=%s, pageHeight=%.3f",
                     player.getName(), entityId, clickType, lineFound, actionCount, hitYLog, pageHeightLog));
+            // 动作执行事件（可取消，携带已路由的行）
+            HologramActionExecuteEvent actionEvent = new HologramActionExecuteEvent(player, hologram, page, line, clickType);
+            Bukkit.getPluginManager().callEvent(actionEvent);
+            if (actionEvent.isCancelled()) {
+                return;
+            }
+
             if (line != null && line.hasActions()) {
                 line.executeActions(player, clickType);
                 return;

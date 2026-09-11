@@ -731,6 +731,10 @@ gui:
   # ===== 行编辑 =====
   line-edit:
     btn-current-content: "<white>当前内容</white>"
+    btn-back-to-edit: "<color:#3B82F6>[ 返回本行编辑 ]</color>"
+    hover-back-to-edit: "<color:#9CA3AF>打开本行的编辑菜单</color>"
+    btn-edit-next: "<color:#06B6D4>[ 编辑下一行(第 {index} 行) ]</color>"
+    hover-edit-next: "<color:#9CA3AF>直接开始编辑下一行的文本(自动预填当前内容)</color>"
     btn-set-text: "<white>设置文本</white>"
     lore-set-text: "<gray>修改此行的文本内容</gray>"
     lore-support-color: "<gray>支持颜色代码和变量</gray>"
@@ -1226,6 +1230,11 @@ cmd:
 
 # ==================== 聊天输入相关 ====================
 input:
+  prefill-current: "<color:#9CA3AF>当前内容:</color><color:#E5E7EB>{value}</color>"
+  prefill-button: "<color:#10B981>[ ▸ 点击预填后修改 ]</color>"
+  prefill-hover: "<color:#9CA3AF>点击后将当前内容填入聊天框，修改后回车提交</color>\n<color:#EF4444>注意：以 / 开头的内容直接回车会被当作命令执行</color>"
+  cancel-button: "<color:#EF4444>[ ✕ 取消输入 ]</color>"
+  cancel-hover: "<color:#9CA3AF>点击立即取消本次输入，聊天恢复正常</color>"
   cancel-hint: "<color:#9CA3AF>输入 <color:#F59E0B>cancel</color> 或 <color:#F59E0B>取消</color> 来取消输入</color>"
   timeout: "{prefix}<color:#EF4444>输入已超时取消！</color>"
   cancelled: "{prefix}<color:#EF4444>输入已取消！</color>"

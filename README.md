@@ -25,6 +25,10 @@
 3. 使用 `/wh create <名称>` 创建全息图
 4. 使用 `/hologram`或 `/wh` 打开 GUI 编辑
 
+## 🔌 开发者 API
+
+第三方插件 API（v2）：[docs/API.md](docs/API.md) —— Builder 创建、行内容工厂、事件、自定义动作/动画注册，JitPack 一行引入。
+
 ## 📖 详细文档
 
 完整使用文档请访问 [Wiki](https://github.com/oolongho/WooHolograms/wiki)

@@ -7,7 +7,7 @@ paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArt
 
 group = 'com.oolongho'
 
-version = '1.1.1'
+version = '1.2.2'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -24,8 +24,9 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle('1.21.11-R0.1-SNAPSHOT')
+    // API 模块：编译期可见，运行期打包进插件 jar
+    implementation project(':wooholograms-api')
     compileOnly 'me.clip:placeholderapi:2.11.6'
-    compileOnly files('../WooSimMarket/libs/craft-engine-bukkit-26.7.4.jar', '../WooSimMarket/libs/craft-engine-core-26.7.4.jar')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
@@ -44,7 +45,15 @@ processResources {
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveBaseName = 'WooHolograms'
-    
+    // 先构建 api 模块产物，再将其类打包进插件 jar
+    dependsOn ':wooholograms-api:jar'
+
+    // 将 API 子模块的类打包进插件 jar（runtimeClasspath 仅含 api 模块，
+    // Paper/PlaceholderAPI 等为 compileOnly 不会被打入）
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
     manifest {
         attributes(
             'Built-By': 'Gradle',

@@ -9,10 +9,14 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
- * WooHolograms API
+ * WooHolograms API（v1 静态门面）
  * 提供对外接口供其他插件使用
- * 
+ *
+ * @deprecated 请迁移到 v2 实例 API：通过 {@code WooHologramsApiProvider.getOrThrow()}
+ *             获取 {@link com.oolongho.holograms.api.HologramApi}。
+ *             本门面保留以兼容存量代码，仅转发调用，不再新增功能
  */
+@Deprecated
 public class WooHologramsAPI {
 
     private static WooHolograms instance;

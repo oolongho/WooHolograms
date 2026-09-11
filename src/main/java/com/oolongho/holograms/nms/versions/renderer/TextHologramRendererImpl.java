@@ -1,8 +1,8 @@
 package com.oolongho.holograms.nms.versions.renderer;
-import com.oolongho.holograms.hologram.Billboard;
+import com.oolongho.holograms.api.hologram.Billboard;
 import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
-import com.oolongho.holograms.hologram.TextAlignment;
+import com.oolongho.holograms.api.hologram.TextAlignment;
 import com.oolongho.holograms.nms.renderer.NmsTextHologramRenderer;
 import com.oolongho.holograms.nms.util.HologramPosition;
 import com.oolongho.holograms.nms.versions.EntityIdGenerator;

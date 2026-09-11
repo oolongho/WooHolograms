@@ -1,4 +1,5 @@
 package com.oolongho.holograms.hologram;
+import com.oolongho.holograms.api.action.ClickType;
 
 import com.oolongho.holograms.WooHolograms;
 import com.oolongho.holograms.api.event.HologramCreateEvent;
@@ -21,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 参考 DecentHolograms 的 HologramManager 实现
  * 
  */
-public class HologramManager {
+public class HologramManager implements com.oolongho.holograms.api.hologram.HologramRegistry {
 
     private static final long TELEPORT_DELAY_TICKS = 20L;
     private static final int MAX_NAME_LENGTH = 50;
@@ -83,6 +84,14 @@ public class HologramManager {
      * @param saveToFile 是否保存到文件
      * @return 创建的全息图，如果名称已存在则返回 null
      */
+    /**
+     * 创建流式构建器（HologramRegistry API）
+     */
+    @Override
+    public com.oolongho.holograms.api.hologram.HologramBuilder builder(String name, Location location) {
+        return new com.oolongho.holograms.api.hologram.HologramBuilder(this, name, location);
+    }
+
     public Hologram createHologram(String name, Location location, boolean saveToFile) {
         if (!isValidName(name)) {
             return null;
@@ -196,13 +205,23 @@ public class HologramManager {
 
     /**
      * 获取所有全息图
-     * 
+     *
      * @return 全息图集合
      */
     public Collection<Hologram> getHolograms() {
         return Collections.unmodifiableCollection(holograms.values());
     }
-    
+
+    /**
+     * 获取所有全息图（HologramRegistry API 桥接方法，等价于 {@link #getHolograms()}）
+     *
+     * @return 全息图集合
+     */
+    @Override
+    public Collection<Hologram> getAllHolograms() {
+        return getHolograms();
+    }
+
     /**
      * 获取全息图数量
      * 
@@ -268,6 +287,25 @@ public class HologramManager {
         storage.delete(name);
 
         return true;
+    }
+
+    /**
+     * 计划延迟删除全息图（HologramRegistry API，临时全息图定时销毁）
+     * 全息图被提前删除时任务自动跳过
+     */
+    @Override
+    public void scheduleDeletion(com.oolongho.holograms.api.hologram.Hologram hologram, long delayTicks) {
+        if (hologram == null || delayTicks < 0) {
+            return;
+        }
+        String name = hologram.getName();
+        SchedulerUtil.runTaskLater(() -> {
+            com.oolongho.holograms.api.hologram.Hologram current = holograms.get(name);
+            // 仅当仍是同一实例时删除（期间可能已被删除并重建同名全息图）
+            if (current == hologram) {
+                deleteHologram(name);
+            }
+        }, delayTicks);
     }
 
     /**
@@ -742,7 +780,7 @@ public class HologramManager {
      * @param clickType 点击类型
      * @return 是否处理成功
      */
-    public boolean handleClick(Player player, int entityId, com.oolongho.holograms.action.ClickType clickType) {
+    public boolean handleClick(Player player, int entityId, com.oolongho.holograms.api.action.ClickType clickType) {
         Hologram hologram = entityIdIndex.get(entityId);
         if (hologram != null && hologram.isVisible(player)) {
             return hologram.onClick(player, entityId, clickType);

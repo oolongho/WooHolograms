@@ -1,44 +1,31 @@
 package com.oolongho.holograms.api.event;
 
-import com.oolongho.holograms.hologram.Hologram;
-import org.bukkit.event.Cancellable;
+import com.oolongho.holograms.api.hologram.Hologram;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 全息图创建事件
- * 当全息图被创建时触发
+ * 全息图删除事件
+ * 当全息图被删除时触发
  * 
  */
-public class HologramCreateEvent extends Event implements Cancellable {
+public class HologramDeleteEvent extends Event {
 
     private static final HandlerList HANDLERS = new HandlerList();
     
     private final Hologram hologram;
-    private boolean cancelled;
 
-    public HologramCreateEvent(Hologram hologram) {
+    public HologramDeleteEvent(Hologram hologram) {
         this.hologram = hologram;
-        this.cancelled = false;
     }
 
     /**
-     * 获取被创建的全息图
+     * 获取被删除的全息图
      * @return 全息图
      */
     public Hologram getHologram() {
         return hologram;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
     }
 
     @Override

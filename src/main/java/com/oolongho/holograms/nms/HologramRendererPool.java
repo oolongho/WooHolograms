@@ -1,6 +1,6 @@
 package com.oolongho.holograms.nms;
 
-import com.oolongho.holograms.hologram.HologramType;
+import com.oolongho.holograms.api.hologram.HologramType;
 import com.oolongho.holograms.nms.renderer.NmsTextHologramRenderer;
 import com.oolongho.holograms.nms.renderer.NmsItemDisplayRenderer;
 import com.oolongho.holograms.nms.renderer.NmsHeadHologramRenderer;

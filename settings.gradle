@@ -1,1 +1,4 @@
 rootProject.name = 'WooHolograms'
+
+// API 子模块：纯接口/事件/注册表，零 NMS 依赖，供第三方插件 compileOnly 引用
+include 'wooholograms-api'

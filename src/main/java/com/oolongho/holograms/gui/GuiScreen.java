@@ -1,4 +1,5 @@
 package com.oolongho.holograms.gui;
+import com.oolongho.holograms.api.action.ClickType;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
