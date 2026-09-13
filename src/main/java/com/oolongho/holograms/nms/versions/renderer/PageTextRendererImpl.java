@@ -58,6 +58,12 @@ public class PageTextRendererImpl {
     /** Interaction 实体的位置和尺寸参数 */
     private record InteractionBounds(double x, double y, double z, float width, float height) {}
 
+    /** 视线命中 Interaction 的结果：实体 ID、相对实体底部的 hitY、射线距离平方（用于跨组/跨全息图取最近） */
+    public record InteractionHit(int entityId, float hitY, double distanceSq) {}
+
+    /** 射线与判定盒相交结果：t 为沿视线方向的距离（视线向量为单位向量），hitY 为击中点相对实体底部的 Y 偏移 */
+    private record RayHit(double t, float hitY) {}
+
     /**
      * Interaction 高度系数（每行判定高度 = lineHeight × scaleY × 此系数）
      * 1.0 = 覆盖完整行高（推荐，与文字渲染范围一致）
@@ -596,6 +602,33 @@ public class PageTextRendererImpl {
      */
 
     /**
+     * 视线检测：返回玩家视线命中的本页最近 Interaction 判定盒
+     * 用于左键回退路由——客户端对 Interaction 实体不发送 ATTACK 交互包，
+     * 左键只表现为一次挥手，服务端用射线检测还原点击意图
+     *
+     * @param player 玩家
+     * @return 命中结果；视线未命中任何判定盒返回 null
+     */
+    public InteractionHit rayTraceInteraction(Player player) {
+        if (destroyed) return null;
+        InteractionHit best = null;
+        for (TextGroup group : textGroups) {
+            int interactionId = group.interactionEntityId();
+            if (interactionId == -1) continue;
+            InteractionBounds bounds = computeInteractionBounds(group);
+            if (bounds == null) continue;
+            Location entityLoc = new Location(player.getWorld(), bounds.x(), bounds.y(), bounds.z());
+            RayHit hit = rayTrace(player, entityLoc, bounds.width(), bounds.height());
+            if (hit == null) continue;
+            double distSq = hit.t() * hit.t();
+            if (best == null || distSq < best.distanceSq()) {
+                best = new InteractionHit(interactionId, hit.hitY(), distSq);
+            }
+        }
+        return best;
+    }
+
+    /**
      * 用玩家视线计算点击 Interaction 实体的 hitY
      * 用于左键（ATTACK）时 Minecraft 不发送 INTERACT_AT 包、hitY=null 的情况
      *
@@ -617,22 +650,23 @@ public class PageTextRendererImpl {
                     bounds.x(),
                     bounds.y(),
                     bounds.z());
-            return rayTraceHitY(player, entityLoc, bounds.width(), bounds.height());
+            RayHit hit = rayTrace(player, entityLoc, bounds.width(), bounds.height());
+            return hit != null ? hit.hitY() : null;
         }
         return null;
     }
 
     /**
-     * 射线-AABB 相交（slab 法），计算击中点相对于 AABB 底部的 Y 偏移
+     * 射线-AABB 相交（slab 法）
      * AABB 中心在 (entityLoc.x, entityLoc.z)，X/Z 范围 ±(width/2)，Y 从 entityLoc.y 向上延伸 height
      *
-     * @param player    玩家
+     * @param player    玩家（取眼睛位置与视线方向）
      * @param entityLoc AABB 底部中心位置
      * @param width     AABB 宽度（X/Z 方向）
      * @param height    AABB 高度（Y 方向）
-     * @return 相对于 entityLoc.y 的 Y 偏移，null 表示射线未击中 AABB
+     * @return 相交结果（t 为击中距离，hitY 为击中点相对 AABB 底部的 Y 偏移），null 表示未击中
      */
-    private Float rayTraceHitY(Player player, Location entityLoc, float width, double height) {
+    private RayHit rayTrace(Player player, Location entityLoc, float width, double height) {
         org.bukkit.Location eye = player.getEyeLocation();
         org.bukkit.util.Vector dir = eye.getDirection();
         org.bukkit.util.Vector origin = eye.toVector();
@@ -675,7 +709,7 @@ public class PageTextRendererImpl {
         if (tmax < tmin || tmax < 0) return null; // 无交点
         double t = tmin >= 0 ? tmin : tmax;
         double hitWorldY = origin.getY() + t * dir.getY();
-        return (float) (hitWorldY - entityLoc.getY());
+        return new RayHit(t, (float) (hitWorldY - entityLoc.getY()));
     }
 
     /**

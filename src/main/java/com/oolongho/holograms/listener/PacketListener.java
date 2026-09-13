@@ -9,12 +9,14 @@ import com.oolongho.holograms.hologram.Hologram;
 import com.oolongho.holograms.hologram.HologramLine;
 import com.oolongho.holograms.hologram.HologramPage;
 import com.oolongho.holograms.nms.versions.FriendlyByteBufWrapper;
+import com.oolongho.holograms.nms.versions.renderer.PageTextRendererImpl;
 import com.oolongho.holograms.util.SchedulerUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
@@ -79,6 +81,9 @@ public class PacketListener {
                     if (handleInteractPacket(player, packet)) {
                         return; // 取消数据包
                     }
+                } else if (msg instanceof ServerboundSwingPacket swing
+                        && swing.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
+                    handleSwingPacket(player);
                 }
                 super.channelRead(ctx, msg);
             }
@@ -244,6 +249,88 @@ public class PacketListener {
             case 0, 2 -> player.isSneaking() ? ClickType.SHIFT_RIGHT : ClickType.RIGHT;
             default -> ClickType.RIGHT;
         };
+    }
+
+    /**
+     * 处理主手挥手包（左键回退路由）
+     *
+     * 客户端对 Interaction 实体不发送 ATTACK 交互包（26.x 实测：左键无任何 Interact 包到达），
+     * 左键只表现为一次主手挥手。这里在主线程做服务端射线检测：
+     * 视线命中全息图判定盒且前方无更近的方块/实体时，还原为一次左键点击。
+     *
+     * @param player 玩家
+     */
+    private void handleSwingPacket(Player player) {
+        SchedulerUtil.runTask(player, () -> processSwing(player));
+    }
+
+    /**
+     * 挥手回退路由（主线程执行）
+     *
+     * @param player 玩家
+     */
+    private void processSwing(Player player) {
+        if (!player.isOnline()) {
+            return;
+        }
+
+        // interaction.enabled = false 时全局禁用点击交互
+        if (!plugin.getConfigManager().isInteractionEnabled()) {
+            return;
+        }
+
+        // 视线检测：在玩家正在查看的全息图中找最近的命中判定盒
+        Hologram target = null;
+        PageTextRendererImpl.InteractionHit best = null;
+        for (Hologram hologram : plugin.getHologramManager().getHologramsInWorld(player.getWorld().getName())) {
+            if (!hologram.isEnabled() || !hologram.isVisible(player)) {
+                continue;
+            }
+            if (hologram.hasFlag(com.oolongho.holograms.api.hologram.EnumFlag.DISABLE_ACTIONS)) {
+                continue;
+            }
+            HologramPage page = hologram.getPage(player);
+            if (page == null) {
+                continue;
+            }
+            PageTextRendererImpl.InteractionHit hit = page.rayTraceInteraction(player);
+            if (hit != null && (best == null || hit.distanceSq() < best.distanceSq())) {
+                best = hit;
+                target = hologram;
+            }
+        }
+
+        if (target == null || best == null) {
+            return;
+        }
+
+        final Hologram targetHologram = target;
+        final PageTextRendererImpl.InteractionHit bestHit = best;
+
+        double reach = Math.sqrt(bestHit.distanceSq());
+        org.bukkit.Location eye = player.getEyeLocation();
+        org.bukkit.util.Vector direction = eye.getDirection();
+
+        // 判定盒之前有更近的方块/实体时，视为正常挖掘/攻击行为，不触发全息图左键
+        org.bukkit.util.RayTraceResult blockHit = player.getWorld().rayTraceBlocks(eye, direction, reach);
+        if (blockHit != null) {
+            plugin.debug(() -> String.format(
+                    "[Debug.click] swing-skip(block), player=%s, hologram=%s", player.getName(), targetHologram.getName()));
+            return;
+        }
+        org.bukkit.util.RayTraceResult entityHit = player.getWorld().rayTraceEntities(eye, direction, reach);
+        if (entityHit != null) {
+            plugin.debug(() -> String.format(
+                    "[Debug.click] swing-skip(entity), player=%s, hologram=%s", player.getName(), targetHologram.getName()));
+            return;
+        }
+
+        ClickType clickType = player.isSneaking() ? ClickType.SHIFT_LEFT : ClickType.LEFT;
+        plugin.debug(() -> String.format(
+                "[Debug.click] swing-fallback, player=%s, entityId=%d, clickType=%s, hitY=%.3f",
+                player.getName(), bestHit.entityId(), clickType, bestHit.hitY()));
+        // 冷却由 handleClick 内统一判定，此处不重复设置
+        handleClick(player, bestHit.entityId(), clickType, bestHit.hitY());
     }
 
     /**
