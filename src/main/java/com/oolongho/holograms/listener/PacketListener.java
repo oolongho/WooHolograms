@@ -35,13 +35,33 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PacketListener {
 
     private static final String HANDLER_NAME = "wooholograms_packet";
+    /** 26.1+ 将 ATTACK 动作从 ServerboundInteractPacket 拆分为的独立攻击包类名 */
+    private static final String ATTACK_PACKET_CLASS = "net.minecraft.network.protocol.game.ServerboundAttackPacket";
 
     private final WooHolograms plugin;
     private final Map<Player, Channel> playerChannels;
 
+    /** 26.1+ 的攻击包类（运行时反射解析；1.21.x 上不存在则为 null，左键走 InteractPacket 旧路径） */
+    private final Class<?> attackPacketClass;
+    /** 攻击包的 entityId() 访问器（record 访问器） */
+    private final java.lang.reflect.Method attackEntityIdAccessor;
+
     public PacketListener(WooHolograms plugin) {
         this.plugin = plugin;
         this.playerChannels = new ConcurrentHashMap<>();
+
+        Class<?> cls = null;
+        java.lang.reflect.Method accessor = null;
+        try {
+            cls = Class.forName(ATTACK_PACKET_CLASS);
+            accessor = cls.getMethod("entityId");
+        } catch (ClassNotFoundException ignored) {
+            // 1.21.x：ATTACK 仍在 ServerboundInteractPacket 中（actionOrdinal=1），无需本分支
+        } catch (ReflectiveOperationException e) {
+            plugin.getLogger().warning(() -> "解析 ServerboundAttackPacket 失败: " + e.getMessage());
+        }
+        this.attackPacketClass = cls;
+        this.attackEntityIdAccessor = accessor;
     }
 
     /**
@@ -81,6 +101,9 @@ public class PacketListener {
                     if (handleInteractPacket(player, packet)) {
                         return; // 取消数据包
                     }
+                } else if (attackPacketClass != null && attackPacketClass.isInstance(msg)) {
+                    // 26.1+：左键攻击为独立数据包，原生左键路由
+                    handleAttackPacket(player, msg);
                 } else if (msg instanceof ServerboundSwingPacket swing
                         && swing.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
                     handleSwingPacket(player);
@@ -252,11 +275,49 @@ public class PacketListener {
     }
 
     /**
-     * 处理主手挥手包（左键回退路由）
+     * 处理攻击数据包（26.1+ 原生左键路由）
      *
-     * 客户端对 Interaction 实体不发送 ATTACK 交互包（26.x 实测：左键无任何 Interact 包到达），
-     * 左键只表现为一次主手挥手。这里在主线程做服务端射线检测：
-     * 视线命中全息图判定盒且前方无更近的方块/实体时，还原为一次左键点击。
+     * 26.1 起 Minecraft 将 ATTACK 动作从 ServerboundInteractPacket 拆分为独立的
+     * ServerboundAttackPacket（record，仅含 entityId）。客户端对 Interaction
+     * 实体（含数据包虚拟实体）的左键即发此包。1.21.x 运行时无此类，
+     * 左键仍由 {@link #handleInteractPacket} 的 actionOrdinal=1 旧路径处理。
+     *
+     * 包内不含点击坐标，hitY 由 handleClick 内的射线回退计算；
+     * 潜行状态在主线程处理时实时读取（与旧路径 mapActionToClickType 一致）。
+     *
+     * @param player 玩家
+     * @param packet ServerboundAttackPacket 实例（运行时类型，编译期不可见）
+     */
+    private void handleAttackPacket(Player player, Object packet) {
+        try {
+            int entityId = (int) attackEntityIdAccessor.invoke(packet);
+            if (entityId < 0) {
+                return;
+            }
+
+            final int finalEntityId = entityId;
+            plugin.debug(() -> String.format(
+                    "[Debug.click] packet-received(attack), player=%s, entityId=%d",
+                    player.getName(), finalEntityId));
+
+            SchedulerUtil.runTask(player, () -> {
+                ClickType clickType = mapActionToClickType(player, 1);
+                handleClick(player, finalEntityId, clickType, null);
+            });
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebug()) {
+                plugin.getLogger().warning(() -> "处理攻击数据包时出错: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 处理主手挥手包（左键兜底路由）
+     *
+     * 正常情况下左键由攻击数据包处理（26.1+ 走 ServerboundAttackPacket，
+     * 1.21.x 走 InteractPacket 的 ATTACK 动作）。此兜底在视线命中全息图判定盒
+     * 且前方无更近的方块/实体时还原为左键点击，覆盖攻击包缺失的异常场景。
+     * 与攻击路径靠点击冷却自然去重（同一点击只生效一次）。
      *
      * @param player 玩家
      */
