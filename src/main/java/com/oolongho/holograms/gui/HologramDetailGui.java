@@ -319,10 +319,15 @@ public class HologramDetailGui extends GuiScreen {
                         if (h != null) {
                             HologramPage p = h.getPage(currentPageIndex);
                             if (p != null) {
-                                p.addLine(input);
-                                h.save();
-                                h.showToNearby();
-                                plugin.getMessages().send(player, "gui.msg-line-add-success");
+                                if (!p.canAddLine()) {
+                                    plugin.getMessages().send(player, "edit.line-limit", "max",
+                                            String.valueOf(plugin.getConfigManager().getMaxLinesPerHologram()));
+                                } else {
+                                    p.addLine(input);
+                                    h.save();
+                                    h.showToNearby();
+                                    plugin.getMessages().send(player, "gui.msg-line-add-success");
+                                }
                             }
                         }
                         guiManager.openGui(player, new HologramDetailGui(plugin, guiManager, chatInputManager, hologramName, currentPageIndex));
@@ -366,6 +371,9 @@ public class HologramDetailGui extends GuiScreen {
                                 plugin.getMessages().send(player, "gui.msg-page-not-exists");
                             } else if (lineNum < 1 || lineNum > p.size() + 1) {
                                 plugin.getMessages().send(player, "gui.msg-line-number-range", "max", String.valueOf(p.size() + 1));
+                            } else if (!p.canAddLine()) {
+                                plugin.getMessages().send(player, "edit.line-limit", "max",
+                                        String.valueOf(plugin.getConfigManager().getMaxLinesPerHologram()));
                             } else {
                                 p.insertLine(lineNum - 1, content);
                                 h.save();

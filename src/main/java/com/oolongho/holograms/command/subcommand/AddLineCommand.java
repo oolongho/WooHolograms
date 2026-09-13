@@ -48,6 +48,12 @@ public class AddLineCommand extends Subcommand {
             page = hologram.addPage();
         }
 
+        if (!page.canAddLine()) {
+            plugin.getMessages().send(sender, "edit.line-limit", "max",
+                    String.valueOf(plugin.getConfigManager().getMaxLinesPerHologram()));
+            return true;
+        }
+
         page.addLine(content);
         hologram.save();
 

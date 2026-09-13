@@ -31,9 +31,6 @@ public class ConfigManager {
     private double defaultUpdateRange;
     private int defaultUpdateInterval;
     private double defaultLineHeight;
-    private double defaultTextHeight;
-    private double defaultItemHeight;
-    private double defaultHeadHeight;
     private int defaultBackgroundAlpha;
     private int defaultBackgroundColor;
     private int defaultLineWidth;
@@ -53,17 +50,13 @@ public class ConfigManager {
 
     // 性能设置
     private long renderInterval;
-    private long placeholderInterval;
-    private int cacheSize;
-    private int maxUpdatesPerTick;
 
     // 动画设置
     private boolean animationEnabled;
-    private int animationFrameInterval;
 
     // 交互设置
     private boolean interactionEnabled;
-    private int clickCooldown;
+    private int clickCooldownTicks;
 
     // 限制设置
     private int maxHologramsPerWorld;
@@ -97,16 +90,14 @@ public class ConfigManager {
         // 基本设置
         debug = config.getBoolean("settings.debug", false);
         language = config.getString("settings.language", "zh-CN");
-        autoSaveInterval = Math.max(1, config.getInt("settings.auto-save-interval", 300));
+        // 自动保存间隔（秒），控制 dirty 全息图的批量落盘周期；0 表示禁用自动保存
+        autoSaveInterval = Math.max(0, config.getInt("settings.auto-save-interval", 300));
 
         // 默认值设置
         defaultDisplayRange = config.getDouble("defaults.display-range", 48.0);
         defaultUpdateRange = config.getDouble("defaults.update-range", 48.0);
         defaultUpdateInterval = config.getInt("defaults.update-interval", 0);
         defaultLineHeight = config.getDouble("defaults.line-height", 0.3);
-        defaultTextHeight = config.getDouble("defaults.text-height", 0.3);
-        defaultItemHeight = config.getDouble("defaults.item-height", 0.6);
-        defaultHeadHeight = config.getDouble("defaults.head-height", 0.6);
         defaultBackgroundAlpha = config.getInt("defaults.default-background-alpha", 128);
         defaultBackgroundColor = config.getInt("defaults.default-background-color", 0);
         defaultLineWidth = config.getInt("defaults.default-line-width", 300);
@@ -126,17 +117,14 @@ public class ConfigManager {
 
         // 性能设置
         renderInterval = config.getLong("performance.render-interval", 2L);
-        placeholderInterval = config.getLong("performance.placeholder-interval", 40L);
-        cacheSize = Math.max(1, config.getInt("performance.cache-size", 500));
-        maxUpdatesPerTick = config.getInt("performance.max-updates-per-tick", 50);
 
         // 动画设置
         animationEnabled = config.getBoolean("animation.enabled", true);
-        animationFrameInterval = config.getInt("animation.frame-interval", 4);
 
         // 交互设置
         interactionEnabled = config.getBoolean("interaction.enabled", true);
-        clickCooldown = config.getInt("interaction.click-cooldown", 500);
+        // 点击冷却按 tick 配置（20 tick = 1 秒），消费方使用毫秒
+        clickCooldownTicks = Math.max(0, config.getInt("interaction.click-cooldown", 10));
 
         // 限制设置
         maxHologramsPerWorld = Math.max(1, config.getInt("limits.max-holograms-per-world", 100));
@@ -210,18 +198,6 @@ public class ConfigManager {
         return defaultLineHeight;
     }
 
-    public double getDefaultTextHeight() {
-        return defaultTextHeight;
-    }
-
-    public double getDefaultItemHeight() {
-        return defaultItemHeight;
-    }
-
-    public double getDefaultHeadHeight() {
-        return defaultHeadHeight;
-    }
-
     public int getDefaultBackgroundAlpha() {
         return defaultBackgroundAlpha;
     }
@@ -282,32 +258,26 @@ public class ConfigManager {
         return renderInterval;
     }
 
-    public long getPlaceholderInterval() {
-        return placeholderInterval;
-    }
-
-    public int getCacheSize() {
-        return cacheSize;
-    }
-
-    public int getMaxUpdatesPerTick() {
-        return maxUpdatesPerTick;
-    }
-
     public boolean isAnimationEnabled() {
         return animationEnabled;
-    }
-
-    public int getAnimationFrameInterval() {
-        return animationFrameInterval;
     }
 
     public boolean isInteractionEnabled() {
         return interactionEnabled;
     }
 
-    public int getClickCooldown() {
-        return clickCooldown;
+    /**
+     * 获取点击冷却（tick）
+     */
+    public int getClickCooldownTicks() {
+        return clickCooldownTicks;
+    }
+
+    /**
+     * 获取点击冷却（毫秒），供基于 System.currentTimeMillis() 的冷却判定使用
+     */
+    public long getClickCooldownMs() {
+        return clickCooldownTicks * 50L;
     }
 
     public int getMaxHologramsPerWorld() {
@@ -343,7 +313,8 @@ public class ConfigManager {
     }
 
     /**
-     * 获取更新间隔（兼容旧方法）
+     * 获取全局更新任务间隔（tick），即 performance.render-interval
+     * 该任务驱动动画/占位符文本刷新与视距可见性检测
      * @return 更新间隔（tick）
      */
     public long getUpdateInterval() {

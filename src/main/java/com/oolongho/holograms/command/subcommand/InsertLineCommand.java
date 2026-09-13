@@ -58,6 +58,12 @@ public class InsertLineCommand extends Subcommand {
             return true;
         }
 
+        if (!page.canAddLine()) {
+            plugin.getMessages().send(sender, "edit.line-limit", "max",
+                    String.valueOf(plugin.getConfigManager().getMaxLinesPerHologram()));
+            return true;
+        }
+
         String content = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
         page.addLine(content);
 

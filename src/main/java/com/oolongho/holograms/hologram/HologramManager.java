@@ -26,7 +26,6 @@ public class HologramManager implements com.oolongho.holograms.api.hologram.Holo
 
     private static final long TELEPORT_DELAY_TICKS = 20L;
     private static final int MAX_NAME_LENGTH = 50;
-    private static final long FLUSH_INTERVAL_TICKS = 100L; // 5 秒批量保存
 
     private final WooHolograms plugin;
     private final HologramStorage storage;
@@ -374,13 +373,19 @@ public class HologramManager implements com.oolongho.holograms.api.hologram.Holo
     }
 
     /**
-     * 启动 flush 后台任务（延迟批量保存）
+     * 启动 flush 后台任务（dirty 全息图延迟批量保存）
+     * 周期由 settings.auto-save-interval（秒）驱动，0 表示禁用自动保存
      */
     private void startFlushTask() {
         if (flushTaskHandle != null) {
             flushTaskHandle.cancel();
+            flushTaskHandle = null;
         }
-        flushTaskHandle = SchedulerUtil.runAtFixedRate(this::flushDirty, FLUSH_INTERVAL_TICKS, FLUSH_INTERVAL_TICKS);
+        long intervalTicks = plugin.getConfigManager().getAutoSaveInterval() * 20L;
+        if (intervalTicks <= 0) {
+            return;
+        }
+        flushTaskHandle = SchedulerUtil.runAtFixedRate(this::flushDirty, intervalTicks, intervalTicks);
     }
 
     /**
@@ -805,7 +810,7 @@ public class HologramManager implements com.oolongho.holograms.api.hologram.Holo
     }
 
     public boolean checkAndSetCooldown(Player player) {
-        long cooldownMs = plugin.getConfigManager().getClickCooldown();
+        long cooldownMs = plugin.getConfigManager().getClickCooldownMs();
         if (cooldownMs <= 0) return false;
         UUID playerId = player.getUniqueId();
         long now = System.currentTimeMillis();

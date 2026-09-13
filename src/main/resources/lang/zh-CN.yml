@@ -52,6 +52,7 @@ edit:
   line-added: "{prefix}<color:#10B981>已添加新行！</color>"
   line-removed: "{prefix}<color:#10B981>已删除第 {line} 行！</color>"
   line-inserted: "{prefix}<color:#10B981>已在第 {line} 行插入新内容！</color>"
+  line-limit: "{prefix}<color:#EF4444>已达到每页行数上限（{max} 行）！</color>"
   position-updated: "{prefix}<color:#10B981>已更新全息图位置！</color>"
   height-set: "{prefix}<color:#10B981>已设置行高为 {height}！</color>"
   range-set: "{prefix}<color:#10B981>已设置显示范围为 {range}！</color>"

@@ -200,8 +200,18 @@ public class HologramPage implements com.oolongho.holograms.api.hologram.Hologra
     }
 
     /**
+     * 检查是否还能添加行（config.yml limits.max-lines-per-hologram 上限）
+     * 供命令/GUI 等用户操作路径在添加前检查；存储加载与克隆不受此限制
+     *
+     * @return 当前行数未达上限返回 true
+     */
+    public boolean canAddLine() {
+        return size() < WooHolograms.getInstance().getConfigManager().getMaxLinesPerHologram();
+    }
+
+    /**
      * 在指定位置插入行
-     * 
+     *
      * @param index 索引
      * @param line 行
      * @return 是否成功
@@ -1057,11 +1067,12 @@ public class HologramPage implements com.oolongho.holograms.api.hologram.Hologra
 
     /**
      * 显示可点击实体（委托给 pageTextRenderer）
+     * interaction.enabled = false 时全局禁用，不生成 Interaction 实体
      *
      * @param player 玩家
      */
     public void showClickableEntities(Player player) {
-        if (pageTextRenderer == null || !isClickable()) return;
+        if (pageTextRenderer == null || !isClickable() || !isInteractionEnabled()) return;
         pageTextRenderer.showClickableEntities(player);
     }
 
@@ -1081,8 +1092,15 @@ public class HologramPage implements com.oolongho.holograms.api.hologram.Hologra
      * @param player 玩家
      */
     public void teleportClickableEntities(Player player) {
-        if (pageTextRenderer == null || !isClickable()) return;
+        if (pageTextRenderer == null || !isClickable() || !isInteractionEnabled()) return;
         pageTextRenderer.teleportClickableEntities(player);
+    }
+
+    /**
+     * 交互全局开关（config.yml interaction.enabled）
+     */
+    private boolean isInteractionEnabled() {
+        return WooHolograms.getInstance().getConfigManager().isInteractionEnabled();
     }
 
     /*

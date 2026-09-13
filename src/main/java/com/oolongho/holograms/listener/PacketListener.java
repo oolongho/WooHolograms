@@ -260,6 +260,11 @@ public class PacketListener {
             return;
         }
 
+        // interaction.enabled = false 时全局禁用点击交互
+        if (!plugin.getConfigManager().isInteractionEnabled()) {
+            return;
+        }
+
         Hologram hologram = findHologramByEntityId(player, entityId);
         if (hologram == null) {
             // 点击路由：hologram 未找到

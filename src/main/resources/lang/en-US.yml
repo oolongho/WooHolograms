@@ -52,6 +52,7 @@ edit:
   line-added: "{prefix}<color:#10B981>New line added!</color>"
   line-removed: "{prefix}<color:#10B981>Removed line {line}!</color>"
   line-inserted: "{prefix}<color:#10B981>Inserted new line at line {line}!</color>"
+  line-limit: "{prefix}<color:#EF4444>Page line limit reached ({max} lines)!</color>"
   position-updated: "{prefix}<color:#10B981>Hologram position updated!</color>"
   height-set: "{prefix}<color:#10B981>Line height set to {height}!</color>"
   range-set: "{prefix}<color:#10B981>Display range set to {range}!</color>"

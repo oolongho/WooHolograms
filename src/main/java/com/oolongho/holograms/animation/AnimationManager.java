@@ -118,6 +118,11 @@ public class AnimationManager {
             return string;
         }
 
+        // animation.enabled = false 时全局禁用动画，文本原样返回
+        if (!plugin.getConfigManager().isAnimationEnabled()) {
+            return string;
+        }
+
         Profiler profiler = Profiler.getInstance();
         if (profiler.isEnabled()) profiler.start("animation");
         try {
