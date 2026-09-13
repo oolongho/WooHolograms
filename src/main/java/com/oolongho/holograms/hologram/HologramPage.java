@@ -1066,17 +1066,6 @@ public class HologramPage implements com.oolongho.holograms.api.hologram.Hologra
     }
 
     /**
-     * 视线检测当前页的 Interaction 判定盒（左键挥手回退路由用）
-     *
-     * @param player 玩家
-     * @return 命中结果；未命中、无渲染器或页面不可点击返回 null
-     */
-    public PageTextRendererImpl.InteractionHit rayTraceInteraction(Player player) {
-        if (pageTextRenderer == null || !isClickable()) return null;
-        return pageTextRenderer.rayTraceInteraction(player);
-    }
-
-    /**
      * 显示可点击实体（委托给 pageTextRenderer）
      * interaction.enabled = false 时全局禁用，不生成 Interaction 实体
      *

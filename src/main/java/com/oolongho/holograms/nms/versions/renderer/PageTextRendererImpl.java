@@ -58,9 +58,6 @@ public class PageTextRendererImpl {
     /** Interaction 实体的位置和尺寸参数 */
     private record InteractionBounds(double x, double y, double z, float width, float height) {}
 
-    /** 视线命中 Interaction 的结果：实体 ID、相对实体底部的 hitY、射线距离平方（用于跨组/跨全息图取最近） */
-    public record InteractionHit(int entityId, float hitY, double distanceSq) {}
-
     /** 射线与判定盒相交结果：t 为沿视线方向的距离（视线向量为单位向量），hitY 为击中点相对实体底部的 Y 偏移 */
     private record RayHit(double t, float hitY) {}
 
@@ -600,33 +597,6 @@ public class PageTextRendererImpl {
     /*
      * Interaction 实体管理方法
      */
-
-    /**
-     * 视线检测：返回玩家视线命中的本页最近 Interaction 判定盒
-     * 用于左键回退路由——客户端对 Interaction 实体不发送 ATTACK 交互包，
-     * 左键只表现为一次挥手，服务端用射线检测还原点击意图
-     *
-     * @param player 玩家
-     * @return 命中结果；视线未命中任何判定盒返回 null
-     */
-    public InteractionHit rayTraceInteraction(Player player) {
-        if (destroyed) return null;
-        InteractionHit best = null;
-        for (TextGroup group : textGroups) {
-            int interactionId = group.interactionEntityId();
-            if (interactionId == -1) continue;
-            InteractionBounds bounds = computeInteractionBounds(group);
-            if (bounds == null) continue;
-            Location entityLoc = new Location(player.getWorld(), bounds.x(), bounds.y(), bounds.z());
-            RayHit hit = rayTrace(player, entityLoc, bounds.width(), bounds.height());
-            if (hit == null) continue;
-            double distSq = hit.t() * hit.t();
-            if (best == null || distSq < best.distanceSq()) {
-                best = new InteractionHit(interactionId, hit.hitY(), distSq);
-            }
-        }
-        return best;
-    }
 
     /**
      * 用玩家视线计算点击 Interaction 实体的 hitY
